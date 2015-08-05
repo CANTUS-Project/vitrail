@@ -1,3 +1,20 @@
+var SearchBox = React.createClass({
+    submitSearch: function(changeEvent) {
+        this.props.submitSearch(changeEvent.target[0].value);
+        changeEvent.preventDefault();  // stop the default GET form submission
+    },
+    render: function() {
+        return (
+            <form onSubmit={this.submitSearch}>
+                <label>Search Query:&nbsp;
+                    <input type="search" name="searchQuery" defaultValue={this.props.contents} />&nbsp;
+                    <input type="submit" value="Search" />
+                </label>
+            </form>
+        );
+    }
+});
+
 var TypeRadioButton = React.createClass({
     render: function() {
         return (
@@ -144,26 +161,42 @@ var Paginator = React.createClass({
 });
 
 var ResultListFrame = React.createClass({
-    getNewData: function(resourceType, requestPage, perPage) {
-        if (undefined === requestPage) {
-            requestPage = 1;
-        }
-        if (undefined === perPage) {
-            perPage = 10;
-        }
-        var requestUrl = "http://localhost:8888/" + resourceType + "/";
-        $.ajax({
-            url: requestUrl,
-            headers: {"X-Cantus-Page": requestPage, "X-Cantus-Per-Page": perPage},
-            dataType: 'json',
-            cache: false,
+    getNewData: function(resourceType, requestPage, perPage, searchQuery) {
+        // default, unchanging things
+        var ajaxSettings = {
+            headers: {},
+            dataType: "json",
+            cache: false,  // TODO: can this be true?
             success: function(data, status, jqxhr) {
                 this.setState({data: data, jqxhr: jqxhr, page: requestPage});
             }.bind(this),
             error: function(xhr, status, err) {
-                console.error(requestUrl, status, err.toString());
+                console.error(ajaxSettings.requestUrl, status, err.toString());
             }.bind(this)
-        });
+        };
+
+        // headers
+        if (undefined === requestPage)
+            ajaxSettings.headers["X-Cantus-Page"] = 1;
+        else
+            ajaxSettings.headers["X-Cantus-Page"] = requestPage;
+
+        if (undefined === perPage)
+            ajaxSettings["X-Cantus-Per-Page"] = 10;
+        else
+            ajaxSettings["X-Cantus-Per-Page"] = perPage;
+
+        // URL
+        ajaxSettings["url"] = "http://localhost:8888/" + resourceType + "/";
+
+        // search query
+        if (undefined !== searchQuery && "" !== searchQuery) {
+            ajaxSettings.method = "SEARCH";
+            ajaxSettings.data = "{\"query\": \"" + searchQuery + "\"}";
+        }
+
+        // submit the request
+        $.ajax(ajaxSettings);
     },
     componentDidMount: function() { this.getNewData(this.props.resourceType); },
     componentWillReceiveProps: function(newProps) {
@@ -173,7 +206,7 @@ var ResultListFrame = React.createClass({
         }
         // otherwise we can go ahead and update
         else {
-            this.getNewData(newProps.resourceType, 1, newProps.perPage);
+            this.getNewData(newProps.resourceType, 1, newProps.perPage, newProps.searchQuery);
         }
     },
     getInitialState: function() {
@@ -222,10 +255,15 @@ var ResultListFrame = React.createClass({
 
 var SearchForm = React.createClass({
     getInitialState: function() {
-        return {resourceType: "cantusids", perPage: 10};
+        return {resourceType: "cantusids", perPage: 10, currentSearch: ""};
     },
     changePerPage: function(newPerPage) { this.setState({perPage: newPerPage}); },
-    changeResourceType: function(resourceType) { this.setState({resourceType: resourceType}); },
+    changeResourceType: function(resourceType) {
+        this.setState({resourceType: resourceType, currentSearch: ""});
+    },
+    submitSearch: function(searchQuery) {
+        this.setState({currentSearch: searchQuery});
+    },
     render: function() {
         // the resource types to allow searching for
         var types = [
@@ -247,11 +285,13 @@ var SearchForm = React.createClass({
         var dontRender = ['type', 'id'];
         return (
             <div className="searchForm">
-                <TypeSelector onUserInput={this.handleUserInput} types={types} />
+                <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
+                <TypeSelector onUserInput={this.changeResourceType} types={types} />
                 <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
                 <ResultListFrame resourceType={this.state.resourceType}
                                  dontRender={dontRender}
                                  perPage={this.state.perPage}
+                                 searchQuery={this.state.currentSearch}
                 />
             </div>
         );
