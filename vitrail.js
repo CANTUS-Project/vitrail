@@ -166,7 +166,6 @@ var ResultListFrame = React.createClass({
         var ajaxSettings = {
             headers: {},
             dataType: "json",
-            cache: false,  // TODO: can this be true?
             success: function(data, status, jqxhr) {
                 this.setState({data: data, jqxhr: jqxhr, page: requestPage});
             }.bind(this),
