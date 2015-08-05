@@ -18,7 +18,9 @@ var SearchBox = React.createClass({
 var TypeRadioButton = React.createClass({
     render: function() {
         return (
-            <label><input type="radio" name="resourceType" value={this.props.value} onChange={this.handleChange} />{this.props.label}</label>
+            <label><input type="radio" name="resourceType" value={this.props.value}
+                          onChange={this.handleChange} checked={this.props.selected} />
+                   {this.props.label}</label>
         );
     },
     handleChange: function(changeEvent) {
@@ -30,7 +32,14 @@ var TypeSelector = React.createClass({
     render: function() {
         var renderedButtons = [];
         this.props.types.forEach(function (buttonDeets) {
-            renderedButtons.push(<TypeRadioButton label={buttonDeets[0]} value={buttonDeets[1]} onUserInput={this.props.onUserInput} />);
+            var selected = false;
+            if (this.props.selectedType === buttonDeets[1]) {
+                selected = true;
+            }
+            renderedButtons.push(<TypeRadioButton label={buttonDeets[0]}
+                                                  value={buttonDeets[1]}
+                                                  onUserInput={this.props.onUserInput}
+                                                  selected={selected} />);
         }, this);
         return  (
             <div className="typeSelector">
@@ -312,7 +321,9 @@ var SearchForm = React.createClass({
         return (
             <div className="searchForm">
                 <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
-                <TypeSelector onUserInput={this.changeResourceType} types={types} />
+                <TypeSelector onUserInput={this.changeResourceType}
+                              types={types}
+                              selectedType={this.state.resourceType} />
                 <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
                 <ResultListFrame resourceType={this.state.resourceType}
                                  dontRender={dontRender}
