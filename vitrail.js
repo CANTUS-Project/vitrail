@@ -225,7 +225,7 @@ var SearchForm = React.createClass({
         return {resourceType: "cantusids", perPage: 10};
     },
     changePerPage: function(newPerPage) { this.setState({perPage: newPerPage}); },
-    handleUserInput: function(resourceType) { this.setState({resourceType: resourceType}); },
+    changeResourceType: function(resourceType) { this.setState({resourceType: resourceType}); },
     render: function() {
         // the resource types to allow searching for
         var types = [
@@ -249,7 +249,10 @@ var SearchForm = React.createClass({
             <div className="searchForm">
                 <TypeSelector onUserInput={this.handleUserInput} types={types} />
                 <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
-                <ResultListFrame resourceType={this.state.resourceType} dontRender={dontRender} perPage={this.state.perPage} />
+                <ResultListFrame resourceType={this.state.resourceType}
+                                 dontRender={dontRender}
+                                 perPage={this.state.perPage}
+                />
             </div>
         );
     }
