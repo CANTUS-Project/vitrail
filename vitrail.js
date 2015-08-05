@@ -167,7 +167,12 @@ var ResultListFrame = React.createClass({
             headers: {},
             dataType: "json",
             success: function(data, status, jqxhr) {
-                this.setState({data: data, jqxhr: jqxhr, page: requestPage});
+                var totalPages = 1;
+                if ("initial" != this.state.jqxhr) {
+                    totalPages = Math.ceil(jqxhr.getResponseHeader("X-Cantus-Total-Results") /
+                                           jqxhr.getResponseHeader("X-Cantus-Per-Page"));
+                }
+                this.setState({data: data, jqxhr: jqxhr, page: requestPage, totalPages: totalPages});
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(ajaxSettings.requestUrl, status, err.toString());
@@ -203,37 +208,35 @@ var ResultListFrame = React.createClass({
         if (newProps.perPage < 1 || newProps.perPage > 100) {
             return;
         }
+        // check if "page" is "last"
+        else if ("last" === newProps.page) {
+            this.props.changePage(this.state.totalPages);
+        }
+        // check if "page" is valid
+        else if (newProps.page > this.state.totalPages) {
+            this.props.changePage(this.state.totalPages);
+        }
         // otherwise we can go ahead and update
         else {
-            this.getNewData(newProps.resourceType, 1, newProps.perPage, newProps.searchQuery);
+            this.getNewData(newProps.resourceType,
+                            newProps.page,
+                            newProps.perPage,
+                            newProps.searchQuery);
+        }
+    },
+    shouldComponentUpdate: function(nextProps, nextState) {
+        // we'll get another props change in a moment
+        if ("last" === nextProps.page) {
+            return false;
+        // this would produce an invalid result
+        } else if (nextProps.page > this.state.totalPages) {
+            return false;
+        } else {
+            return true;
         }
     },
     getInitialState: function() {
-        return {data: {}, jqxhr: "initial", page: 1};
-    },
-    changePage: function(direction) {
-        // Give this function a string, either "first," "previous," "next," or "last," to
-        // determine which way to change the page.
-        var totalPages = 1;
-        if ("initial" != this.state.jqxhr) {
-            totalPages = Math.ceil(this.state.jqxhr.getResponseHeader("X-Cantus-Total-Results") /
-                                   this.state.jqxhr.getResponseHeader("X-Cantus-Per-Page"));
-        }
-        if ("next" === direction) {
-            if (this.state.page <= totalPages) {
-                this.getNewData(this.props.resourceType, this.state.page + 1, this.props.perPage);
-            }
-        } else if ("previous" === direction) {
-            if (this.state.page > 1) {
-                this.getNewData(this.props.resourceType, this.state.page - 1, this.props.perPage);
-            }
-        } else if ("first" === direction) {
-            this.getNewData(this.props.resourceType, 1, this.props.perPage);
-        } else if ("last" === direction) {
-            this.getNewData(this.props.resourceType, totalPages, this.props.perPage);
-        } else {
-            console.err("Did not understand direction to turn the page: " + direction);
-        }
+        return {data: {}, jqxhr: "initial", page: 1, totalPages: 1};
     },
     render: function() {
         var currentPage = 0;
@@ -244,9 +247,9 @@ var ResultListFrame = React.createClass({
                                    this.state.jqxhr.getResponseHeader("X-Cantus-Per-Page"));
         }
         return (
-            <div className="resultListFrame">
+            <div className="resultList">
                 <ResultList data={this.state.data} jqxhr={this.state.jqxhr} dontRender={this.props.dontRender} />
-                <Paginator changePage={this.changePage} currentPage={currentPage} totalPages={totalPages} />
+                <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
             </div>
         );
     }
@@ -254,14 +257,36 @@ var ResultListFrame = React.createClass({
 
 var SearchForm = React.createClass({
     getInitialState: function() {
-        return {resourceType: "cantusids", perPage: 10, currentSearch: ""};
+        return {resourceType: "cantusids", page: 1, perPage: 10, currentSearch: ""};
+    },
+    changePage: function(direction) {
+        // Give this function a string, either "first," "previous," "next," or "last," to
+        // determine which way to change the page. Or supply a page number directly.
+        var newPage = 1;
+        var curPage = this.state.page;
+
+        if ("next" === direction) {
+            newPage = curPage + 1;
+        } else if ("previous" === direction) {
+            if (curPage > 1) {
+                newPage = curPage - 1;
+            }
+        } else if ("first" === direction) {
+            // it's already 1
+        } else if ("last" === direction) {
+            newPage = "last";
+        } else {
+            newPage = direction;
+        }
+
+        this.setState({page: newPage});
     },
     changePerPage: function(newPerPage) { this.setState({perPage: newPerPage}); },
     changeResourceType: function(resourceType) {
-        this.setState({resourceType: resourceType, currentSearch: ""});
+        this.setState({resourceType: resourceType, currentSearch: "", page: 1});
     },
     submitSearch: function(searchQuery) {
-        this.setState({currentSearch: searchQuery});
+        this.setState({currentSearch: searchQuery, page: 1});
     },
     render: function() {
         // the resource types to allow searching for
@@ -290,7 +315,9 @@ var SearchForm = React.createClass({
                 <ResultListFrame resourceType={this.state.resourceType}
                                  dontRender={dontRender}
                                  perPage={this.state.perPage}
+                                 page={this.state.page}
                                  searchQuery={this.state.currentSearch}
+                                 changePage={this.changePage}
                 />
             </div>
         );
