@@ -180,15 +180,17 @@ var ResultListFrame = React.createClass({
         };
 
         // headers
-        if (undefined === requestPage)
+        if (undefined === requestPage) {
             ajaxSettings.headers["X-Cantus-Page"] = 1;
-        else
+        } else {
             ajaxSettings.headers["X-Cantus-Page"] = requestPage;
+        }
 
-        if (undefined === perPage)
-            ajaxSettings["X-Cantus-Per-Page"] = 10;
-        else
-            ajaxSettings["X-Cantus-Per-Page"] = perPage;
+        if (undefined === perPage) {
+            ajaxSettings.headers["X-Cantus-Per-Page"] = 10;
+        } else {
+            ajaxSettings.headers["X-Cantus-Per-Page"] = perPage;
+        }
 
         // URL
         ajaxSettings["url"] = "http://localhost:8888/" + resourceType + "/";
