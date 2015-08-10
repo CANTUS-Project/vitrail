@@ -207,7 +207,7 @@ var ResultListFrame = React.createClass({
         }
 
         // URL
-        ajaxSettings["url"] = "http://localhost:8888/" + resourceType + "/";
+        ajaxSettings["url"] = this.props.hateoas.browse[resourceType];
 
         // search query
         if (undefined !== searchQuery && "" !== searchQuery) {
@@ -281,7 +281,7 @@ var SearchForm = React.createClass({
             error: this.failedAjaxRequest,
             cache: false
         });
-        return {resourceType: "browse", page: 1, perPage: 10, currentSearch: "", hateoas: null,
+        return {resourceType: "all", page: 1, perPage: 10, currentSearch: "", hateoas: null,
                 serverIsCompatible: null};
     },
     receiveRootUrl: function(data, textStatus, jqxhr) {
@@ -357,7 +357,7 @@ var SearchForm = React.createClass({
 
         // the resource types to allow searching for
         var types = [
-            ['Any Type', 'browse'],
+            ['Any Type', 'all'],
             ['Cantus ID', 'cantusids'],
             ['Centuries', 'centuries'],
             ['Chants', 'chants'],
@@ -392,6 +392,7 @@ var SearchForm = React.createClass({
                                  page={this.state.page}
                                  searchQuery={this.state.currentSearch}
                                  changePage={this.changePage}
+                                 hateoas={this.state.hateoas}
                 />
             </div>
         );
