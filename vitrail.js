@@ -350,7 +350,7 @@ var SearchForm = React.createClass({
 
         this.setState({page: newPage, errorMessage: null});
     },
-    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, errorMessage: null}); },
+    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
     changeResourceType: function(resourceType) {
         this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null});
     },
