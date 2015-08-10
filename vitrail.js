@@ -268,7 +268,7 @@ var ResultListFrame = React.createClass({
 
 var SearchForm = React.createClass({
     getInitialState: function() {
-        return {resourceType: "cantusids", page: 1, perPage: 10, currentSearch: ""};
+        return {resourceType: "browse", page: 1, perPage: 10, currentSearch: ""};
     },
     changePage: function(direction) {
         // Give this function a string, either "first," "previous," "next," or "last," to
@@ -302,6 +302,7 @@ var SearchForm = React.createClass({
     render: function() {
         // the resource types to allow searching for
         var types = [
+            ['Any Type', 'browse'],
             ['Cantus ID', 'cantusids'],
             ['Centuries', 'centuries'],
             ['Chants', 'chants'],
