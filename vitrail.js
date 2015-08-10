@@ -178,14 +178,7 @@ var ResultListFrame = React.createClass({
         var ajaxSettings = {
             headers: {},
             dataType: "json",
-            success: function(data, status, jqxhr) {
-                var totalPages = 1;
-                if ("initial" != this.state.jqxhr) {
-                    totalPages = Math.ceil(jqxhr.getResponseHeader("X-Cantus-Total-Results") /
-                                           jqxhr.getResponseHeader("X-Cantus-Per-Page"));
-                }
-                this.setState({data: data, jqxhr: jqxhr, page: requestPage, totalPages: totalPages});
-            }.bind(this),
+            success: this.ajaxSuccessCallback,
             error: this.props.onError
         };
 
@@ -213,6 +206,15 @@ var ResultListFrame = React.createClass({
 
         // submit the request
         $.ajax(ajaxSettings);
+    },
+    ajaxSuccessCallback: function(data, textStatus, jqxhr) {
+        // Called when an AJAX request returns successfully.
+
+        var totalPages = Math.ceil(jqxhr.getResponseHeader("X-Cantus-Total-Results") /
+                                   jqxhr.getResponseHeader("X-Cantus-Per-Page"));
+        var page = jqxhr.getResponseHeader("X-Cantus-Page");
+
+        this.setState({data: data, jqxhr: jqxhr, page: page, totalPages: totalPages});
     },
     componentDidMount: function() { this.getNewData(this.props.resourceType); },
     componentWillReceiveProps: function(newProps) {
