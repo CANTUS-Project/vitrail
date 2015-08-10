@@ -188,9 +188,7 @@ var ResultListFrame = React.createClass({
                 }
                 this.setState({data: data, jqxhr: jqxhr, page: requestPage, totalPages: totalPages});
             }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(ajaxSettings.requestUrl, status, err.toString());
-            }.bind(this)
+            error: this.props.onError
         };
 
         // headers
@@ -282,7 +280,7 @@ var SearchForm = React.createClass({
             cache: false
         });
         return {resourceType: "all", page: 1, perPage: 10, currentSearch: "", hateoas: null,
-                serverIsCompatible: null};
+                serverIsCompatible: null, errorMessage: null};
     },
     receiveRootUrl: function(data, textStatus, jqxhr) {
         // when the getInitialState() AJAX request to the root URL succeeds
@@ -310,9 +308,25 @@ var SearchForm = React.createClass({
         // 3.) set everything
         this.setState({hateoas: data, serverIsCompatible: serverIsCompatible});
     },
-    failedAjaxRequest: function(data, textStatus, jqxhr) {
+    failedAjaxRequest: function(jqxhr, textStatus, errorThrown) {
         // when an AJAX request fails
-        this.setState({serverIsCompatible: false});
+
+        // 1.) if the failure happened during the initial request to the root URL
+        if (null === this.state.serverIsCompatible) {
+            this.setState({errorMessage: "Unable to reach the CANTUS server."});
+        }
+
+        // 2.) was there a 404, meaning no search results were found?
+        else if (404 === jqxhr.status) {
+            this.setState({errorMessage: "No results were found."});
+        }
+
+        // 3.) otherwise there was another failure
+        else {
+            var errorMessage = "There was an error while contacting the CANTUS server:\n" + jqxhr.status + " " + jqxhr.statusText;
+            console.error(errorMessage);
+            this.setState({errorMessage: errorMessage});
+        }
     },
     changePage: function(direction) {
         // Give this function a string, either "first," "previous," "next," or "last," to
@@ -334,25 +348,49 @@ var SearchForm = React.createClass({
             newPage = direction;
         }
 
-        this.setState({page: newPage});
+        this.setState({page: newPage, errorMessage: null});
     },
-    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage}); },
+    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, errorMessage: null}); },
     changeResourceType: function(resourceType) {
-        this.setState({resourceType: resourceType, currentSearch: "", page: 1});
+        this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null});
     },
     submitSearch: function(searchQuery) {
-        this.setState({currentSearch: searchQuery, page: 1});
+        this.setState({currentSearch: searchQuery, page: 1, errorMessage: null});
     },
     render: function() {
+        var mainScreen = null;
+
         // if we don't have "serverIsCompatible," it means we can't do anything yet
-        if (null === this.state.serverIsCompatible) {
+        if (null === this.state.serverIsCompatible && null === this.state.errorMessage) {
             return (
                 <p>(waiting on the server)</p>
             );
+        } else if (null === this.state.serverIsCompatible && null !== this.state.errorMessage) {
+            return (
+                <p>{this.state.errorMessage}</p>
+            );
         } else if (false === this.state.serverIsCompatible) {
             return (
-                <p>There was an error while contacting the Cantus server.</p>
+                <p>The Cantus server is incompatible with this version of Vitrail.</p>
             );
+        }
+
+        // the server is compatible, but there was another error
+        else if (null !== this.state.errorMessage) {
+            mainScreen = (<p>{this.state.errorMessage}</p>);
+        }
+
+        // otherwise we'll show the usual thing
+        else {
+            mainScreen = (<ResultListFrame resourceType={this.state.resourceType}
+                                           dontRender={dontRender}
+                                           perPage={this.state.perPage}
+                                           page={this.state.page}
+                                           searchQuery={this.state.currentSearch}
+                                           changePage={this.changePage}
+                                           hateoas={this.state.hateoas}
+                                           onError={this.failedAjaxRequest}
+            />);
         }
 
         // the resource types to allow searching for
@@ -386,14 +424,7 @@ var SearchForm = React.createClass({
                               types={types}
                               selectedType={this.state.resourceType} />
                 <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
-                <ResultListFrame resourceType={this.state.resourceType}
-                                 dontRender={dontRender}
-                                 perPage={this.state.perPage}
-                                 page={this.state.page}
-                                 searchQuery={this.state.currentSearch}
-                                 changePage={this.changePage}
-                                 hateoas={this.state.hateoas}
-                />
+                {mainScreen}
             </div>
         );
     }
