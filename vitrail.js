@@ -273,7 +273,46 @@ var ResultListFrame = React.createClass({
 
 var SearchForm = React.createClass({
     getInitialState: function() {
-        return {resourceType: "browse", page: 1, perPage: 10, currentSearch: ""};
+        $.ajax({
+            url: this.props.rootUrl,
+            method: "GET",
+            dataType: "json",
+            success: this.receiveRootUrl,
+            error: this.failedAjaxRequest,
+            cache: false
+        });
+        return {resourceType: "browse", page: 1, perPage: 10, currentSearch: "", hateoas: null,
+                serverIsCompatible: null};
+    },
+    receiveRootUrl: function(data, textStatus, jqxhr) {
+        // when the getInitialState() AJAX request to the root URL succeeds
+
+        // 1.) make sure the server's API version is compatible
+        var requiredVersion = [0, 2, 1];  // this is a minimum
+        var serverIsCompatible = jqxhr.getResponseHeader("X-Cantus-Version");
+        if (0 === serverIsCompatible.indexOf("Cantus")) {
+            // the header value is like "Cantus/n.n.n"
+            serverIsCompatible = serverIsCompatible.slice(7);
+            var actualVersion = serverIsCompatible.split('.');
+            actualVersion.map(function(num) { return parseInt(num, 10); });
+            if (actualVersion[0] < requiredVersion[0] ||
+                actualVersion[1] < requiredVersion[1] ||
+                actualVersion[2] < requiredVersion[2]) {
+                    serverIsCompatible = false;
+            }
+        } else {
+            serverIsCompatible = false;
+        }
+
+        // 2.) save the "resources" links
+        data = data.resources;
+
+        // 3.) set everything
+        this.setState({hateoas: data, serverIsCompatible: serverIsCompatible});
+    },
+    failedAjaxRequest: function(data, textStatus, jqxhr) {
+        // when an AJAX request fails
+        this.setState({serverIsCompatible: false});
     },
     changePage: function(direction) {
         // Give this function a string, either "first," "previous," "next," or "last," to
@@ -305,6 +344,17 @@ var SearchForm = React.createClass({
         this.setState({currentSearch: searchQuery, page: 1});
     },
     render: function() {
+        // if we don't have "serverIsCompatible," it means we can't do anything yet
+        if (null === this.state.serverIsCompatible) {
+            return (
+                <p>(waiting on the server)</p>
+            );
+        } else if (false === this.state.serverIsCompatible) {
+            return (
+                <p>There was an error while contacting the Cantus server.</p>
+            );
+        }
+
         // the resource types to allow searching for
         var types = [
             ['Any Type', 'browse'],
@@ -349,6 +399,6 @@ var SearchForm = React.createClass({
 });
 
 React.render(
-    <SearchForm />,
+    <SearchForm rootUrl="http://localhost:8888/" />,
     document.getElementById('content')
     );
