@@ -110,6 +110,11 @@ var ResultList = React.createClass({
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if ('initial' != this.props.jqxhr) {
             var columns = this.props.jqxhr.getResponseHeader('X-Cantus-Fields').split(',');
+            var extraFields = this.props.jqxhr.getResponseHeader('X-Cantus-Extra-Fields');
+            if (null !== extraFields) {
+                extraFields = extraFields.split(',');
+                columns = columns.concat(extraFields);
+            }
 
             // remove the field names in "dontRender"
             for (field in this.props.dontRender) {
@@ -319,6 +324,11 @@ var SearchForm = React.createClass({
         ];
         // fields that shouldn't be rendered for users
         var dontRender = ['type', 'id'];
+        if ('browse' === this.state.resourceType) {
+            // if there may be many types, we want users to know what they're getting
+            dontRender = ['id'];
+        }
+        // do the rendering
         return (
             <div className="searchForm">
                 <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
