@@ -43,7 +43,6 @@ var TypeSelector = React.createClass({
         }, this);
         return  (
             <div className="typeSelector">
-                <h2>Select a Result Type</h2>
                 <form>
                     {renderedButtons}
                 </form>
@@ -141,7 +140,6 @@ var ResultList = React.createClass({
 
         return (
             <div className="resultList">
-                <h2>These are some results.</h2>
                 <table>
                     <thead>
                         <tr>
@@ -419,11 +417,13 @@ var SearchForm = React.createClass({
         // do the rendering
         return (
             <div className="searchForm">
+                <h2>Query Settings</h2>
                 <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
                 <TypeSelector onUserInput={this.changeResourceType}
                               types={types}
                               selectedType={this.state.resourceType} />
                 <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
+                <h2>Results</h2>
                 {mainScreen}
             </div>
         );
