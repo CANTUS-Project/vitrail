@@ -31,7 +31,7 @@ var TypeRadioButton = React.createClass({
 var TypeSelector = React.createClass({
     render: function() {
         var renderedButtons = [];
-        this.props.types.forEach(function (buttonDeets) {
+        this.props.types.forEach(function (buttonDeets, index) {
             var selected = false;
             if (this.props.selectedType === buttonDeets[1]) {
                 selected = true;
@@ -39,7 +39,9 @@ var TypeSelector = React.createClass({
             renderedButtons.push(<TypeRadioButton label={buttonDeets[0]}
                                                   value={buttonDeets[1]}
                                                   onUserInput={this.props.onUserInput}
-                                                  selected={selected} />);
+                                                  selected={selected}
+                                                  key={index}
+                                 />);
         }, this);
         return  (
             <div className="typeSelector">
