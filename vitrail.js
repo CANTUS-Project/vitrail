@@ -288,7 +288,7 @@ var SearchForm = React.createClass({
         // 1.) make sure the server's API version is compatible
         var requiredVersion = [0, 2, 1];  // this is a minimum
         var serverIsCompatible = jqxhr.getResponseHeader("X-Cantus-Version");
-        if (0 === serverIsCompatible.indexOf("Cantus")) {
+        if (serverIsCompatible.startsWith("Cantus")) {
             // the header value is like "Cantus/n.n.n"
             serverIsCompatible = serverIsCompatible.slice(7);
             var actualVersion = serverIsCompatible.split('.');
