@@ -408,7 +408,7 @@ var SearchForm = React.createClass({
             ['RISM Sigla', 'sigla'],
             ['Segments', 'segments'],
             ['Sources', 'sources'],
-            ['Source Status', 'statii']
+            ['Source Status', 'source_statii']
         ];
         // fields that shouldn't be rendered for users
         var dontRender = ['type', 'id'];
