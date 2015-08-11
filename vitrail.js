@@ -43,9 +43,7 @@ var TypeSelector = React.createClass({
         }, this);
         return  (
             <div className="typeSelector">
-                <form>
-                    {renderedButtons}
-                </form>
+                {renderedButtons}
             </div>
         );
     },
