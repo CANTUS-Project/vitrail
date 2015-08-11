@@ -1,0 +1,16 @@
+{
+    "name": "vitrail",
+    "version": "0.0.99",
+    "description": "User agent for the CANTUS API.",
+    "keywords": ["music", "musicology", "mediaeval", "Gregorian chant", "manuscript"],
+    "homepage": "https://github.com/CANTUS-Project/vitrail",
+    "bugs": {"url": "https://github.com/CANTUS-Project/vitrail/issues"},
+    "license": "AGPL-3.0",
+    "author": {"name": "Christopher Antila",
+               "email": "christopher@antila.ca",
+               "url": "http://christopher.antila.ca/"},
+    "repository": {"type": "git", "url": "https://github.com/CANTUS-Project/vitrail.git"},
+    "dependencies": {"jquery": ">=2.1",
+                     "react": ">=0.13"},
+    "devDependencies": {"babel": "*"}
+}
