@@ -164,7 +164,9 @@ var Paginator = React.createClass({
             <div className="paginator">
                 <button type="button" name="pages" value="first" onClick={this.changePage}>&lt;&lt;</button>
                 <button type="button" name="pages" value="previous" onClick={this.changePage}>&lt;</button>
-                &nbsp;{this.props.currentPage} of {this.props.totalPages}&nbsp;
+                <div className="blankOfBlank">
+                    &nbsp;{this.props.currentPage} of {this.props.totalPages}&nbsp;
+                </div>
                 <button type="button" name="pages" value="next" onClick={this.changePage}>&gt;</button>
                 <button type="button" name="pages" value="last" onClick={this.changePage}>&gt;&gt;</button>
             </div>

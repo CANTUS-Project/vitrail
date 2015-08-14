@@ -1,3 +1,6 @@
+/* for all apps */
+/****************/
+
 .searchSettings {
     /*border: 1px black solid;*/
     padding: 0px 10px 5px;
@@ -21,5 +24,37 @@
     /*border: 1px black solid;*/
     padding: 0px 10px 5px;
 }
+
+.paginator {
+    padding: 8px 0px 5px;
+    margin: 3px 0px;
+    border-top: 1px #EAEAEA solid;
+    border-bottom: 1px #EAEAEA solid;
+}
+
+.paginator .blankOfBlank {
+    display: inline;
+    background-color: #C33;
+    color: #EAEAEA;
+    padding: 12px 15px;
+}
+
+.paginator button {
+    background-color: inherit;
+    border: none;
+    border-bottom: 3px rgba(0, 0, 0, 0) solid;
+    padding: 12px 5px;
+}
+
+.paginator button:hover, .paginator button:focus {
+    border-bottom: 3px #C33 solid;
+}
+
+.paginator buttom:checked {
+    border-bottom: blue;
+}
+
+/* for not-Drupal only */
+/***********************/
 
 .searchResults td { border: 1px black solid; }
