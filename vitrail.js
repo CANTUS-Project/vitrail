@@ -217,7 +217,7 @@ var ResultListFrame = React.createClass({
 
         // search query
         if (undefined !== searchQuery && "" !== searchQuery) {
-            ajaxSettings.method = "SEARCH";
+            ajaxSettings.type = "SEARCH";
             ajaxSettings.data = "{\"query\": \"" + searchQuery + "\"}";
         }
 
