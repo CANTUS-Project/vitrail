@@ -116,7 +116,7 @@ var ResultList = React.createClass({
             }
 
             // remove the field names in "dontRender"
-            for (field in this.props.dontRender) {
+            for (var field in this.props.dontRender) {
                 var pos = columns.indexOf(this.props.dontRender[field]);
                 if (pos >= 0) {
                     columns.splice(pos, 1);
@@ -360,6 +360,31 @@ var SearchForm = React.createClass({
     render: function() {
         var mainScreen = null;
 
+        // the resource types to allow searching for
+        var types = [
+            ['Any Type', 'all'],
+            ['Cantus ID', 'cantusids'],
+            ['Centuries', 'centuries'],
+            ['Chants', 'chants'],
+            ['Feasts', 'feasts'],
+            ['Genres', 'genres'],
+            ['Indexers', 'indexers'],
+            ['Notations', 'notations'],
+            ['Offices', 'offices'],
+            ['Provenances', 'provenances'],
+            ['RISM Sigla', 'sigla'],
+            ['Segments', 'segments'],
+            ['Sources', 'sources'],
+            ['Source Status', 'source_statii']
+        ];
+        // fields that shouldn't be rendered for users
+        // NB: this must be done before the call to the <ResultListFrame> component
+        var dontRender = ['type', 'id'];
+        if ('browse' === this.state.resourceType) {
+            // if there may be many types, we want users to know what they're getting
+            dontRender = ['id'];
+        }
+
         // if we don't have "serverIsCompatible," it means we can't do anything yet
         if (null === this.state.serverIsCompatible && null === this.state.errorMessage) {
             return (
@@ -393,29 +418,6 @@ var SearchForm = React.createClass({
             />);
         }
 
-        // the resource types to allow searching for
-        var types = [
-            ['Any Type', 'all'],
-            ['Cantus ID', 'cantusids'],
-            ['Centuries', 'centuries'],
-            ['Chants', 'chants'],
-            ['Feasts', 'feasts'],
-            ['Genres', 'genres'],
-            ['Indexers', 'indexers'],
-            ['Notations', 'notations'],
-            ['Offices', 'offices'],
-            ['Provenances', 'provenances'],
-            ['RISM Sigla', 'sigla'],
-            ['Segments', 'segments'],
-            ['Sources', 'sources'],
-            ['Source Status', 'source_statii']
-        ];
-        // fields that shouldn't be rendered for users
-        var dontRender = ['type', 'id'];
-        if ('browse' === this.state.resourceType) {
-            // if there may be many types, we want users to know what they're getting
-            dontRender = ['id'];
-        }
         // do the rendering
         return (
             <div className="searchForm">
