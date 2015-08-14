@@ -91,7 +91,7 @@ var Result = React.createClass({
             }
         }, this);
         if (this.props.data["drupal_path"] !== undefined) {
-            renderedColumns.push(<ResultColumn key="drupal_path" data="CD" link={this.props.data["drupal_path"]} />);
+            renderedColumns.push(<ResultColumn key="drupal_path" data="Show" link={this.props.data["drupal_path"]} />);
         }
         return (
             <tr>
