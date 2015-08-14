@@ -434,5 +434,5 @@ var SearchForm = React.createClass({
 
 React.render(
     <SearchForm rootUrl="http://localhost:8888/" />,
-    document.getElementById('content')
+    document.getElementById('vitrail-content')
     );
