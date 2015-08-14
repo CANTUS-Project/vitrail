@@ -126,8 +126,20 @@ var ResultList = React.createClass({
                 }
             };
 
-            columns.forEach(function(col) {
-                tableHeader.push(<ResultColumn key={col} data={col} header={true} />);
+            columns.forEach(function(columnName) {
+                // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
+                var working = columnName.split("_");
+                var polishedName = "";
+                for (var i in working) {
+                    var rawr = working[i][0];
+                    rawr = rawr.toLocaleUpperCase();
+                    polishedName += rawr;
+                    polishedName += working[i].slice(1) + " ";
+                }
+                polishedName = polishedName.slice(0, polishedName.length);
+
+                // now we can make the <th> cell itself
+                tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
             });
 
             Object.keys(this.props.data).forEach(function (id) {
