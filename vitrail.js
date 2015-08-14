@@ -68,15 +68,18 @@ var PerPageSelector = React.createClass({
 
 var ResultColumn = React.createClass({
     render: function() {
+        var post;
         if (this.props.link) {
-            return (
-                <td><a href={this.props.link}>{this.props.data}</a></td>
-            )
+            post = <a href={this.props.link}>{this.props.data}</a>;
         } else {
-            return (
-                <td>{this.props.data}</td>
-            )
+            post = this.props.data;
         }
+        if (this.props.header) {
+            post = <th>{post}</th>;
+        } else {
+            post = <td>{post}</td>;
+        }
+        return post;
     }
 });
 
@@ -124,7 +127,7 @@ var ResultList = React.createClass({
             };
 
             columns.forEach(function(col) {
-                tableHeader.push(<ResultColumn key={col} data={col} />);
+                tableHeader.push(<ResultColumn key={col} data={col} header={true} />);
             });
 
             Object.keys(this.props.data).forEach(function (id) {
