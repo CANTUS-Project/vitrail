@@ -419,14 +419,18 @@ var SearchForm = React.createClass({
         // do the rendering
         return (
             <div className="searchForm">
-                <h2>Query Settings</h2>
-                <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
-                <TypeSelector onUserInput={this.changeResourceType}
-                              types={types}
-                              selectedType={this.state.resourceType} />
-                <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
-                <h2>Results</h2>
-                {mainScreen}
+                <div className="searchSettings">
+                    <h2>Query Settings</h2>
+                    <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
+                    <TypeSelector onUserInput={this.changeResourceType}
+                                  types={types}
+                                  selectedType={this.state.resourceType} />
+                    <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
+                </div>
+                <div className="searchResults">
+                    <h2>Results</h2>
+                    {mainScreen}
+                </div>
             </div>
         );
     }
