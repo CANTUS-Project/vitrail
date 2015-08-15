@@ -50,8 +50,13 @@
     border-bottom: 3px #C33 solid;
 }
 
-.paginator buttom:checked {
-    border-bottom: blue;
+/* for Drupal only */
+/*******************/
+/* NOTE: the <div id="block-system-main"> is a thing that Drupal sets up, and it's not going to
+ *       be used in our other use cases, so we can use that to ask "Is this Drupal?" in CSS alone.
+ */
+#block-system-main #vitrail-content {
+    overflow-x: scroll;
 }
 
 /* for not-Drupal only */
