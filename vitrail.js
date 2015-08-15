@@ -222,7 +222,7 @@ var ResultListFrame = React.createClass({
         }
 
         // submit the request
-        $.ajax(ajaxSettings);
+        Zepto.ajax(ajaxSettings);
     },
     ajaxSuccessCallback: function(data, textStatus, jqxhr) {
         // Called when an AJAX request returns successfully.
@@ -288,7 +288,7 @@ var ResultListFrame = React.createClass({
 
 var SearchForm = React.createClass({
     getInitialState: function() {
-        $.ajax({
+        Zepto.ajax({
             url: this.props.rootUrl,
             method: "GET",
             dataType: "json",
