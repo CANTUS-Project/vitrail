@@ -1,3 +1,6 @@
+import React from "react";
+import "zepto.min";
+
 var SearchBox = React.createClass({
     propTypes: {
         submitSearch: React.PropTypes.func.isRequired,
