@@ -278,7 +278,7 @@ var ResultListFrame = React.createClass({
                                    this.state.jqxhr.getResponseHeader("X-Cantus-Per-Page"));
         }
         return (
-            <div className="resultList">
+            <div className="resultListFrame">
                 <ResultList data={this.state.data} jqxhr={this.state.jqxhr} dontRender={this.props.dontRender} />
                 <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
             </div>
