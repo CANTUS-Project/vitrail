@@ -1,6 +1,6 @@
 {
     "name": "vitrail",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "User agent for the CANTUS API.",
     "keywords": ["music", "musicology", "mediaeval", "Gregorian chant", "manuscript"],
     "homepage": "https://github.com/CANTUS-Project/vitrail",

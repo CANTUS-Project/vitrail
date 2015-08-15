@@ -1,4 +1,11 @@
 var SearchBox = React.createClass({
+    propTypes: {
+        submitSearch: React.PropTypes.func.isRequired,
+        defaultValue: React.PropTypes.string
+    },
+    getDefaultProps: function() {
+        return {defaultValue: ""};
+    },
     submitSearch: function(changeEvent) {
         this.props.submitSearch(changeEvent.target[0].value);
         changeEvent.preventDefault();  // stop the default GET form submission
@@ -16,6 +23,15 @@ var SearchBox = React.createClass({
 });
 
 var TypeRadioButton = React.createClass({
+    propTypes: {
+        value: React.PropTypes.string.isRequired,
+        onUserInput: React.PropTypes.func.isRequired,
+        selected: React.PropTypes.bool,
+        label: React.PropTypes.string
+    },
+    getDefaultProps: function() {
+        return {checked: false, label: ""};
+    },
     render: function() {
         return (
             <label><input type="radio" name="resourceType" value={this.props.value}
@@ -29,6 +45,14 @@ var TypeRadioButton = React.createClass({
 });
 
 var TypeSelector = React.createClass({
+    propTypes: {
+        types: React.PropTypes.arrayOf(React.PropTypes.arrayOf(React.PropTypes.string)),
+        selectedType: React.PropTypes.string,
+        onUserInput: React.PropTypes.func.isRequired
+    },
+    getDefaultProps: function() {
+        return {types: [], selectedType: ""};
+    },
     render: function() {
         var renderedButtons = [];
         this.props.types.forEach(function (buttonDeets, index) {
@@ -55,6 +79,13 @@ var TypeSelector = React.createClass({
 });
 
 var PerPageSelector = React.createClass({
+    propTypes: {
+        onUserInput: React.PropTypes.func.isRequired,
+        perPage: React.PropTypes.number
+    },
+    getDefaultProps: function() {
+        return {perPage: 10};
+    },
     render: function() {
         return (
             <label>Results per page: <input type="number" name="perPage" value={this.props.perPage} onChange={this.handleChange} /></label>
@@ -67,6 +98,14 @@ var PerPageSelector = React.createClass({
 });
 
 var ResultColumn = React.createClass({
+    propTypes: {
+        link: React.PropTypes.string,
+        data: React.PropTypes.string,
+        header: React.PropTypes.bool
+    },
+    getDefaultProps: function() {
+        return {link: "", data: "", header: false};
+    },
     render: function() {
         var post;
         if (this.props.link) {
@@ -84,6 +123,17 @@ var ResultColumn = React.createClass({
 });
 
 var Result = React.createClass({
+    propTypes: {
+        // the column names to render, or the fields in "data" to render as columns
+        columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+        // the object to render into columns
+        data: React.PropTypes.object.isRequired,
+        // members here are the URL for the same-name member in "data"
+        resources: React.PropTypes.object
+    },
+    getDefaultProps: function() {
+        return {resources: {}};
+    },
     render: function() {
         var renderedColumns = [];
         this.props.columns.forEach(function (columnName) {
@@ -105,11 +155,21 @@ var Result = React.createClass({
 });
 
 var ResultList = React.createClass({
+    propTypes: {
+        jqxhr: React.PropTypes.instanceOf(XMLHttpRequest),
+        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
+        data: React.PropTypes.object,
+
+    },
+    getDefaultProps: function() {
+        return {dontRender: [], data: {}, jqxhr: new XMLHttpRequest()};
+    },
     render: function() {
         var tableHeader = [];
         var results = [];
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
+        // TODO: this is the wrong way to do this
         if ('initial' != this.props.jqxhr) {
             var columns = this.props.jqxhr.getResponseHeader('X-Cantus-Fields').split(',');
             var extraFields = this.props.jqxhr.getResponseHeader('X-Cantus-Extra-Fields');
@@ -171,6 +231,14 @@ var ResultList = React.createClass({
 });
 
 var Paginator = React.createClass({
+    propTypes: {
+        changePage: React.PropTypes.func.isRequired,
+        currentPage: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
+        totalPages: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string])
+    },
+    getDefaultProps: function() {
+        return {currentPage: 1, totalPages: 1};
+    },
     changePage: function(button) {
         this.props.changePage(button.target.value);
     },
@@ -190,6 +258,16 @@ var Paginator = React.createClass({
 });
 
 var ResultListFrame = React.createClass({
+    propTypes: {
+        onError: React.PropTypes.func.isRequired,
+        changePage: React.PropTypes.func.isRequired,
+        hateoas: React.PropTypes.object.isRequired,
+        resourceType: React.PropTypes.string,
+        dontRender: React.PropTypes.arrayOf(React.PropTypes.string)
+    },
+    getDefaultProps: function() {
+        return {resourceType: "any", dontRender: []};
+    },
     getNewData: function(resourceType, requestPage, perPage, searchQuery) {
         // default, unchanging things
         var ajaxSettings = {
@@ -287,6 +365,9 @@ var ResultListFrame = React.createClass({
 });
 
 var SearchForm = React.createClass({
+    propTypes: {
+        rootUrl: React.PropTypes.string.isRequired,
+    },
     getInitialState: function() {
         Zepto.ajax({
             url: this.props.rootUrl,
