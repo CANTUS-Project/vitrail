@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+
+# Script to compile the Vitrail's JavaScript assets, then run the test suite with Jest.
+
+import subprocess
+try:
+    import pathlib
+except ImportError:
+    print('This script uses the "pathlib" module from Python 3.4. Please install and use Python 3.4\n'
+          'or use PyPI to install the "pathlib" module.')
+    raise SystemExit(1)
+
+
+# list of the required directories in "node_modules"
+_REQUIRED_NODE_MODULES = [
+    'react',
+    'zepto-commonjs'
+    ]
+
+# list of the JS files that must be compiled with Babel; it's input filename, then output filename
+_COMPILE_WITH_BABEL = [
+    ('js/vitrail.src.js', 'js/vitrail.js')
+    ]
+
+
+def _the_script():
+    # see if the proper node dependencies are installed
+    node_dir = pathlib.Path('node_modules')
+    if not (node_dir.exists() and node_dir.is_dir()):
+        print('Please install the required Node dependencies.')
+        raise SystemExit(1)
+    node_mods = [x.name for x in node_dir.iterdir()]
+    for each_module in _REQUIRED_NODE_MODULES:
+        if each_module not in node_mods:
+            print('Please install "{}" with Node'.format(each_module))
+            raise SystemExit(1)
+
+    # For Zepto, we can't use the package named "zepto" from NPM because it's too old. We'll use
+    # this hack for compatibility. The RequireJS thing works just fine with the "zepto" name.
+    if 'zepto' not in node_mods:
+        zepto_dir = pathlib.Path('node_modules/zepto')
+        zepto_dir.symlink_to('zepto-commonjs', target_is_directory=True)
+        if not zepto_dir.exists():
+            print('Could not make the "zepto" symlink.')
+            raise SystemExit(1)
+
+    # see if we can find/use Babel
+    try:
+        subprocess.check_output(['which', 'babel'])
+    except subprocess.CalledProcessError:
+        print('Could not find Babel. Is it installed?')
+        raise SystemExit(1)
+
+    # compile the files
+    for each_file in _COMPILE_WITH_BABEL:
+        print('Compiling {} with Babel.'.format(each_file[0]))
+        try:
+            subprocess.check_call(['babel', each_file[0], '--modules', 'common',
+                                   '--out-file', each_file[1]])
+        except subprocess.CalledProcessError as cperr:
+            print('Encountered the following error while starting babel:\n{}'.format(cperr))
+            raise SystemExit(1)
+
+    # run the tests
+    print('Starting the tests.')
+    try:
+        subprocess.check_call(['jest'])
+    except subprocess.CalledProcessError:
+        print('\nSome tests failed!\n')
+        raise SystemExit(1)
+    else:
+        print('\nAll the tests passed!\n')
+
+
+if '__main__' == __name__:
+    _the_script()
+else:
+    print('This script is only intended to be run from a commandline.')
+    raise SystemExit(1)
