@@ -539,7 +539,5 @@ var SearchForm = React.createClass({
     }
 });
 
-React.render(
-    <SearchForm rootUrl="http://localhost:8888/" />,
-    document.getElementById('vitrail-content')
-    );
+export {SearchBox, TypeRadioButton, TypeSelector, PerPageSelector, ResultColumn, Result, ResultList,
+        Paginator, ResultListFrame, SearchForm};
