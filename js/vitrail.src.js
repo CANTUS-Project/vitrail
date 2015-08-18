@@ -116,8 +116,11 @@ var PerPageSelector = React.createClass({
 
 var ResultColumn = React.createClass({
     propTypes: {
+        // URL corresponding to "data," which will be used as the @href of an <a>. Optional.
         link: React.PropTypes.string,
+        // Data to show in the column.
         data: React.PropTypes.string,
+        // Whether this is a column in the table header (default is false).
         header: React.PropTypes.bool
     },
     getDefaultProps: function() {
