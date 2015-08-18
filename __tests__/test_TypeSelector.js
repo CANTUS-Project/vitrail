@@ -30,13 +30,13 @@ describe("TypeSelector", function() {
         expect(TestUtils.isElementOfType(appleButton, TypeRadioButton)).toBe(true);
         expect(TestUtils.isElementOfType(watermelonButton, TypeRadioButton)).toBe(true);
         // check the sub-components have the right labels
-        expect(strawberryButton._store.props.label).toBe(types[0][0]);
-        expect(appleButton._store.props.label).toBe(types[1][0]);
-        expect(watermelonButton._store.props.label).toBe(types[2][0]);
+        expect(strawberryButton.props.label).toBe(types[0][0]);
+        expect(appleButton.props.label).toBe(types[1][0]);
+        expect(watermelonButton.props.label).toBe(types[2][0]);
         // check the sub-components have the right values
-        expect(strawberryButton._store.props.value).toBe(types[0][1]);
-        expect(appleButton._store.props.value).toBe(types[1][1]);
-        expect(watermelonButton._store.props.value).toBe(types[2][1]);
+        expect(strawberryButton.props.value).toBe(types[0][1]);
+        expect(appleButton.props.value).toBe(types[1][1]);
+        expect(watermelonButton.props.value).toBe(types[2][1]);
     });
 
     it("calls the 'onUserInput' func with the @value attribute", function() {

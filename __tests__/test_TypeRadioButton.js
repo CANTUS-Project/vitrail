@@ -26,8 +26,8 @@ describe("TypeRadioButton", function() {
         // the following props are set properly: value, selected, and label
         expect(labelInDom.props.children[1]).toBe(labelValue);
         expect(buttonInDom.type).toBe("input");
-        expect(buttonInDom._store.props.checked).toBe(selected);
-        expect(buttonInDom._store.props.value).toBe(buttonValue);
+        expect(buttonInDom.props.checked).toBe(selected);
+        expect(buttonInDom.props.value).toBe(buttonValue);
     });
 
     it("calls the 'onUserInput' func with the @value attribute", function() {
@@ -45,5 +45,5 @@ describe("TypeRadioButton", function() {
         // after "clicking," it called the "onUserInput" func with @value
         expect(testFunc).toBeCalledWith(buttonValue);
     });
-    
+
 });
