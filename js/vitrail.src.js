@@ -33,7 +33,7 @@ var TypeRadioButton = React.createClass({
         label: React.PropTypes.string
     },
     getDefaultProps: function() {
-        return {checked: false, label: ""};
+        return {selected: false, label: ""};
     },
     render: function() {
         return (
