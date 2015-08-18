@@ -49,8 +49,16 @@ var TypeRadioButton = React.createClass({
 
 var TypeSelector = React.createClass({
     propTypes: {
+        // "types" is an array of 2-element array of strings. In the sub-arrays, the first element
+        // should be the name of the type, for use in the UI; the second element should be the name
+        // of the member as it's held in the HATEOAS resource URLs provided by the Cantus server.
         types: React.PropTypes.arrayOf(React.PropTypes.arrayOf(React.PropTypes.string)),
+        // Name of the currently selected type, as it appears in the second element of the sub-array
+        // described in "types."
         selectedType: React.PropTypes.string,
+        // This function is executed when the user selects a different type. There is one argument,
+        // a string with the name of the newly-selected type, as it appears in the second element
+        // of the sub-array described in "types."
         onUserInput: React.PropTypes.func.isRequired
     },
     getDefaultProps: function() {
