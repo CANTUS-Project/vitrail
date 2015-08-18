@@ -101,12 +101,16 @@ var PerPageSelector = React.createClass({
     },
     render: function() {
         return (
-            <label>Results per page: <input type="number" name="perPage" value={this.props.perPage} onChange={this.handleChange} /></label>
+            <label>Results per page: <input type="number"
+                                            name="perPage"
+                                            value={this.props.perPage}
+                                            onChange={this.handleChange}
+                                     />
+            </label>
         );
     },
     handleChange: function(changeEvent) {
-        var newPerPage = changeEvent.target.value;
-        this.props.onUserInput(newPerPage);
+        this.props.onUserInput(changeEvent.target.value);
     }
 });
 
