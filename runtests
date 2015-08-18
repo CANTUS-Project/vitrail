@@ -14,7 +14,8 @@ except ImportError:
 # list of the required directories in "node_modules"
 _REQUIRED_NODE_MODULES = [
     'react',
-    'zepto-commonjs'
+    'zepto-commonjs',
+    'jest-cli'
     ]
 
 # list of the JS files that must be compiled with Babel; it's input filename, then output filename
@@ -64,7 +65,7 @@ def _the_script():
     # run the tests
     print('Starting the tests.')
     try:
-        subprocess.check_call(['jest'])
+        subprocess.check_call(['node_modules/jest-cli/bin/jest.js'])
     except subprocess.CalledProcessError:
         print('\nSome tests failed!\n')
         raise SystemExit(1)
