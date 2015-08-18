@@ -3,11 +3,13 @@ import "zepto";
 
 var SearchBox = React.createClass({
     propTypes: {
+        // "submitSearch" is called with a single argument, a string, containing the search query.
         submitSearch: React.PropTypes.func.isRequired,
-        defaultValue: React.PropTypes.string
+        // "contents" is the initial value in the search box
+        contents: React.PropTypes.string
     },
     getDefaultProps: function() {
-        return {defaultValue: ""};
+        return {contents: ""};
     },
     submitSearch: function(changeEvent) {
         this.props.submitSearch(changeEvent.target[0].value);
