@@ -23,11 +23,12 @@
 //-------------------------------------------------------------------------------------------------
 
 
-// This is written in straight-up ECMAScript 5, bro.
-define(["react", "vitrail"], function(React, Vitrail) {
-    React.render(
-        React.createElement(Vitrail.SearchForm,
-                            {rootUrl: "http://localhost:8888/"}),
-        document.getElementById('vitrail-content')
-    );
-});
+import React from 'react';
+import {SearchForm} from './vitrail.src.js';
+
+
+React.render(
+    React.createElement(SearchForm,
+                        {rootUrl: 'http://localhost:8888/'}),
+    document.getElementById('vitrail-content')
+);

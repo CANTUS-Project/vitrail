@@ -24,7 +24,6 @@
 
 
 import React from "react";
-import "zepto";
 
 var SearchBox = React.createClass({
     propTypes: {
