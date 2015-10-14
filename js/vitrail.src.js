@@ -542,7 +542,8 @@ var SearchForm = React.createClass({
 
         // do the rendering
         return (
-            <div className="searchForm">
+            <div className="searchForm col-sm-12">
+                <h1>Vitrail: Cantus Database App</h1>
                 <div className="searchSettings card">
                     <div className="card-block">
                         <h2 className="card-title">Query Settings</h2>
