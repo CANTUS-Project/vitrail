@@ -24,6 +24,7 @@
 
 
 import React from "react";
+import cantusModule from "./cantusjs/cantus.src";
 
 var SearchBox = React.createClass({
     propTypes: {
@@ -181,11 +182,19 @@ var Result = React.createClass({
     render: function() {
         var renderedColumns = [];
         this.props.columns.forEach(function (columnName) {
-            if ("name" === columnName)
-                renderedColumns.push(<ResultColumn key={columnName} data={this.props.data[columnName]} link={this.props.resources['self']} />);
-            else {
-                renderedColumns.push(<ResultColumn key={columnName} data={this.props.data[columnName]} link={this.props.resources[columnName]} />);
+            var columnData = this.props.data[columnName];
+            if (columnData !== undefined) {
+                columnData = columnData.toString();
             }
+
+            var columnLink = '';
+            if ("name" === columnName)
+                columnLink = this.props.resources['self'];
+            else {
+                columnLink = this.props.resources[columnName];
+            }
+
+            renderedColumns.push(<ResultColumn key={columnName} data={columnData} link={columnLink} />);
         }, this);
         if (this.props.data["drupal_path"] !== undefined) {
             renderedColumns.push(<ResultColumn key="drupal_path" data="Show" link={this.props.data["drupal_path"]} />);
@@ -200,23 +209,23 @@ var Result = React.createClass({
 
 var ResultList = React.createClass({
     propTypes: {
-        jqxhr: React.PropTypes.instanceOf(XMLHttpRequest),
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
         data: React.PropTypes.object,
-
+        headers: React.PropTypes.object,
+        // the order in which to display results
+        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
     },
     getDefaultProps: function() {
-        return {dontRender: [], data: {}, jqxhr: new XMLHttpRequest()};
+        return {dontRender: [], data: null, headers: null};
     },
     render: function() {
         var tableHeader = [];
         var results = [];
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
-        // TODO: this is the wrong way to do this
-        if ('initial' != this.props.jqxhr) {
-            var columns = this.props.jqxhr.getResponseHeader('X-Cantus-Fields').split(',');
-            var extraFields = this.props.jqxhr.getResponseHeader('X-Cantus-Extra-Fields');
+        if (null !== this.props.data && null !== this.props.headers) {
+            var columns = this.props.headers.fields.split(',');
+            var extraFields = this.props.headers.extra_fields;
             if (null !== extraFields) {
                 extraFields = extraFields.split(',');
                 columns = columns.concat(extraFields);
@@ -246,9 +255,7 @@ var ResultList = React.createClass({
                 tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
             });
 
-            Object.keys(this.props.data).forEach(function (id) {
-                if ("resources" === id)
-                    return;
+            this.props.sortOrder.forEach(function (id) {
                 results.push(<Result
                     key={id}
                     columns={columns}
@@ -305,7 +312,6 @@ var ResultListFrame = React.createClass({
     propTypes: {
         onError: React.PropTypes.func.isRequired,
         changePage: React.PropTypes.func.isRequired,
-        hateoas: React.PropTypes.object.isRequired,
         resourceType: React.PropTypes.string,
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string)
     },
@@ -315,45 +321,43 @@ var ResultListFrame = React.createClass({
     getNewData: function(resourceType, requestPage, perPage, searchQuery) {
         // default, unchanging things
         var ajaxSettings = {
-            headers: {},
-            dataType: "json",
-            success: this.ajaxSuccessCallback,
-            error: this.props.onError
+            type: resourceType
         };
 
-        // headers
+        // TODO: id, fields, sort
+
+        // pagination
         if (undefined === requestPage) {
-            ajaxSettings.headers["X-Cantus-Page"] = 1;
+            ajaxSettings["page"] = 1;
         } else {
-            ajaxSettings.headers["X-Cantus-Page"] = requestPage;
+            ajaxSettings["page"] = requestPage;
         }
 
         if (undefined === perPage) {
-            ajaxSettings.headers["X-Cantus-Per-Page"] = 10;
+            ajaxSettings["per_page"] = 10;
         } else {
-            ajaxSettings.headers["X-Cantus-Per-Page"] = perPage;
-        }
-
-        // URL
-        ajaxSettings["url"] = this.props.hateoas.browse[resourceType];
-
-        // search query
-        if (undefined !== searchQuery && "" !== searchQuery) {
-            ajaxSettings.type = "SEARCH";
-            ajaxSettings.data = "{\"query\": \"" + searchQuery + "\"}";
+            ajaxSettings["per_page"] = perPage;
         }
 
         // submit the request
-        Zepto.ajax(ajaxSettings);
+        if (undefined !== searchQuery && "" !== searchQuery) {
+            // search query
+            ajaxSettings["any"] = searchQuery;
+            this.props.cantus.search(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.props.onError);
+        } else {
+            // browse query
+            this.props.cantus.get(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.props.onError);
+        }
     },
-    ajaxSuccessCallback: function(data, textStatus, jqxhr) {
+    ajaxSuccessCallback: function(response) {
         // Called when an AJAX request returns successfully.
-
-        var totalPages = Math.ceil(jqxhr.getResponseHeader("X-Cantus-Total-Results") /
-                                   jqxhr.getResponseHeader("X-Cantus-Per-Page"));
-        var page = jqxhr.getResponseHeader("X-Cantus-Page");
-
-        this.setState({data: data, jqxhr: jqxhr, page: page, totalPages: totalPages});
+        var headers = response.headers;
+        delete response.headers;
+        var sortOrder = response.sort_order;
+        delete response.sort_order;
+        var totalPages = Math.ceil(headers.total_results / headers.per_page);
+        this.setState({data: response, headers: headers, page: headers.page, totalPages: totalPages,
+                       sortOrder: sortOrder});
     },
     componentDidMount: function() { this.getNewData(this.props.resourceType); },
     componentWillReceiveProps: function(newProps) {
@@ -384,24 +388,26 @@ var ResultListFrame = React.createClass({
         // this would produce an invalid result
         } else if (nextProps.page > this.state.totalPages) {
             return false;
+        // this wouldn't change anything
+        } else if (nextState.data === this.state.data && nextState.headers === this.state.headers &&
+                   nextState.page === this.state.page && nextState.totalPages === this.state.totalPages) {
+            return false;
         } else {
             return true;
         }
     },
     getInitialState: function() {
-        return {data: {}, jqxhr: "initial", page: 1, totalPages: 1};
+        return {data: null, headers: null, page: 1, totalPages: 1};
     },
     render: function() {
-        var currentPage = 0;
-        var totalPages = 0;
-        if ("initial" != this.state.jqxhr) {
-            currentPage = this.state.jqxhr.getResponseHeader("X-Cantus-Page");
-            totalPages = Math.ceil(this.state.jqxhr.getResponseHeader("X-Cantus-Total-Results") /
-                                   this.state.jqxhr.getResponseHeader("X-Cantus-Per-Page"));
-        }
+        var currentPage = this.state.page;
+        var totalPages = this.state.totalPages;
         return (
             <div className="resultListFrame">
-                <ResultList data={this.state.data} jqxhr={this.state.jqxhr} dontRender={this.props.dontRender} />
+                <ResultList data={this.state.data}
+                            headers={this.state.headers}
+                            dontRender={this.props.dontRender}
+                            sortOrder = {this.state.sortOrder} />
                 <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
             </div>
         );
@@ -413,60 +419,22 @@ var SearchForm = React.createClass({
         rootUrl: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
-        Zepto.ajax({
-            url: this.props.rootUrl,
-            method: "GET",
-            dataType: "json",
-            success: this.receiveRootUrl,
-            error: this.failedAjaxRequest,
-            cache: false
-        });
-        return {resourceType: "all", page: 1, perPage: 10, currentSearch: "", hateoas: null,
-                serverIsCompatible: null, errorMessage: null};
+        var cantus = new cantusModule.Cantus(this.props.rootUrl);
+        return {cantus: cantus, resourceType: "all", page: 1, perPage: 10, currentSearch: "",
+                errorMessage: null};
     },
-    receiveRootUrl: function(data, textStatus, jqxhr) {
-        // when the getInitialState() AJAX request to the root URL succeeds
-
-        // 1.) make sure the server's API version is compatible
-        var requiredVersion = [0, 2, 1];  // this is a minimum
-        var serverIsCompatible = jqxhr.getResponseHeader("X-Cantus-Version");
-        if (serverIsCompatible.startsWith("Cantus")) {
-            // the header value is like "Cantus/n.n.n"
-            serverIsCompatible = serverIsCompatible.slice(7);
-            var actualVersion = serverIsCompatible.split('.');
-            actualVersion.map(function(num) { return parseInt(num, 10); });
-            if (actualVersion[0] < requiredVersion[0] ||
-                actualVersion[1] < requiredVersion[1] ||
-                actualVersion[2] < requiredVersion[2]) {
-                    serverIsCompatible = false;
-            }
-        } else {
-            serverIsCompatible = false;
-        }
-
-        // 2.) save the "resources" links
-        data = data.resources;
-
-        // 3.) set everything
-        this.setState({hateoas: data, serverIsCompatible: serverIsCompatible});
-    },
-    failedAjaxRequest: function(jqxhr, textStatus, errorThrown) {
+    failedAjaxRequest: function(errorInfo) {
         // when an AJAX request fails
 
-        // 1.) if the failure happened during the initial request to the root URL
-        if (null === this.state.serverIsCompatible) {
-            this.setState({errorMessage: "Unable to reach the CANTUS server."});
-        }
-
-        // 2.) was there a 404, meaning no search results were found?
-        else if (404 === jqxhr.status) {
+        // 1.) was there a 404, meaning no search results were found?
+        if (404 === errorInfo.code) {
             this.setState({errorMessage: "No results were found."});
         }
 
-        // 3.) otherwise there was another failure
+        // 2.) otherwise there was another failure
         else {
-            var errorMessage = "There was an error while contacting the CANTUS server:\n" + jqxhr.status + " " + jqxhr.statusText;
-            console.error(errorMessage);
+            var errorMessage = "There was an error while contacting the CANTUS server:\n" + errorInfo.response;
+            console.error(errorInfo);
             this.setState({errorMessage: errorMessage});
         }
     },
@@ -527,21 +495,6 @@ var SearchForm = React.createClass({
             dontRender = ['id'];
         }
 
-        // if we don't have "serverIsCompatible," it means we can't do anything yet
-        if (null === this.state.serverIsCompatible && null === this.state.errorMessage) {
-            return (
-                <p>(waiting on the server)</p>
-            );
-        } else if (null === this.state.serverIsCompatible && null !== this.state.errorMessage) {
-            return (
-                <p>{this.state.errorMessage}</p>
-            );
-        } else if (false === this.state.serverIsCompatible) {
-            return (
-                <p>The Cantus server is incompatible with this version of Vitrail.</p>
-            );
-        }
-
         // the server is compatible, but there was another error
         else if (null !== this.state.errorMessage) {
             mainScreen = (<p>{this.state.errorMessage}</p>);
@@ -555,8 +508,8 @@ var SearchForm = React.createClass({
                                            page={this.state.page}
                                            searchQuery={this.state.currentSearch}
                                            changePage={this.changePage}
-                                           hateoas={this.state.hateoas}
                                            onError={this.failedAjaxRequest}
+                                           cantus={this.state.cantus}
             />);
         }
 
