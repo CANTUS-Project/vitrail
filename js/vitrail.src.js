@@ -66,7 +66,7 @@ var TypeRadioButton = React.createClass({
     render: function() {
         let thisId = `typeRadioButton-${this.props.value}`;
         return (
-            <div class="radio">
+            <div className="radio">
                 <input type="radio" name="resourceType" id={thisId} value={this.props.value}
                        onChange={this.handleChange} checked={this.props.selected} />
                 <label htmlFor={thisId}>
