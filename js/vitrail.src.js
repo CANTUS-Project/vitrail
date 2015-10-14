@@ -28,26 +28,27 @@ import cantusModule from "./cantusjs/cantus.src";
 
 var SearchBox = React.createClass({
     propTypes: {
-        // "submitSearch" is called with a single argument, a string, containing the search query.
-        submitSearch: React.PropTypes.func.isRequired,
         // "contents" is the initial value in the search box
         contents: React.PropTypes.string
     },
     getDefaultProps: function() {
         return {contents: ""};
     },
-    submitSearch: function(changeEvent) {
-        this.props.submitSearch(changeEvent.target[0].value);
-        changeEvent.preventDefault();  // stop the default GET form submission
-    },
+    // submitSearch: function(changeEvent) {
+        // this.props.submitSearch(changeEvent.target[0].value);
+        // changeEvent.preventDefault();  // stop the default GET form submission
+    // },
     render: function() {
         return (
-            <form onSubmit={this.submitSearch}>
-                <label>Search Query:&nbsp;
-                    <input type="search" name="searchQuery" defaultValue={this.props.contents} />&nbsp;
-                    <input type="submit" value="Search" />
-                </label>
-            </form>
+            <fieldset className="form-group row">
+                <label htmlFor="#searchQuery" className="col-sm-2">Search Query</label>
+                <div className="input-group col-sm-10">
+                    <input id="searchQuery" type="search" className="form-control form-control-search" defaultValue={this.props.contents}/>
+                    <span className="input-group-btn">
+                        <button className="btn btn-secondary" type="submit" value="Search">Search</button>
+                    </span>
+                </div>
+            </fieldset>
         );
     }
 });
@@ -213,7 +214,7 @@ var ResultList = React.createClass({
         data: React.PropTypes.object,
         headers: React.PropTypes.object,
         // the order in which to display results
-        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string)
     },
     getDefaultProps: function() {
         return {dontRender: [], data: null, headers: null};
@@ -288,7 +289,8 @@ var Paginator = React.createClass({
     propTypes: {
         changePage: React.PropTypes.func.isRequired,
         currentPage: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
-        totalPages: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string])
+        totalPages: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
+        searchQuery: React.PropTypes.string
     },
     getDefaultProps: function() {
         return {currentPage: 1, totalPages: 1};
@@ -471,8 +473,11 @@ var SearchForm = React.createClass({
     changeResourceType: function(resourceType) {
         this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null});
     },
-    submitSearch: function(searchQuery) {
-        this.setState({currentSearch: searchQuery, page: 1, errorMessage: null});
+    submitSearch: function(submitEvent) {
+        submitEvent.preventDefault();  // stop the default GET form submission
+        this.setState({currentSearch: submitEvent.target[1].value,
+                       page: 1,
+                       errorMessage: null});
     },
     render: function() {
         var mainScreen = null;
@@ -523,13 +528,17 @@ var SearchForm = React.createClass({
         // do the rendering
         return (
             <div className="searchForm">
-                <div className="searchSettings">
-                    <h2>Query Settings</h2>
-                    <SearchBox contents={this.state.currentSearch} submitSearch={this.submitSearch} />
-                    <TypeSelector onUserInput={this.changeResourceType}
-                                  types={types}
-                                  selectedType={this.state.resourceType} />
-                    <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
+                <div className="searchSettings card">
+                    <div className="card-block">
+                        <h2 className="card-title">Query Settings</h2>
+                    </div>
+                    <form onSubmit={this.submitSearch}>
+                        <SearchBox contents={this.state.currentSearch} />
+                        <TypeSelector onUserInput={this.changeResourceType}
+                                      types={types}
+                                      selectedType={this.state.resourceType} />
+                        <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
+                    </form>
                 </div>
                 <div className="searchResults">
                     {mainScreen}
