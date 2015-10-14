@@ -64,10 +64,15 @@ var TypeRadioButton = React.createClass({
         return {selected: false, label: ""};
     },
     render: function() {
+        let thisId = `typeRadioButton-${this.props.value}`;
         return (
-            <label><input type="radio" name="resourceType" value={this.props.value}
-                          onChange={this.handleChange} checked={this.props.selected} />
-                   {this.props.label}</label>
+            <div class="radio">
+                <input type="radio" name="resourceType" id={thisId} value={this.props.value}
+                       onChange={this.handleChange} checked={this.props.selected} />
+                <label htmlFor={thisId}>
+                    {this.props.label}
+                </label>
+            </div>
         );
     },
     handleChange: function(changeEvent) {
@@ -107,9 +112,12 @@ var TypeSelector = React.createClass({
                                  />);
         }, this);
         return  (
-            <div className="typeSelector">
-                {renderedButtons}
-            </div>
+            <fieldset className="typeSelector form-group row">
+                <label className="col-sm-2">Resource Type</label>
+                <div className="col-sm-10">
+                    {renderedButtons}
+                </div>
+            </fieldset>
         );
     },
     handleChange: function(changeEvent) {
