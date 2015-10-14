@@ -126,13 +126,20 @@ var PerPageSelector = React.createClass({
         return {perPage: 10};
     },
     render: function() {
+        // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
         return (
-            <label>Results per page: <input type="number"
-                                            name="perPage"
-                                            value={this.props.perPage}
-                                            onChange={this.handleChange}
-                                     />
-            </label>
+            <fieldset className="form-group row">
+                <label htmlFor="#perPageSelector" className="col-sm-2">Results per page:</label>
+                <div className="col-sm-10">
+                    <input type="number"
+                           name="perPage"
+                           id="perPageSelector"
+                           className="form-control form-control-number"
+                           value={this.props.perPage}
+                           onChange={this.handleChange}
+                           />
+                </div>
+            </fieldset>
         );
     },
     handleChange: function(changeEvent) {
