@@ -200,7 +200,7 @@ var Result = React.createClass({
             renderedColumns.push(<ResultColumn key="drupal_path" data="Show" link={this.props.data["drupal_path"]} />);
         }
         return (
-            <tr>
+            <tr className="resultComponent">
                 {renderedColumns}
             </tr>
         );
@@ -265,10 +265,13 @@ var ResultList = React.createClass({
         }
 
         return (
-            <div className="resultList">
-                <table>
+            <div className="resultList card">
+                <div className="card-block">
+                    <h2 className="card-title">Results</h2>
+                </div>
+                <table className="table table-hover">
                     <thead>
-                        <tr>
+                        <tr className="resultTableHeader">
                             {tableHeader}
                         </tr>
                     </thead>
@@ -529,7 +532,6 @@ var SearchForm = React.createClass({
                     <PerPageSelector onUserInput={this.changePerPage} perPage={this.state.perPage} />
                 </div>
                 <div className="searchResults">
-                    <h2>Results</h2>
                     {mainScreen}
                 </div>
             </div>
