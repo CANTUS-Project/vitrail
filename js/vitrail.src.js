@@ -295,14 +295,18 @@ var Paginator = React.createClass({
     },
     render: function() {
         return (
-            <div className="paginator">
-                <button type="button" name="pages" value="first" onClick={this.changePage}>&lt;&lt;</button>
-                <button type="button" name="pages" value="previous" onClick={this.changePage}>&lt;</button>
-                <div className="blankOfBlank">
-                    &nbsp;{this.props.currentPage} of {this.props.totalPages}&nbsp;
-                </div>
-                <button type="button" name="pages" value="next" onClick={this.changePage}>&gt;</button>
-                <button type="button" name="pages" value="last" onClick={this.changePage}>&gt;&gt;</button>
+            <div className="btn-group paginator" role="group" aria-label="paginator">
+                <button type="button" className="btn btn-secondary" name="pages"
+                        value="first" onClick={this.changePage}>&lt;&lt;</button>
+                <button type="button" className="btn btn-secondary" name="pages"
+                        value="previous" onClick={this.changePage}>&lt;</button>
+                <button type="button" className="blankOfBlank btn btn-secondary">
+                    {this.props.currentPage} of {this.props.totalPages}
+                </button>
+                <button type="button" className="btn btn-secondary" name="pages"
+                        value="next" onClick={this.changePage}>&gt;</button>
+                <button type="button" className="btn btn-secondary" name="pages"
+                        value="last" onClick={this.changePage}>&gt;&gt;</button>
             </div>
         );
     }
