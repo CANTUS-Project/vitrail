@@ -543,7 +543,6 @@ var SearchForm = React.createClass({
         // do the rendering
         return (
             <div className="searchForm col-sm-12">
-                <h1>Vitrail: Cantus Database App</h1>
                 <div className="searchSettings card">
                     <div className="card-block">
                         <h2 className="card-title">Query Settings</h2>
@@ -564,5 +563,135 @@ var SearchForm = React.createClass({
     }
 });
 
+
+let NavbarItem = React.createClass({
+    propTypes: {
+        // the textual name to display for this navbar entry
+        name: React.PropTypes.string.isRequired,
+        // a function to execute when the navbar button is clicked
+        onClick: React.PropTypes.func,
+        // whether this is the currently-active navbar item
+        active: React.PropTypes.bool
+    },
+    getDefaultProps: function() {
+        return {onClick: null, active: false};
+    },
+    defaultOnClick: function() {
+        alert('That functionality is not implemented yet.');
+    },
+    render: function() {
+        let navbarButton;
+
+        if (this.props.active) {
+            navbarButton = (
+                <a className="btn btn-primary-outline active">
+                    {this.props.name}
+                    <span className="sr-only">(current)</span>
+                </a>
+            );
+        } else if (null === this.props.onClick) {
+            navbarButton = <a className="btn btn-primary-outline disabled">{this.props.name}</a>;
+        } else {
+            navbarButton = (
+                <a className="btn btn-primary-outline" onClick={this.props.onClick}>
+                    {this.props.name}
+                </a>
+            );
+        }
+
+        return (
+            <li className="nav-item">{navbarButton}</li>
+        );
+    }
+});
+
+
+let VitrailNavbar = React.createClass({
+    propTypes: {
+        // array of objects with the props required for the "NavbarItem" component
+        navbarItems: React.PropTypes.arrayOf(React.PropTypes.object)
+    },
+    getDefaultProps: function() {
+        return [];
+    },
+    render: function() {
+        let navbarButtons = [];
+
+        this.props.navbarItems.forEach(function(btn, key) {
+            navbarButtons.push(
+                <NavbarItem key={key} name={btn.name} onClick={btn.onClick} active={btn.active}/>
+            );
+        });
+
+        return (
+            <nav className="navbar navbar-light bg-faded">
+                <div className="navbar-brand">CANTUS Database</div>
+                <ul className="nav navbar-nav">
+                    {navbarButtons}
+                </ul>
+            </nav>
+        );
+    }
+});
+
+
+let Vitrail = React.createClass({
+    propTypes: {
+        // URL to the root of the Cantus API server
+        rootUrl: React.PropTypes.string.isRequired,
+    },
+    // State Definition
+    // ================
+    // - activeScreen: Internal name of the currently-active screen; one of:
+    //    - 'onebox'  (Onebox Search)
+    //    - 'basic'  (Basic Search)
+    //    - 'template'  (Template Search)
+    //    - 'workspace'  (My Workspace)
+    getInitialState: function() {
+        return ({
+            activeScreen: 'basic'
+        });
+    },
+    activateOnebox: function() { this.setState({activeScreen: 'onebox'}); },
+    activateBasic: function() { this.setState({activeScreen: 'basic'}); },
+    activateTemplate: function() { this.setState({activeScreen: 'template'}); },
+    activateWorkspace: function() { this.setState({activeScreen: 'workspace'}); },
+    render: function() {
+        let navbarItems = [
+            // {name, onClick, active}
+            {name: 'Onebox Search', active: false, onClick: this.activateOnebox},
+            {name: 'Basic Search (just for testing)', active: false, onClick: this.activateBasic},
+            {name: 'Template Search', active: false, onClick: this.activateTemplate},
+            {name: 'My Workspace', active: false, onClick: this.activateWorkspace}
+        ];
+
+        let activeScreen = <div className="alert alert-danger" htmlRole="alert">Not implemented!</div>;
+
+        // deal with activating the active screen
+        if ('onebox' === this.state.activeScreen) {
+            navbarItems[0]['active'] = true;
+            navbarItems[0]['onClick'] = null;
+        } else if ('basic' === this.state.activeScreen) {
+            navbarItems[1]['active'] = true;
+            navbarItems[1]['onClick'] = null;
+            activeScreen = <SearchForm rootUrl={this.props.rootUrl}/>
+        } else if ('template' === this.state.activeScreen) {
+            navbarItems[2]['active'] = true;
+            navbarItems[2]['onClick'] = null;
+        } else if ('workspace' === this.state.activeScreen) {
+            navbarItems[3]['active'] = true;
+            navbarItems[3]['onClick'] = null;
+        }
+
+        return (
+            <div>
+                <VitrailNavbar navbarItems={navbarItems}/>
+                <div className="container-fluid">{activeScreen}</div>
+            </div>
+        );
+    }
+});
+
+
 export {SearchBox, TypeRadioButton, TypeSelector, PerPageSelector, ResultColumn, Result, ResultList,
-        Paginator, ResultListFrame, SearchForm};
+        Paginator, ResultListFrame, SearchForm, Vitrail};

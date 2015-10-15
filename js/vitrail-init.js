@@ -24,11 +24,11 @@
 
 
 import React from 'react';
-import {SearchForm} from './vitrail.src.js';
+import {Vitrail} from './vitrail.src.js';
 
 
 React.render(
-    React.createElement(SearchForm,
+    React.createElement(Vitrail,
                         {rootUrl: 'http://localhost:8888/'}),
-    document.getElementById('vitrail-content')
+    document.getElementsByTagName('body')[0]
 );
