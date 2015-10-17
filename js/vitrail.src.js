@@ -562,6 +562,105 @@ var BasicSearch = React.createClass({
 });
 
 
+let OneboxSearch = React.createClass({
+    propTypes: {
+        cantusjs: React.PropTypes.object.isRequired,
+    },
+    getInitialState: function() {
+        return {page: 1, perPage: 10, currentSearch: '', errorMessage: null};
+    },
+    failedAjaxRequest: function(errorInfo) {
+        // when an AJAX request fails
+
+        // 1.) was there a 404, meaning no search results were found?
+        if (404 === errorInfo.code) {
+            this.setState({errorMessage: "No results were found."});
+        }
+
+        // 2.) otherwise there was another failure
+        else {
+            var errorMessage = "There was an error while contacting the CANTUS server:\n" + errorInfo.response;
+            console.error(errorInfo);
+            this.setState({errorMessage: errorMessage});
+        }
+    },
+    changePage: function(direction) {
+        // Give this function a string, either "first," "previous," "next," or "last," to
+        // determine which way to change the page. Or supply a page number directly.
+        var newPage = 1;
+        var curPage = this.state.page;
+
+        if ("next" === direction) {
+            newPage = curPage + 1;
+        } else if ("previous" === direction) {
+            if (curPage > 1) {
+                newPage = curPage - 1;
+            }
+        } else if ("first" === direction) {
+            // it's already 1
+        } else if ("last" === direction) {
+            newPage = "last";
+        } else {
+            newPage = direction;
+        }
+
+        this.setState({page: newPage, errorMessage: null});
+    },
+    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
+    changeResourceType: function(resourceType) {
+        this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null});
+    },
+    submitSearch: function(submitEvent) {
+        submitEvent.preventDefault();  // stop the default GET form submission
+        this.setState({currentSearch: submitEvent.target[1].value,
+                       page: 1,
+                       errorMessage: null});
+    },
+    render: function() {
+        let mainScreen = null;
+
+        // fields that shouldn't be rendered for users
+        // NB: this must be done before the call to the <ResultListFrame> component
+        let dontRender = ['id'];
+
+        // if there's an error, show an error message
+        if (null !== this.state.errorMessage) {
+            mainScreen = (<p>{this.state.errorMessage}</p>);
+        }
+
+        // otherwise we'll show the usual thing
+        else {
+            mainScreen = (<ResultListFrame resourceType='all'
+                                           dontRender={dontRender}
+                                           perPage={this.state.perPage}
+                                           page={this.state.page}
+                                           searchQuery={this.state.currentSearch}
+                                           changePage={this.changePage}
+                                           onError={this.failedAjaxRequest}
+                                           cantus={this.props.cantusjs}
+            />);
+        }
+
+        // do the rendering
+        return (
+            <div className="searchForm col-sm-12">
+                <div className="searchSettings card">
+                    <div className="card-block">
+                        <h2 className="card-title">Onebox Search</h2>
+                    </div>
+                    <form onSubmit={this.submitSearch}>
+                        <SearchBox contents={this.state.currentSearch} />
+                    </form>
+                </div>
+                <div className="searchResults">
+                    {mainScreen}
+                </div>
+            </div>
+        );
+    }
+});
+
+
 let NavbarItem = React.createClass({
     propTypes: {
         // the textual name to display for this navbar entry
@@ -647,7 +746,7 @@ let Vitrail = React.createClass({
     //    - 'workspace'  (My Workspace)
     getInitialState: function() {
         return ({
-            activeScreen: 'basic',
+            activeScreen: 'onebox',
             cantusjs: new cantusModule.Cantus(this.props.rootUrl)
         });
     },
@@ -670,6 +769,7 @@ let Vitrail = React.createClass({
         if ('onebox' === this.state.activeScreen) {
             navbarItems[0]['active'] = true;
             navbarItems[0]['onClick'] = null;
+            activeScreen = <OneboxSearch cantusjs={this.state.cantusjs}/>
         } else if ('basic' === this.state.activeScreen) {
             navbarItems[1]['active'] = true;
             navbarItems[1]['onClick'] = null;
@@ -693,4 +793,4 @@ let Vitrail = React.createClass({
 
 
 export {SearchBox, TypeRadioButton, TypeSelector, PerPageSelector, ResultColumn, Result, ResultList,
-        Paginator, ResultListFrame, BasicSearch, Vitrail};
+        Paginator, ResultListFrame, BasicSearch, Vitrail, OneboxSearch};
