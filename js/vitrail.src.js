@@ -438,14 +438,12 @@ var ResultListFrame = React.createClass({
     }
 });
 
-var SearchForm = React.createClass({
+var BasicSearch = React.createClass({
     propTypes: {
-        rootUrl: React.PropTypes.string.isRequired,
+        cantusjs: React.PropTypes.object.isRequired,
     },
     getInitialState: function() {
-        var cantus = new cantusModule.Cantus(this.props.rootUrl);
-        return {cantus: cantus, resourceType: "all", page: 1, perPage: 10, currentSearch: "",
-                errorMessage: null};
+        return {resourceType: 'all', page: 1, perPage: 10, currentSearch: '', errorMessage: null};
     },
     failedAjaxRequest: function(errorInfo) {
         // when an AJAX request fails
@@ -536,7 +534,7 @@ var SearchForm = React.createClass({
                                            searchQuery={this.state.currentSearch}
                                            changePage={this.changePage}
                                            onError={this.failedAjaxRequest}
-                                           cantus={this.state.cantus}
+                                           cantus={this.props.cantusjs}
             />);
         }
 
@@ -649,7 +647,8 @@ let Vitrail = React.createClass({
     //    - 'workspace'  (My Workspace)
     getInitialState: function() {
         return ({
-            activeScreen: 'basic'
+            activeScreen: 'basic',
+            cantusjs: new cantusModule.Cantus(this.props.rootUrl)
         });
     },
     activateOnebox: function() { this.setState({activeScreen: 'onebox'}); },
@@ -674,7 +673,7 @@ let Vitrail = React.createClass({
         } else if ('basic' === this.state.activeScreen) {
             navbarItems[1]['active'] = true;
             navbarItems[1]['onClick'] = null;
-            activeScreen = <SearchForm rootUrl={this.props.rootUrl}/>
+            activeScreen = <BasicSearch cantusjs={this.state.cantusjs}/>
         } else if ('template' === this.state.activeScreen) {
             navbarItems[2]['active'] = true;
             navbarItems[2]['onClick'] = null;
@@ -694,4 +693,4 @@ let Vitrail = React.createClass({
 
 
 export {SearchBox, TypeRadioButton, TypeSelector, PerPageSelector, ResultColumn, Result, ResultList,
-        Paginator, ResultListFrame, SearchForm, Vitrail};
+        Paginator, ResultListFrame, BasicSearch, Vitrail};
