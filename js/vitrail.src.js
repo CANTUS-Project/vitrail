@@ -26,6 +26,27 @@
 import React from "react";
 import cantusModule from "./cantusjs/cantus.src";
 
+
+// Utility Functions ==============================================================================
+function encloseWithQuotes(query) {
+    // Given a string with a search query, remove surrounding whitespace. Then if there is a space
+    // character in the string, ensure the first and last characters are a double quote.
+
+    query = query.trim();
+    if (query.includes(' ')) {
+        if ('"' !== query.slice(0, 1)) {
+            query = '"' + query;
+        }
+        if ('"' !== query.slice(-1)) {
+            query = query + '"';
+        }
+    }
+    return query
+};
+
+
+// React Components ===============================================================================
+
 var SearchBox = React.createClass({
     propTypes: {
         // "contents" is the initial value in the search box
@@ -334,13 +355,20 @@ var Paginator = React.createClass({
 
 var ResultListFrame = React.createClass({
     propTypes: {
-        onError: React.PropTypes.func.isRequired,
         changePage: React.PropTypes.func.isRequired,
         resourceType: React.PropTypes.string,
-        dontRender: React.PropTypes.arrayOf(React.PropTypes.string)
+        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
+        perPage: React.PropTypes.number,
+        page: React.PropTypes.number,
+        searchQuery: React.PropTypes.string,
+        cantus: React.PropTypes.object,
+
+        // When the "searchQuery" is empty and "doGenericGet" is true, this component renders the
+        // results of a GET to the resource-type-specific URL. This is true by default.
+        doGenericGet: React.PropTypes.bool
     },
     getDefaultProps: function() {
-        return {resourceType: "any", dontRender: []};
+        return {resourceType: "any", dontRender: [], doGenericGet: true};
     },
     getNewData: function(resourceType, requestPage, perPage, searchQuery) {
         // default, unchanging things
@@ -367,10 +395,10 @@ var ResultListFrame = React.createClass({
         if (undefined !== searchQuery && "" !== searchQuery) {
             // search query
             ajaxSettings["any"] = searchQuery;
-            this.props.cantus.search(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.props.onError);
-        } else {
+            this.props.cantus.search(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.ajaxFailureCallback);
+        } else if (this.props.doGenericGet) {
             // browse query
-            this.props.cantus.get(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.props.onError);
+            this.props.cantus.get(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.ajaxFailureCallback);
         }
     },
     ajaxSuccessCallback: function(response) {
@@ -382,6 +410,14 @@ var ResultListFrame = React.createClass({
         var totalPages = Math.ceil(headers.total_results / headers.per_page);
         this.setState({data: response, headers: headers, page: headers.page, totalPages: totalPages,
                        sortOrder: sortOrder});
+    },
+    ajaxFailureCallback: function(response) {
+        // Called when an AJAX request returns unsuccessfully.
+        if (404 === response.code) {
+            this.setState({errorMessage: 404});
+        } else {
+            this.setState({errorMessage: response.response});
+        }
     },
     componentDidMount: function() { this.getNewData(this.props.resourceType); },
     componentWillReceiveProps: function(newProps) {
@@ -399,6 +435,7 @@ var ResultListFrame = React.createClass({
         }
         // otherwise we can go ahead and update
         else {
+            this.setState({errorMessage: null});
             this.getNewData(newProps.resourceType,
                             newProps.page,
                             newProps.perPage,
@@ -406,8 +443,11 @@ var ResultListFrame = React.createClass({
         }
     },
     shouldComponentUpdate: function(nextProps, nextState) {
+        // this will always change the output
+        if (nextState.errorMessage !== this.state.errorMesssage) {
+            return true;
         // we'll get another props change in a moment
-        if ("last" === nextProps.page) {
+        } else if ("last" === nextProps.page) {
             return false;
         // this would produce an invalid result
         } else if (nextProps.page > this.state.totalPages) {
@@ -421,22 +461,41 @@ var ResultListFrame = React.createClass({
         }
     },
     getInitialState: function() {
-        return {data: null, headers: null, page: 1, totalPages: 1};
+        return {data: null, headers: null, page: 1, totalPages: 1, errorMessage: null};
     },
     render: function() {
         var currentPage = this.state.page;
         var totalPages = this.state.totalPages;
-        return (
-            <div className="resultListFrame">
-                <ResultList data={this.state.data}
-                            headers={this.state.headers}
-                            dontRender={this.props.dontRender}
-                            sortOrder = {this.state.sortOrder} />
-                <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
-            </div>
-        );
+
+        if (null === this.state.errorMessage) {
+            return (
+                <div className="resultListFrame">
+                    <ResultList data={this.state.data}
+                                headers={this.state.headers}
+                                dontRender={this.props.dontRender}
+                                sortOrder = {this.state.sortOrder} />
+                    <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
+                </div>
+            );
+        } else {
+            let errorMessage = '';
+            if (null !== this.state.errorMessage) {
+                if (404 == this.state.errorMessage) {
+                    errorMessage = <div className="alert alert-warning">No results were found for your search.</div>;
+                } else {
+                    errorMessage = <div className="alert alert-danger"><strong>Error:&nbsp;</strong>{this.state.errorMessage}</div>;
+                }
+            }
+
+            return (
+                <div className="resultListFrame">
+                    {errorMessage}
+                </div>
+            );
+        }
     }
 });
+
 
 var BasicSearch = React.createClass({
     propTypes: {
@@ -562,7 +621,7 @@ var BasicSearch = React.createClass({
 });
 
 
-let OneboxSearch = React.createClass({
+var OneboxSearch = React.createClass({
     propTypes: {
         cantusjs: React.PropTypes.object.isRequired,
     },
@@ -661,6 +720,334 @@ let OneboxSearch = React.createClass({
 });
 
 
+var TemplateTypeSelector = React.createClass({
+    // Type selection component for the TemplateSearch.
+    propTypes: {
+        // A function that deals with changing the resource type when it is called with a string,
+        // either "chants", "sources", "indexers", or "feasts".
+        chooseNewType: React.PropTypes.func.isRequired,
+        activeType: React.PropTypes.string
+    },
+    getDefaultProps: function() {
+        return {activeType: null};
+    },
+    chooseNewType: function(event) {
+        let newType = 'chants';
+
+        switch (event.target.id) {
+            case 'indexersTypeButton':
+                newType = 'indexers';
+                break;
+
+            case 'sourcesTypeButton':
+                newType = 'sources';
+                break;
+
+            case 'feastsTypeButton':
+                newType = 'feasts';
+                break;
+        }
+
+        this.props.chooseNewType(newType);
+    },
+    render: function() {
+        let className = 'btn btn-secondary-outline';
+        let classNameActive = 'btn btn-secondary-outline active';
+
+        let buttonProps = {
+            'chants': {'className': className, 'aria-pressed': 'false'},
+            'indexers': {'className': className, 'aria-pressed': 'false'},
+            'sources': {'className': className, 'aria-pressed': 'false'},
+            'feasts': {'className': className, 'aria-pressed': 'false'}
+        };
+
+        if (null !== this.props.activeType) {
+            buttonProps[this.props.activeType]['aria-pressed'] = 'true';
+            buttonProps[this.props.activeType]['className'] = classNameActive;
+        }
+
+        return (
+            <div>
+                <div className="btn-group" htmlRole="group" aria-label="resource type selector">
+                    <button id="chantsTypeButton" type="button" className={buttonProps.chants.className}
+                            aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
+                            Chants</button>
+                    <button id="indexersTypeButton" type="button" className={buttonProps.indexers.className}
+                            aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
+                            Indexers</button>
+                    <button id="sourcesTypeButton" type="button" className={buttonProps.sources.className}
+                            aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
+                            Sources</button>
+                    <button id="feastsTypeButton" type="button" className={buttonProps.feasts.className}
+                            aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
+                            Feasts</button>
+                </div>
+            </div>
+        );
+    }
+});
+
+
+var SearchTemplateField = React.createClass({
+    propTypes: {
+        //
+    },
+    render: function() {
+        return (
+            null
+        );
+    }
+});
+
+
+var TemplateSearchField = React.createClass({
+    // A field in the TemplateSearch template.
+    propTypes: {
+        // The field name according to the Cantus API.
+        field: React.PropTypes.string.isRequired,
+        // The field name displayed in the GUI. If omitted, the "field" is displayed.
+        displayName: React.PropTypes.string,
+        // You know... the field contents.
+        contents: React.PropTypes.string,
+        // And a function to call when the contents change!
+        updateFieldContents: React.PropTypes.func.isRequired
+    },
+    getDefaultProps: function() {
+        return {displayName: null, contents: ''};
+    },
+    render: function() {
+        let displayName = this.props.displayName || this.props.field;
+        let fieldID = `template-field-${this.props.field}`;
+
+        return (
+            <fieldset className="form-group row">
+                <label className="col-sm-2">{displayName}</label>
+                <div className="col-sm-10">
+                    <input id={fieldID}
+                           type="text"
+                           className="form-control"
+                           value={this.props.contents}
+                           onChange={this.props.updateFieldContents}
+                           />
+                </div>
+            </fieldset>
+        );
+    }
+});
+
+
+var TemplateSearchChants = React.createClass({
+    // For TemplateSearch, this is the chant template.
+    //
+
+    propTypes: {
+        // A function that accepts two arguments: field name (according to the Cantus API) and its
+        // new contents.
+        updateField: React.PropTypes.func.isRequired
+    },
+    getInitialState: function() {
+        return {'contents':
+            {'id': '', 'incipit': '', 'source': '', 'marginalia': '', 'folio': '', 'sequence': '',
+             'office': '', 'genre': '', 'position': '', 'cantus_id': '', 'feast': '', 'mode': '',
+             'differentia': '', 'finalis': '', 'full_text': '', 'full_text_manuscript': '',
+             'volpiano': '', 'notes': '', 'cao_concordances': '', 'siglum': '',
+             'proofreader': '', 'melody_id': ''
+            }
+        };
+    },
+    updateFieldContents: function(event) {
+        // Accepts change event for one of the "TemplateSearchField" components, then calls the
+        // updateField() function with appropriate arguments to pass changes "up."
+
+        // the target is a TemplateSearchField, and its @id starts with "template-field-"
+        let fieldName = event.target.id.slice('template-field-'.length);
+
+        // first let our bosses know that a field changed!
+        this.props.updateField(fieldName, event.target.value);
+
+        // now update the TemplateSearchField component with its new text
+        let contents = this.state.contents;
+        contents[fieldName] = event.target.value;
+        this.setState({'contents': contents});
+    },
+    render: function() {
+        let fieldNames = [
+            {'field': 'incipit', 'displayName': 'Incipit'},
+            {'field': 'full_text', 'displayName': 'Full Text (standard spelling)'},
+            {'field': 'full_text_manuscript', 'displayName': 'Full Text (manuscript spelling)'},
+            {'field': 'id', 'displayName': 'ID'},
+            {'field': 'source', 'displayName': 'Source Name'},
+            {'field': 'marginalia', 'displayName': 'Marginalia'},
+            {'field': 'feast', 'displayName': 'Feast'},
+            {'field': 'office', 'displayName': 'Office'},
+            {'field': 'genre', 'displayName': 'Genre'},
+            {'field': 'folio', 'displayName': 'Folio'},
+            {'field': 'sequence', 'displayName': 'Sequence'},
+            {'field': 'position', 'displayName': 'Position'},
+            {'field': 'cantus_id', 'displayName': 'Cantus ID'},
+            {'field': 'mode', 'displayName': 'Mode'},
+            {'field': 'differentia', 'displayName': 'Differentia'},
+            {'field': 'finalis', 'displayName': 'Finalis'},
+            {'field': 'volpiano', 'displayName': 'Volpiano'},
+            {'field': 'notes', 'displayName': 'Notes'},
+            {'field': 'cao_concordances', 'displayName': 'CAO Concordances'},
+            {'field': 'siglum', 'displayName': 'Siglum'},
+            {'field': 'proofreader', 'displayName': 'Proofreader'},
+            {'field': 'melody_id', 'displayName': 'Melody ID'}
+        ];
+
+        let renderedFields = [];
+
+        fieldNames.forEach(function(field, index) {
+            let fieldKey = `template-field-${index}`;
+            renderedFields.push(<TemplateSearchField key={fieldKey}
+                                                     field={field.field}
+                                                     displayName={field.displayName}
+                                                     contents={this.state.contents[field.field]}
+                                                     updateFieldContents={this.updateFieldContents}
+                                                     />);
+        }, this);
+
+        return (
+            <div className="card">
+                <div className="card-block">
+                    <form>{renderedFields}</form>
+                </div>
+            </div>
+        );
+    }
+});
+
+
+var TemplateSearchTemplate = React.createClass({
+    // For TemplateSearch, this is the template. This just selects the proper sub-component, but it
+    // leaves TemplateSearch much cleaner.
+    //
+
+    propTypes: {
+        // A function that accepts two arguments: field name (according to the Cantus API) and its
+        // new contents.
+        updateField: React.PropTypes.func.isRequired,
+        // The type of template.
+        type: React.PropTypes.oneOf(['chants', 'feasts', 'indexers', 'sources'])
+    },
+    render: function() {
+        switch (this.props.type) {
+            case 'chants':
+                return <TemplateSearchChants updateField={this.props.updateField}/> ;
+
+            case 'feasts':
+                // return <TemplateSearchFeasts updateField={this.props.updateField}/> ;
+
+            case 'indexers':
+                // return <TemplateSearchIndexers updateField={this.props.updateField}/> ;
+
+            case 'sources':
+                // return <TemplateSearchSources updateField={this.props.updateField}/> ;
+                return <div className="alert alert-danger">The {this.props.type} template is not implemented yet.</div>
+        }
+    }
+});
+
+
+var TemplateSearch = React.createClass({
+    propTypes: {
+        cantusjs: React.PropTypes.object.isRequired,
+    },
+    getInitialState: function() {
+        // - searchFor (object): members are fields with strings as values
+        // - page
+        // - perPage
+        // - resourceType: the currently-active template ('chants', 'sources', 'indexers', 'feasts')
+        // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
+        return {page: 1, perPage: 10, searchFor: {}, resourceType: 'chants', currentSearch: ''};
+    },
+    changePage: function(direction) {
+        // Give this function a string, either "first," "previous," "next," or "last," to
+        // determine which way to change the page. Or supply a page number directly.
+        let newPage = 1;
+        let curPage = this.state.page;
+
+        if ("next" === direction) {
+            newPage = curPage + 1;
+        } else if ("previous" === direction) {
+            if (curPage > 1) {
+                newPage = curPage - 1;
+            }
+        } else if ("first" === direction) {
+            // it's already 1
+        } else if ("last" === direction) {
+            newPage = "last";
+        } else {
+            newPage = direction;
+        }
+
+        this.setState({page: newPage, errorMessage: null});
+    },
+    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
+    changeResourceType: function(resourceType) {
+        // A function that deals with changing the resource type when it is called with a string,
+        // either "chants", "sources", "indexers", or "feasts".
+        // TODO: rewrite this
+        // TODO: when you rewrite this, make sure you clear the "searchFor" object when you change type
+        this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null,
+                       searchFor: {}});
+    },
+    submitSearch: function() {
+        let searchFor = this.state.searchFor;
+        let query = '';
+
+        for (let field in searchFor) {
+            query += ` ${field}:${encloseWithQuotes(searchFor[field])}`;
+        }
+
+        this.setState({currentSearch: query, page: 1, errorMessage: null});
+    },
+    updateField: function(fieldName, newContents) {
+        // Update the searched-for value of "fieldName" to "newContents".
+        let searchFor = this.state.searchFor;
+        searchFor[fieldName] = newContents;
+        this.setState({'searchFor': searchFor});
+    },
+    render: function() {
+        // TODO: find a better way to manage the state, because this is stupid.
+
+        // fields that shouldn't be rendered for users
+        // NB: this must be done before the call to the <ResultListFrame> component
+        let dontRender = ['id', 'type'];
+
+        // TODO: refactor "ResultListFrame" so it doesn't show anything if the "searchQuery" is null or sthg
+        return (
+            <div className="col-sm-12">
+                <div className="card">
+                    <div className="card-block">
+                        <h2 className="card-title">Template Search</h2>
+                        <TemplateTypeSelector chooseNewType={this.changeResourceType}
+                                              activeType={this.state.resourceType}
+                                              />
+                    </div>
+                    <TemplateSearchTemplate type={this.state.resourceType} updateField={this.updateField}/>
+                    <div className="card-block">
+                        <button className="btn btn-primary-outline" onClick={this.submitSearch}>Search</button>
+                    </div>
+                </div>
+                <div>
+                    <ResultListFrame resourceType={this.state.resourceType}
+                                     dontRender={dontRender}
+                                     perPage={this.state.perPage}
+                                     page={this.state.page}
+                                     searchQuery={this.state.currentSearch}
+                                     changePage={this.changePage}
+                                     cantus={this.props.cantusjs}
+                                     doGenericGet={false}
+                    />
+                </div>
+            </div>
+        );
+    }
+});
+
+
 let NavbarItem = React.createClass({
     propTypes: {
         // the textual name to display for this navbar entry
@@ -746,7 +1133,7 @@ let Vitrail = React.createClass({
     //    - 'workspace'  (My Workspace)
     getInitialState: function() {
         return ({
-            activeScreen: 'onebox',
+            activeScreen: 'template',
             cantusjs: new cantusModule.Cantus(this.props.rootUrl)
         });
     },
@@ -777,6 +1164,7 @@ let Vitrail = React.createClass({
         } else if ('template' === this.state.activeScreen) {
             navbarItems[2]['active'] = true;
             navbarItems[2]['onClick'] = null;
+            activeScreen = <TemplateSearch cantusjs={this.state.cantusjs}/>
         } else if ('workspace' === this.state.activeScreen) {
             navbarItems[3]['active'] = true;
             navbarItems[3]['onClick'] = null;
