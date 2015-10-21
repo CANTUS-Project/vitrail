@@ -399,6 +399,11 @@ var ResultListFrame = React.createClass({
         } else if (this.props.doGenericGet) {
             // browse query
             this.props.cantus.get(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.ajaxFailureCallback);
+        } else {
+            // Since this function is only called if the query-affecting parameters are changed,
+            // we know it's safe at this point to clear the state that's displayed. If we didn't
+            // reset our "state," the displayed data would not correspond to our new props.
+            this.setState(this.getInitialState);
         }
     },
     ajaxSuccessCallback: function(response) {
@@ -433,8 +438,11 @@ var ResultListFrame = React.createClass({
         else if (newProps.page > this.state.totalPages) {
             this.props.changePage(this.state.totalPages);
         }
-        // otherwise we can go ahead and update
-        else {
+        // if the Cantus API query will be different, submit a new query
+        else if (newProps.resourceType !== this.props.resourceType ||
+                 newProps.searchQuery  !== this.props.searchQuery  ||
+                 newProps.perPage      !== this.props.perPage      ||
+                 newProps.page         !== this.props.page) {
             this.setState({errorMessage: null});
             this.getNewData(newProps.resourceType,
                             newProps.page,
@@ -772,15 +780,15 @@ var TemplateTypeSelector = React.createClass({
                     <button id="chantsTypeButton" type="button" className={buttonProps.chants.className}
                             aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
                             Chants</button>
+                    <button id="feastsTypeButton" type="button" className={buttonProps.feasts.className}
+                            aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
+                            Feasts</button>
                     <button id="indexersTypeButton" type="button" className={buttonProps.indexers.className}
                             aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
                             Indexers</button>
                     <button id="sourcesTypeButton" type="button" className={buttonProps.sources.className}
                             aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
                             Sources</button>
-                    <button id="feastsTypeButton" type="button" className={buttonProps.feasts.className}
-                            aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
-                            Feasts</button>
                 </div>
             </div>
         );
@@ -788,20 +796,10 @@ var TemplateTypeSelector = React.createClass({
 });
 
 
-var SearchTemplateField = React.createClass({
-    propTypes: {
-        //
-    },
-    render: function() {
-        return (
-            null
-        );
-    }
-});
-
-
 var TemplateSearchField = React.createClass({
-    // A field in the TemplateSearch template.
+    // A single field in the TemplateSearch template.
+    //
+
     propTypes: {
         // The field name according to the Cantus API.
         field: React.PropTypes.string.isRequired,
@@ -836,74 +834,47 @@ var TemplateSearchField = React.createClass({
 });
 
 
-var TemplateSearchChants = React.createClass({
-    // For TemplateSearch, this is the chant template.
+var TemplateSearchFields = React.createClass({
+    // All the fields in a TemplateSearch template.
+    //
+    // Contained by TemplateSearchTemplate.
+    // Contains a bunch of TemplateSearchField.
     //
 
     propTypes: {
         // A function that accepts two arguments: field name (according to the Cantus API) and its
         // new contents.
-        updateField: React.PropTypes.func.isRequired
-    },
-    getInitialState: function() {
-        return {'contents':
-            {'id': '', 'incipit': '', 'source': '', 'marginalia': '', 'folio': '', 'sequence': '',
-             'office': '', 'genre': '', 'position': '', 'cantus_id': '', 'feast': '', 'mode': '',
-             'differentia': '', 'finalis': '', 'full_text': '', 'full_text_manuscript': '',
-             'volpiano': '', 'notes': '', 'cao_concordances': '', 'siglum': '',
-             'proofreader': '', 'melody_id': ''
-            }
-        };
+        updateField: React.PropTypes.func.isRequired,
+        // A list of objects, each with three members: 'field', 'displayName', and 'contents'.
+        // These are the internal and GUI names for the fields required in this template, plus the
+        // current contents of the field.
+        fieldNames: React.PropTypes.arrayOf(React.PropTypes.shape({
+            field: React.PropTypes.string,
+            displayName: React.PropTypes.string,
+            contents: React.PropTypes.string
+        })).isRequired
     },
     updateFieldContents: function(event) {
         // Accepts change event for one of the "TemplateSearchField" components, then calls the
         // updateField() function with appropriate arguments to pass changes "up."
 
-        // the target is a TemplateSearchField, and its @id starts with "template-field-"
+        // Find the proper name of the modified field. Target is a TemplateSearchField, and its
+        // @id starts with "template-field-".
         let fieldName = event.target.id.slice('template-field-'.length);
 
-        // first let our bosses know that a field changed!
+        // Now let our bosses know that a field changed!
         this.props.updateField(fieldName, event.target.value);
-
-        // now update the TemplateSearchField component with its new text
-        let contents = this.state.contents;
-        contents[fieldName] = event.target.value;
-        this.setState({'contents': contents});
     },
     render: function() {
-        let fieldNames = [
-            {'field': 'incipit', 'displayName': 'Incipit'},
-            {'field': 'full_text', 'displayName': 'Full Text (standard spelling)'},
-            {'field': 'full_text_manuscript', 'displayName': 'Full Text (manuscript spelling)'},
-            {'field': 'id', 'displayName': 'ID'},
-            {'field': 'source', 'displayName': 'Source Name'},
-            {'field': 'marginalia', 'displayName': 'Marginalia'},
-            {'field': 'feast', 'displayName': 'Feast'},
-            {'field': 'office', 'displayName': 'Office'},
-            {'field': 'genre', 'displayName': 'Genre'},
-            {'field': 'folio', 'displayName': 'Folio'},
-            {'field': 'sequence', 'displayName': 'Sequence'},
-            {'field': 'position', 'displayName': 'Position'},
-            {'field': 'cantus_id', 'displayName': 'Cantus ID'},
-            {'field': 'mode', 'displayName': 'Mode'},
-            {'field': 'differentia', 'displayName': 'Differentia'},
-            {'field': 'finalis', 'displayName': 'Finalis'},
-            {'field': 'volpiano', 'displayName': 'Volpiano'},
-            {'field': 'notes', 'displayName': 'Notes'},
-            {'field': 'cao_concordances', 'displayName': 'CAO Concordances'},
-            {'field': 'siglum', 'displayName': 'Siglum'},
-            {'field': 'proofreader', 'displayName': 'Proofreader'},
-            {'field': 'melody_id', 'displayName': 'Melody ID'}
-        ];
-
         let renderedFields = [];
-
+        let fieldNames = this.props.fieldNames;
         fieldNames.forEach(function(field, index) {
             let fieldKey = `template-field-${index}`;
+
             renderedFields.push(<TemplateSearchField key={fieldKey}
                                                      field={field.field}
                                                      displayName={field.displayName}
-                                                     contents={this.state.contents[field.field]}
+                                                     contents={field.contents}
                                                      updateFieldContents={this.updateFieldContents}
                                                      />);
         }, this);
@@ -928,24 +899,121 @@ var TemplateSearchTemplate = React.createClass({
         // A function that accepts two arguments: field name (according to the Cantus API) and its
         // new contents.
         updateField: React.PropTypes.func.isRequired,
-        // The type of template.
+        // The resource type for the template.
         type: React.PropTypes.oneOf(['chants', 'feasts', 'indexers', 'sources'])
     },
+    updateField: function(name, value) {
+        // Given the name of a field that was modified, and its new value, update our internal state
+        // then tell our boss it was updated.
+        let contents = this.state.contents;
+        contents[name] = value;
+        this.setState({contents: contents});
+        this.props.updateField(name, value);
+    },
+    getInitialState: function() {
+        // - contents: An object to store template field contents. This starts off empty, and has
+        //             members added as this.updateField() is called. When this.props.type is
+        //             changed, "contents" is replaced with an empty object.
+        return {contents: {}};
+    },
+    getFieldContents: function(name) {
+        // Return the currently-held contens of the "name" field or an empty string if the field has
+        // not been set.
+        if (undefined !== this.state.contents[name]) {
+            return this.state.contents[name];
+        } else {
+            return '';
+        }
+    },
+    componentWillReceiveProps: function(nextProps) {
+        // If the nextProps.type is different from this.props.type, we should empty this.contents.
+        if (nextProps.type !== this.props.type) {
+            this.setState({contents: {}});
+        }
+    },
     render: function() {
+        let fieldNames = [];
+
         switch (this.props.type) {
             case 'chants':
-                return <TemplateSearchChants updateField={this.props.updateField}/> ;
+                fieldNames = [
+                    {'field': 'incipit', 'displayName': 'Incipit'},
+                    {'field': 'full_text', 'displayName': 'Full Text (standard spelling)'},
+                    {'field': 'full_text_manuscript', 'displayName': 'Full Text (manuscript spelling)'},
+                    {'field': 'id', 'displayName': 'ID'},
+                    {'field': 'source', 'displayName': 'Source Name'},
+                    {'field': 'marginalia', 'displayName': 'Marginalia'},
+                    {'field': 'feast', 'displayName': 'Feast'},
+                    {'field': 'office', 'displayName': 'Office'},
+                    {'field': 'genre', 'displayName': 'Genre'},
+                    {'field': 'folio', 'displayName': 'Folio'},
+                    {'field': 'sequence', 'displayName': 'Sequence'},
+                    {'field': 'position', 'displayName': 'Position'},
+                    {'field': 'cantus_id', 'displayName': 'Cantus ID'},
+                    {'field': 'mode', 'displayName': 'Mode'},
+                    {'field': 'differentia', 'displayName': 'Differentia'},
+                    {'field': 'finalis', 'displayName': 'Finalis'},
+                    {'field': 'volpiano', 'displayName': 'Volpiano'},
+                    {'field': 'notes', 'displayName': 'Notes'},
+                    {'field': 'cao_concordances', 'displayName': 'CAO Concordances'},
+                    {'field': 'siglum', 'displayName': 'Siglum'},
+                    {'field': 'proofreader', 'displayName': 'Proofreader'},
+                    {'field': 'melody_id', 'displayName': 'Melody ID'}
+                ];
+                break;
 
             case 'feasts':
-                // return <TemplateSearchFeasts updateField={this.props.updateField}/> ;
+                fieldNames = [
+                    {'field': 'name', 'displayName': 'Name'},
+                    {'field': 'description', 'displayName': 'Description'},
+                    {'field': 'date', 'displayName': 'Date'},
+                    {'field': 'feast_code', 'displayName': 'Feast Code'}
+                ];
+                break;
 
             case 'indexers':
-                // return <TemplateSearchIndexers updateField={this.props.updateField}/> ;
+                fieldNames = [
+                    {'field': 'display_name', 'displayName': 'Full Name'},
+                    {'field': 'given_name', 'displayName': 'Given Name'},
+                    {'field': 'family_name', 'displayName': 'Family Name'},
+                    {'field': 'institution', 'displayName': 'Institution'},
+                    {'field': 'city', 'displayName': 'City'},
+                    {'field': 'country', 'displayName': 'Country'},
+                ];
+                break;
 
             case 'sources':
-                // return <TemplateSearchSources updateField={this.props.updateField}/> ;
-                return <div className="alert alert-danger">The {this.props.type} template is not implemented yet.</div>
+                fieldNames = [
+                    {'field': 'title', 'displayName': 'Title'},
+                    {'field': 'summary', 'displayName': 'Summary'},
+                    {'field': 'description', 'displayName': 'Description'},
+                    {'field': 'rism', 'displayName': 'RISM'},
+                    {'field': 'siglum', 'displayName': 'Siglum'},
+                    {'field': 'provenance', 'displayName': 'Provenance'},
+                    {'field': 'date', 'displayName': 'Date'},
+                    {'field': 'century', 'displayName': 'Century'},
+                    {'field': 'notation_style', 'displayName': 'Notation Style'},
+                    {'field': 'editors', 'displayName': 'Editors'},
+                    {'field': 'indexers', 'displayName': 'Indexers'},
+                    {'field': 'proofreaders', 'displayName': 'Proofreaders'},
+                    {'field': 'segment', 'displayName': 'Database Segment'},
+                    {'field': 'source_status_desc', 'displayName': 'Source Status'},
+                    {'field': 'liturgical_occasions', 'displayName': 'Liturgical Occasions'},
+                    {'field': 'indexing_notes', 'displayName': 'Indexing Notes'},
+                    {'field': 'indexing_date', 'displayName': 'Indexing Date'},
+                ];
+                break;
         }
+
+        // Map the "contents" into every field
+        fieldNames.map(function (field) {
+            field['contents'] = this.getFieldContents(field.field);
+            return field;
+        }, this);
+
+        return <TemplateSearchFields updateField={this.updateField}
+                                     fieldNames={fieldNames}
+                                     /> ;
     }
 });
 
@@ -1000,6 +1068,9 @@ var TemplateSearch = React.createClass({
         for (let field in searchFor) {
             query += ` ${field}:${encloseWithQuotes(searchFor[field])}`;
         }
+
+        // remove leading space
+        query = query.slice(1);
 
         this.setState({currentSearch: query, page: 1, errorMessage: null});
     },
