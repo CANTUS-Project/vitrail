@@ -117,7 +117,7 @@ var ItemViewChant = React.createClass({
 
             // Full Text
             if (undefined !== data.full_text && undefined !== data.full_text_manuscript) {
-                //
+                // TODO: this
             } else if (undefined !== data.full_text) {
                 fullText = <li className={liClassName}>{data.full_text}</li>;
             }
@@ -200,6 +200,61 @@ var ItemViewChant = React.createClass({
 });
 
 
+var ItemViewFeast = React.createClass({
+    // An ItemView that displays a Feast resource.
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Fields Available:
+        // - name
+        // - description
+        // - date
+        // - feast code
+
+        // Name and Feast Code
+        let codeAndDate = '';
+        if (undefined !== data.feast_code && undefined !== data.date) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.feast_code}&mdash;{data.date}</h6>;
+        } else if (undefined !== data.feast_code) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.feast_code}</h6>;
+        } else if (undefined !== data.date) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.date}</h6>;
+        }
+
+        // Description and Date
+        let description = '';
+        if ('full' === this.props.size && undefined !== data.description) {
+            description = data.description;
+        }
+
+        // Build the final structure
+        let post = (
+            <div className="card">
+                <div className="card-block">
+                    <h4 className="card-title">{data.name}</h4>
+                    {codeAndDate}
+                    {description}
+                </div>
+            </div>
+        );
+
+        return post;
+    }
+});
+
+
 var ItemView = React.createClass({
     // TODO: description
     //
@@ -245,6 +300,7 @@ var ItemView = React.createClass({
         //
 
         console.error(response);
+        this.setState({response: response.response});
     },
     componentDidMount: function() {
         if (null !== this.props.resourceType && null !== this.props.resourceID) {
@@ -269,11 +325,23 @@ var ItemView = React.createClass({
             return (<div>empty type or ID</div>);
         } else if (null === response) {
             return (<div>waiting on Abbot</div>);
+        } else if ('string' === typeof response) {
+            return (<div className="alert alert-warning">{response}</div>);
         } else {
             let resources = this.state.resources;
-            return (
-                <ItemViewChant data={response} resources={resources} size={this.props.size}/>
-            );
+            let rendered = null;  // this holds the rendered component
+
+            switch (type) {
+                case 'chants':
+                    rendered = <ItemViewChant data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
+                case 'feasts':
+                    rendered = <ItemViewFeast data={response} resources={resources} size={this.props.size}/>;
+                    break;
+            }
+
+            return rendered;
         }
     }
 });

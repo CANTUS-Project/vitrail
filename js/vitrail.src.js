@@ -614,6 +614,9 @@ var BasicSearch = React.createClass({
 
 
 var OneboxSearch = React.createClass({
+    // TODO: move this to its own file and refactor ResultListFrame (etc) when you get rid of BasicSearch
+    //
+
     propTypes: {
         cantusjs: React.PropTypes.object.isRequired,
     },
