@@ -1119,7 +1119,358 @@ var TemplateSearch = React.createClass({
 });
 
 
-let NavbarItem = React.createClass({
+var ItemViewChant = React.createClass({
+    // TODO: description
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Feast and Office
+        let feastAndOffice = '';
+        if ('full' === this.props.size) {
+            if (undefined !== data.feast && undefined !== data.feast_desc && undefined !== data.office) {
+                feastAndOffice = `Chant for ${data.feast} (${data.feast_desc}) office ${data.office}`;
+            } else if (undefined !== data.feast && undefined !== data.office) {
+                feastAndOffice = `Chant for ${data.feast} office ${data.office}`;
+            } else if (undefined !== data.feast) {
+                feastAndOffice = `Chant for ${data.feast}`;
+            } else if (undefined !== data.office) {
+                feastAndOffice = `Chant for ${data.office} office`;
+            }
+            if (feastAndOffice.length > 0) {
+                feastAndOffice = <li className={liClassName}>{feastAndOffice}</li>;
+            }
+        } else {
+            if (undefined !== data.feast && undefined !== data.office) {
+                feastAndOffice = `${data.feast} (${data.office})`;
+            } else if (undefined !== data.feast) {
+                feastAndOffice = data.feast;
+            } else if (undefined !== data.office) {
+                feastAndOffice = `(${data.office})`;
+            }
+        }
+
+        // Source, Folio, and Sequence
+        let sourceFolioSequence = '';
+        if ('full' === this.props.size) {
+            if (undefined !== data.source && undefined !== data.folio && undefined !== data.sequence) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i> on folio {data.folio}, item {data.sequence}.</li>;
+            } else if (undefined !== data.source && undefined !== data.folio) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i> on folio {data.folio}.</li>;
+            } else if (undefined !== data.source) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i>.</li>;
+            }
+        } else {
+            if (undefined !== data.source) {
+                sourceFolioSequence = data.source;
+                if (sourceFolioSequence.length > 30) {
+                    sourceFolioSequence = sourceFolioSequence.slice(0, 30);
+                }
+                sourceFolioSequence = <i className="vitrail-source-name">{sourceFolioSequence}&hellip;</i>;
+            }
+        }
+
+        let mode = '';
+        let concordances = '';
+        let differentia = '';
+        let fullText = '';
+        let volpiano = '';
+        let notes = '';
+        let marginalia = '';
+        let siglum = '';
+        let proofreader = '';
+        let melodyID = '';
+
+        if ('full' === this.props.size) {
+            // Mode
+            if (undefined !== data.mode) {
+                mode = <li className={liClassName}>Mode {data.mode}</li>;
+            }
+
+            // CAO Concordances
+            if (undefined !== data.cao_concordances) {
+                concordances = <li className={liClassName}>CAO Concordances: {data.cao_concordances}</li>;
+            }
+
+            // Differentia
+            if (undefined !== data.differentia) {
+                differentia = <li className={liClassName}>Differentia: {data.differentia}</li>;
+            }
+
+            // Full Text
+            if (undefined !== data.full_text && undefined !== data.full_text_manuscript) {
+                //
+            } else if (undefined !== data.full_text) {
+                fullText = <li className={liClassName}>{data.full_text}</li>;
+            }
+
+            // Volpiano
+            if (undefined !== data.volpiano) {
+                volpiano = <li className={liClassName}>{data.volpiano}</li>;
+            }
+
+            // Notes
+            if (undefined !== data.notes) {
+                notes = <li className={liClassName}>Notes: {data.notes}</li>;
+            }
+
+            // Marginalia
+            if (undefined !== data.marginalia) {
+                marginalia = <li className={liClassName}>Marginalia: {data.marginalia}</li>;
+            }
+
+            // Siglum
+            if (undefined !== data.siglum) {
+                siglum = <li className={liClassName}>Siglum: {data.siglum}</li>;
+            }
+
+            // Proofreader
+            if (undefined !== data.proofreader) {
+                proofreader = <li className={liClassName}>Proofreader: {data.proofreader}</li>;
+            }
+
+            // Melody ID
+            if (undefined !== data.melody_id) {
+                melodyID = <li className={liClassName}>Melody ID: {data.melody_id}</li>;
+            }
+        }
+
+        // Build the final structure
+        let post = '';
+        if ('full' === this.props.size) {
+            post = (
+                <div className="card">
+                    <div className="card-block">
+                        <h4 className="card-title">{data.incipit}</h4>
+                        <h6 className="card-subtitle text-muted">
+                            {data.genre}&mdash;Cantus&nbsp;ID&nbsp;{data.cantus_id}
+                        </h6>
+                    </div>
+                    <ul className="list-group list-group-flush">
+                        {feastAndOffice}
+                        {sourceFolioSequence}
+                        {mode}
+                        {concordances}
+                        {differentia}
+                        {fullText}
+                        {volpiano}
+                        {notes}
+                        {marginalia}
+                        {siglum}
+                        {proofreader}
+                        {melodyID}
+                    </ul>
+                </div>
+            );
+        } else {
+            post = (
+                <div className="card">
+                    <div className="card-block">
+                        <h4 className="card-title">{data.incipit}</h4>
+                        <h6 className="card-subtitle text-muted">
+                            {data.genre}&mdash;Cantus&nbsp;ID&nbsp;{data.cantus_id}
+                        </h6>
+                        {feastAndOffice}<br/>
+                        {sourceFolioSequence}
+                    </div>
+                </div>
+            );
+        }
+
+        return post;
+    }
+});
+
+
+var ItemView = React.createClass({
+    // TODO: description
+    //
+
+    propTypes: {
+        // a CantusJS instance
+        cantusjs: React.PropTypes.object.isRequired,
+        // type of the resource to display
+        resourceType: React.PropTypes.string,
+        // ID of the resource to display
+        resourceID: React.PropTypes.string,
+        // Whether to display the resource with "compact" or "full" formatting.
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {resourceType: null, resourceID: null, size: 'full'};
+    },
+    getInitialState: function() {
+        return {response: null, resources: null};
+    },
+    getNewData: function(resourceType, resourceID) {
+        // Request new data from CantusJS.
+        //
+
+        let settings = {
+            type: resourceType,
+            id: resourceID
+        };
+
+        this.props.cantusjs.get(settings).then(this.cantusjsThen).catch(this.cantusjsCatch);
+    },
+    cantusjsThen: function(response) {
+        // Called when an AJAX request returns successfully.
+        //
+
+        this.setState({
+            response:  response[response.sort_order[0]],
+            resources: response.resources[response.sort_order[0]]
+        });
+    },
+    cantusjsCatch: function(response) {
+        // Called when an AJAX request returns unsuccessfully.
+        //
+
+        console.error(response);
+    },
+    componentDidMount: function() {
+        if (null !== this.props.resourceType && null !== this.props.resourceID) {
+            this.getNewData(this.props.resourceType, this.props.resourceID);
+        }
+    },
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.resourceType !== this.props.resourceType ||
+            nextProps.resourceID !== this.props.resourceID) {
+            if (null !== nextProps.resourceType && null !== nextProps.resourceID) {
+                this.getNewData(nextProps.resourceType, nextProps.resourceID);
+            }
+            this.setState(this.getInitialState());
+        }
+    },
+    render: function() {
+        let type = this.props.resourceType;
+        let id = this.props.resourceID;
+        let response = this.state.response;
+
+        if (null === type || null === id) {
+            return (<div>empty type or ID</div>);
+        } else if (null === response) {
+            return (<div>waiting on Abbot</div>);
+        } else {
+            let resources = this.state.resources;
+            return (
+                <ItemViewChant data={response} resources={resources} size={this.props.size}/>
+            );
+        }
+    }
+});
+
+
+var ItemViewDevelWrapper = React.createClass({
+    // This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT.
+    //
+
+    propTypes: {
+        // a CantusJS instance
+        cantusjs: React.PropTypes.object.isRequired,
+    },
+    getInitialState: function() {
+        return {type: null, id: null, size: 'full'};
+    },
+    componentDidMount: function() {
+        let fakeEvent = {preventDefault: function() {}};
+        this.submitTypeAndId(fakeEvent);
+    },
+    submitTypeAndId: function(event) {
+        // Call this when the "Submit" button is clicked for this wrapper thing.
+
+        // TODO: make this actually use the user-written type and ID
+        event.preventDefault();  // stop the default GET form submission
+        this.setState({
+            type: this.refs.resType.getDOMNode().value,
+            id: this.refs.resID.getDOMNode().value
+        });
+    },
+    onChangeSizeRadioButton: function(event) {
+        this.setState({size: event.target.value});
+    },
+    render: function() {
+
+        // Set @checked for the "size" radio buttons. The first is with default "state."
+        let fullSizeChecked = true;
+        let compactSizeChecked = false;
+        if ('compact' === this.state.size) {
+            fullSizeChecked = false;
+            compactSizeChecked = true;
+        }
+
+        return (
+            <div>
+                <div className="alert alert-info">
+                    <p><strong>Note:</strong> This is a development wrapper around the proper ItemView.</p>
+                    <p>Once &ldquo;Vitrail&rdquo; is deployed, the resource type and ID will be set
+                    automatically, and the ItemView will be triggered from search results when you
+                    choose a particular resource.</p>
+                </div>
+                <div className="card">
+                    <div className="card-block">
+                        <h2 className="card-title">ItemView Development Wrapper</h2>
+                        <form onSubmit={this.submitTypeAndId}>
+                            <fieldset className="form-group">
+                                <label htmlFor="#ivdw-type">Resource Type (lowercase plural):</label>
+                                <input type="text" className="form-control" id="ivdw-type"
+                                       placeholder="e.g., chants" defaultValue="chants" ref="resType"/>
+                            </fieldset>
+                            <fieldset className="form-group">
+                                <label htmlFor="#ivdw-type">Resource ID:</label>
+                                <input type="text" className="form-control" id="ivdw-type"
+                                       placeholder="e.g., 149243" defaultValue="149243" ref="resID"/>
+                            </fieldset>
+                            <fieldset className="form-group">
+                                <div className="radio">
+                                    <label>
+                                        <input type="radio"
+                                               name="itemview-size"
+                                               className="radio-inline"
+                                               value="full"
+                                               checked={fullSizeChecked}
+                                               onChange={this.onChangeSizeRadioButton}
+                                        />
+                                        Full View
+                                    </label>
+                                    <label>
+                                        <input type="radio"
+                                               name="itemview-size"
+                                               className="radio-inline"
+                                               value="compact"
+                                               checked={compactSizeChecked}
+                                               onChange={this.onChangeSizeRadioButton}
+                                        />
+                                        Compact View
+                                    </label>
+                                </div>
+                            </fieldset>
+                            <button type="submit" className="btn btn-primary">Show</button>
+                        </form>
+                    </div>
+                    <div className="card-block">
+                        <ItemView cantusjs={this.props.cantusjs} resourceType={this.state.type}
+                                  resourceID={this.state.id} size={this.state.size}/>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+
+
+var NavbarItem = React.createClass({
     propTypes: {
         // the textual name to display for this navbar entry
         name: React.PropTypes.string.isRequired,
@@ -1161,7 +1512,7 @@ let NavbarItem = React.createClass({
 });
 
 
-let VitrailNavbar = React.createClass({
+var VitrailNavbar = React.createClass({
     propTypes: {
         // array of objects with the props required for the "NavbarItem" component
         navbarItems: React.PropTypes.arrayOf(React.PropTypes.object)
@@ -1190,7 +1541,7 @@ let VitrailNavbar = React.createClass({
 });
 
 
-let Vitrail = React.createClass({
+var Vitrail = React.createClass({
     propTypes: {
         // URL to the root of the Cantus API server
         rootUrl: React.PropTypes.string.isRequired,
@@ -1202,43 +1553,69 @@ let Vitrail = React.createClass({
     //    - 'basic'  (Basic Search)
     //    - 'template'  (Template Search)
     //    - 'workspace'  (My Workspace)
+    // NOTE: the following screens are added here only temporarily, only for development
+    //    - 'itemview' (ItemView component, look at a single resource)
+    //    - 'bookview' (BookView component, look through a Source with "book pages")
     getInitialState: function() {
         return ({
-            activeScreen: 'template',
+            activeScreen: 'itemview',
             cantusjs: new cantusModule.Cantus(this.props.rootUrl)
         });
     },
-    activateOnebox: function() { this.setState({activeScreen: 'onebox'}); },
-    activateBasic: function() { this.setState({activeScreen: 'basic'}); },
-    activateTemplate: function() { this.setState({activeScreen: 'template'}); },
+    activateOnebox:    function() { this.setState({activeScreen: 'onebox'}); },
+    activateBasic:     function() { this.setState({activeScreen: 'basic'}); },
+    activateTemplate:  function() { this.setState({activeScreen: 'template'}); },
     activateWorkspace: function() { this.setState({activeScreen: 'workspace'}); },
+    activateItemview:  function() { this.setState({activeScreen: 'itemview'}); },
+    activateBookview:  function() { this.setState({activeScreen: 'bookview'}); },
     render: function() {
         let navbarItems = [
             // {name, onClick, active}
-            {name: 'Onebox Search', active: false, onClick: this.activateOnebox},
-            {name: 'Basic Search (just for testing)', active: false, onClick: this.activateBasic},
-            {name: 'Template Search', active: false, onClick: this.activateTemplate},
-            {name: 'My Workspace', active: false, onClick: this.activateWorkspace}
+            {name: 'Onebox Search',        active: false, onClick: this.activateOnebox},
+            {name: 'Basic Search (devel)', active: false, onClick: this.activateBasic},
+            {name: 'Template Search',      active: false, onClick: this.activateTemplate},
+            {name: 'My Workspace',         active: false, onClick: this.activateWorkspace},
+            {name: 'ItemView (devel)',     active: false, onClick: this.activateItemview},
+            {name: 'BookView (devel)',     active: false, onClick: this.activateBookview}
         ];
 
         let activeScreen = <div className="alert alert-danger" htmlRole="alert">Not implemented!</div>;
 
         // deal with activating the active screen
-        if ('onebox' === this.state.activeScreen) {
-            navbarItems[0]['active'] = true;
-            navbarItems[0]['onClick'] = null;
-            activeScreen = <OneboxSearch cantusjs={this.state.cantusjs}/>
-        } else if ('basic' === this.state.activeScreen) {
-            navbarItems[1]['active'] = true;
-            navbarItems[1]['onClick'] = null;
-            activeScreen = <BasicSearch cantusjs={this.state.cantusjs}/>
-        } else if ('template' === this.state.activeScreen) {
-            navbarItems[2]['active'] = true;
-            navbarItems[2]['onClick'] = null;
-            activeScreen = <TemplateSearch cantusjs={this.state.cantusjs}/>
-        } else if ('workspace' === this.state.activeScreen) {
-            navbarItems[3]['active'] = true;
-            navbarItems[3]['onClick'] = null;
+        switch (this.state.activeScreen) {
+            case 'onebox':
+                navbarItems[0]['active'] = true;
+                navbarItems[0]['onClick'] = null;
+                activeScreen = <OneboxSearch cantusjs={this.state.cantusjs}/>;
+                break;
+
+            case 'basic':
+                navbarItems[1]['active'] = true;
+                navbarItems[1]['onClick'] = null;
+                activeScreen = <BasicSearch cantusjs={this.state.cantusjs}/>;
+                break;
+
+            case 'template':
+                navbarItems[2]['active'] = true;
+                navbarItems[2]['onClick'] = null;
+                activeScreen = <TemplateSearch cantusjs={this.state.cantusjs}/>;
+                break;
+
+            case 'workspace':
+                navbarItems[3]['active'] = true;
+                navbarItems[3]['onClick'] = null;
+                break;
+
+            case 'itemview':
+                navbarItems[4]['active'] = true;
+                navbarItems[4]['onClick'] = null;
+                activeScreen = <ItemViewDevelWrapper cantusjs={this.state.cantusjs}/>;
+                break;
+
+            case 'bookview':
+                navbarItems[5]['active'] = true;
+                navbarItems[5]['onClick'] = null;
+                break;
         }
 
         return (

@@ -22,3 +22,10 @@
  * along with this program.  If not, see <http: *www.gnu.org/licenses/>.
  *-------------------------------------------------------------------------------------------------
  */
+
+.vitrail-source-name {
+    /* Use this class when displaying the name of a Source in another resource type (e.g., the
+     * "Source" column for a list of Chant resources).
+     */
+    font-style: italic;
+}
