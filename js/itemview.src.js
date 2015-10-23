@@ -323,6 +323,59 @@ var ItemViewIndexer = React.createClass({
 });
 
 
+var ItemViewGenre = React.createClass({
+    // An ItemView that displays a Genre resource.
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Fields Available:
+        // - name
+        // - description
+        // - mass_or_office
+
+        let description = '';
+        let massOrOffice = '';
+
+        if ('full' === this.props.size) {
+            // Mass or Office
+            if (undefined !== data.mass_or_office) {
+                massOrOffice = <h6 className="card-subtitle text-muted">{data.mass_or_office}</h6>;
+            }
+
+            // Description
+            if (undefined !== data.description) {
+                description = data.description;
+            }
+        }
+
+        // Build the final structure
+        let post = (
+            <div className="card">
+                <div className="card-block">
+                    <h4 className="card-title">{data.name}</h4>
+                    {massOrOffice}
+                    {description}
+                </div>
+            </div>
+        );
+
+        return post;
+    }
+});
+
+
 var ItemView = React.createClass({
     // TODO: description
     //
@@ -385,7 +438,7 @@ var ItemView = React.createClass({
         }
     },
     render: function() {
-        let type = this.props.resourceType;
+        let type = this.props.resourceType;  // TODO: regularize this somewhere so it can be specified as plural or singular
         let id = this.props.resourceID;
         let response = this.state.response;
 
@@ -410,6 +463,14 @@ var ItemView = React.createClass({
 
                 case 'indexers':
                     rendered = <ItemViewIndexer data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
+                case 'genres':
+                    rendered = <ItemViewGenre data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
+                default:
+                    rendered = <div className="alert alert-info">Resource type not implemented: {type}.</div>;
                     break;
             }
 
