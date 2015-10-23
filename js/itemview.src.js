@@ -255,6 +255,74 @@ var ItemViewFeast = React.createClass({
 });
 
 
+var ItemViewIndexer = React.createClass({
+    // An ItemView that displays an Indexer resource.
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Fields Available:
+        // - display_name
+        // - given_name
+        // - family_name
+        // - institution
+        // - city
+        // - country
+
+        // Name
+        let name = '';
+        if (undefined !== data.family_name && undefined !== data.given_name) {
+            name = <h4 className="card-title">{data.given_name}&nbsp;{data.family_name}</h4>;
+        } else {
+            name = <h4 className="card-title">{data.display_name}</h4>;
+        }
+
+        let institution = '';
+        let cityAndCountry = '';
+
+        if ('full' === this.props.size) {
+            // Institution
+            if (undefined !== data.institution) {
+                institution = <h6 className="card-subtitle text-muted">{data.institution}</h6>;
+            }
+
+            // City and Country
+            if (undefined !== data.city && undefined !== data.country) {
+                cityAndCountry = `${data.city}, ${data.country}`;
+            } else if (undefined !== data.city) {
+                cityAndCountry = data.city;
+            } else if (undefined !== data.country) {
+                cityAndCountry = data.country;
+            }
+        }
+
+        // Build the final structure
+        let post = (
+            <div className="card">
+                <div className="card-block">
+                    {name}
+                    {institution}
+                    {cityAndCountry}
+                </div>
+            </div>
+        );
+
+        return post;
+    }
+});
+
+
 var ItemView = React.createClass({
     // TODO: description
     //
@@ -338,6 +406,10 @@ var ItemView = React.createClass({
 
                 case 'feasts':
                     rendered = <ItemViewFeast data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
+                case 'indexers':
+                    rendered = <ItemViewIndexer data={response} resources={resources} size={this.props.size}/>;
                     break;
             }
 
