@@ -376,6 +376,52 @@ var ItemViewGenre = React.createClass({
 });
 
 
+var ItemViewSimpleResource = React.createClass({
+    // An ItemView that displays what the Cantus API calls "simple resources": century, notation,
+    // office, portfolio categories, provenance, RISM siglum (pl. sigla), segment, source status
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Fields Available:
+        // - name
+        // - description
+
+        let description = '';
+
+        if ('full' === this.props.size) {
+            // Description
+            if (undefined !== data.description) {
+                description = <h6 className="card-subtitle text-muted">{data.description}</h6>;
+            }
+        }
+
+        // Build the final structure
+        let post = (
+            <div className="card">
+                <div className="card-block">
+                    <h4 className="card-title">{data.name}</h4>
+                    {description}
+                </div>
+            </div>
+        );
+
+        return post;
+    }
+});
+
+
 var ItemView = React.createClass({
     // TODO: description
     //
@@ -467,6 +513,17 @@ var ItemView = React.createClass({
 
                 case 'genres':
                     rendered = <ItemViewGenre data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
+                case 'centuries':
+                case 'notations':
+                case 'offices':
+                case 'portfolia':
+                case 'provenances':
+                case 'sigla':
+                case 'segments':
+                case 'source_statii':
+                    rendered = <ItemViewSimpleResource data={response} resources={resources} size={this.props.size}/>;
                     break;
 
                 default:
