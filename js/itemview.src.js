@@ -738,10 +738,6 @@ var ItemViewDevelWrapper = React.createClass({
     // This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT.
     //
 
-    propTypes: {
-        // a CantusJS instance
-        cantusjs: React.PropTypes.object.isRequired,
-    },
     getInitialState: function() {
         return {type: null, id: null, size: 'full'};
     },
@@ -822,7 +818,7 @@ var ItemViewDevelWrapper = React.createClass({
                         </form>
                     </div>
                     <div className="card-block">
-                        <ItemView cantusjs={this.props.cantusjs} resourceType={this.state.type}
+                        <ItemView cantusjs={window['temporaryCantusJS']} resourceType={this.state.type}
                                   resourceID={this.state.id} size={this.state.size}/>
                     </div>
                 </div>

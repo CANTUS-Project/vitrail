@@ -490,9 +490,6 @@ var ResultListFrame = React.createClass({
 
 
 var BasicSearch = React.createClass({
-    propTypes: {
-        cantusjs: React.PropTypes.object.isRequired,
-    },
     getInitialState: function() {
         return {resourceType: 'all', page: 1, perPage: 10, currentSearch: '', errorMessage: null};
     },
@@ -585,7 +582,7 @@ var BasicSearch = React.createClass({
                                            searchQuery={this.state.currentSearch}
                                            changePage={this.changePage}
                                            onError={this.failedAjaxRequest}
-                                           cantus={this.props.cantusjs}
+                                           cantus={window['temporaryCantusJS']}
             />);
         }
 
@@ -617,9 +614,6 @@ var OneboxSearch = React.createClass({
     // TODO: move this to its own file and refactor ResultListFrame (etc) when you get rid of BasicSearch
     //
 
-    propTypes: {
-        cantusjs: React.PropTypes.object.isRequired,
-    },
     getInitialState: function() {
         return {page: 1, perPage: 10, currentSearch: '', errorMessage: null};
     },
@@ -691,7 +685,7 @@ var OneboxSearch = React.createClass({
                                            searchQuery={this.state.currentSearch}
                                            changePage={this.changePage}
                                            onError={this.failedAjaxRequest}
-                                           cantus={this.props.cantusjs}
+                                           cantus={window['temporaryCantusJS']}
             />);
         }
 
@@ -787,12 +781,9 @@ var VitrailNavbar = React.createClass({
 
 
 var Vitrail = React.createClass({
-    propTypes: {
-        // URL to the root of the Cantus API server
-        rootUrl: React.PropTypes.string.isRequired,
-    },
-    // State Definition
-    // ================
+    //
+    // State:
+    // ======
     // - activeScreen: Internal name of the currently-active screen; one of:
     //    - 'onebox'  (Onebox Search)
     //    - 'basic'  (Basic Search)
@@ -804,7 +795,7 @@ var Vitrail = React.createClass({
     getInitialState: function() {
         return ({
             activeScreen: 'itemview',
-            cantusjs: new cantusModule.Cantus(this.props.rootUrl)
+            cantusjs: window['temporaryCantusJS']
         });
     },
     activateOnebox:    function() { this.setState({activeScreen: 'onebox'}); },
@@ -831,19 +822,19 @@ var Vitrail = React.createClass({
             case 'onebox':
                 navbarItems[0]['active'] = true;
                 navbarItems[0]['onClick'] = null;
-                activeScreen = <OneboxSearch cantusjs={this.state.cantusjs}/>;
+                activeScreen = <OneboxSearch/>;
                 break;
 
             case 'basic':
                 navbarItems[1]['active'] = true;
                 navbarItems[1]['onClick'] = null;
-                activeScreen = <BasicSearch cantusjs={this.state.cantusjs}/>;
+                activeScreen = <BasicSearch/>;
                 break;
 
             case 'template':
                 navbarItems[2]['active'] = true;
                 navbarItems[2]['onClick'] = null;
-                activeScreen = <TemplateSearch cantusjs={this.state.cantusjs}/>;
+                activeScreen = <TemplateSearch/>;
                 break;
 
             case 'workspace':
@@ -854,7 +845,7 @@ var Vitrail = React.createClass({
             case 'itemview':
                 navbarItems[4]['active'] = true;
                 navbarItems[4]['onClick'] = null;
-                activeScreen = <ItemViewDevelWrapper cantusjs={this.state.cantusjs}/>;
+                activeScreen = <ItemViewDevelWrapper/>;
                 break;
 
             case 'bookview':

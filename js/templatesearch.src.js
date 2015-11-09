@@ -335,9 +335,6 @@ var TemplateSearchTemplate = React.createClass({
 
 
 var TemplateSearch = React.createClass({
-    propTypes: {
-        cantusjs: React.PropTypes.object.isRequired,
-    },
     getInitialState: function() {
         // - searchFor (object): members are fields with strings as values
         // - page
@@ -425,7 +422,7 @@ var TemplateSearch = React.createClass({
                                      page={this.state.page}
                                      searchQuery={this.state.currentSearch}
                                      changePage={this.changePage}
-                                     cantus={this.props.cantusjs}
+                                     cantus={window['temporaryCantusJS']}
                                      doGenericGet={false}
                     />
                 </div>

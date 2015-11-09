@@ -25,11 +25,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Router, Route} from 'react-router';
+
+import cantusModule from './cantusjs/cantus.src';
 import {Vitrail} from './vitrail.src.js';
 
 
+// TODO: move this to the models
+window['temporaryCantusJS'] = new cantusModule.Cantus('http://abbot.adjectivenoun.ca:8888/');
+
+
 ReactDOM.render(
-    React.createElement(Vitrail,
-                        {rootUrl: 'http://abbot.adjectivenoun.ca:8888/'}),
-    document.getElementsByTagName('body')[0]
+    (
+        <Router>
+            <Route path="/" component={Vitrail}/>
+        </Router>
+    ),
+    document.getElementById('vitrail-goes-here')
 );
