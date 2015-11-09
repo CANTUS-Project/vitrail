@@ -28,7 +28,9 @@ import ReactDOM from 'react-dom';
 import {Router, Route} from 'react-router';
 
 import cantusModule from './cantusjs/cantus.src';
-import {Vitrail} from './vitrail.src.js';
+import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
+import {ItemViewDevelWrapper} from './itemview.src';
+import TemplateSearch from './templatesearch.src';
 
 
 // TODO: move this to the models
@@ -38,7 +40,14 @@ window['temporaryCantusJS'] = new cantusModule.Cantus('http://abbot.adjectivenou
 ReactDOM.render(
     (
         <Router>
-            <Route path="/" component={Vitrail}/>
+            <Route path="/" component={Vitrail}>
+                <Route path="onebox" component={OneboxSearch}/>
+                <Route path="basicsearchdevel" component={BasicSearch}/>
+                <Route path="template" component={TemplateSearch}/>
+                <Route path="itemviewdevel" component={ItemViewDevelWrapper}/>
+                <Route path="workspace" component={NotImplemented}/>
+                <Route path="bookview" component={NotImplemented}/>
+            </Route>
         </Router>
     ),
     document.getElementById('vitrail-goes-here')
