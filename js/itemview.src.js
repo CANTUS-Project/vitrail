@@ -376,6 +376,199 @@ var ItemViewGenre = React.createClass({
 });
 
 
+var ItemViewSource = React.createClass({
+    // An ItemView that displays a Source resource.
+    //
+
+    propTypes: {
+        data: React.PropTypes.object.isRequired,
+        resources: React.PropTypes.object.isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full'])
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    render: function() {
+        let liClassName = 'list-group-item';
+        let data = this.props.data;
+        let resources = this.props.resources;
+
+        // Fields Available:
+        // - title (string) – Full Manuscript Identification (City, Archive, Shelf-mark)
+        // - rism (string) – RISM number
+        // - provenance (string) – Provenance
+        // - provenance_detail (string) – More detail about the provenance
+        // - date (string) – Date
+        // IGNORED: - century (string) – Century
+        // IGNORED: - notation_style (string) – Notation used for the source
+        // - editors (string) – List of "display_name" of indexers who edited this manuscript
+        // - indexers (string) – List of "display_name" of indexers who entered this manuscript
+        // - proofreaders (string) – List of "display_name" of indexers who proofread this manuscript
+        // IGNORED: - segment (string) – Segment (i.e., source database)
+        // - source_status (string) – Status of this source
+        // - summary (string) – Summary
+        // - liturgical_occasions (string) – Liturgical occasions
+        // - description (string) – Description
+        // - indexing_notes (string) – Indexing notes
+        // - indexing_date (string) – Indexing date
+
+        // Siglum ("rism" field), Provenance, and Date
+        // NB: \u00A0 is &nbsp; and \u2014 is an em dash
+        let siglumProvenanceDate = '';
+        if (undefined !== data.rism && undefined !== data.provenance) {
+            if (undefined !== data.date) {
+                siglumProvenanceDate = `${data.rism}\u00A0(${data.provenance})\u00A0${data.date}`;
+            } else {
+                siglumProvenanceDate = `${data.rism}\u00A0(${data.provenance})`;
+            }
+        } else if (undefined !== data.rism) {
+            if (undefined !== data.date) {
+                siglumProvenanceDate = `${data.rism}\u2014${data.date}`;
+            } else {
+                siglumProvenanceDate = data.rism;
+            }
+        } else if (undefined !== data.provenance) {
+            if (undefined !== data.date) {
+                siglumProvenanceDate = `${data.provenance}\u2014${data.date}`;
+            } else {
+                siglumProvenanceDate = data.provenance;
+            }
+        }
+        if (siglumProvenanceDate.length > 0) {
+            siglumProvenanceDate = <h6 className="card-subtitle text-muted">{siglumProvenanceDate}</h6>;
+        }
+
+        let provenanceDetail = '';
+        let status = '';
+        let summary = '';
+        let occasions = '';
+        let indexingInfo = '';
+        let description = '';
+
+        if ('full' === this.props.size) {
+            // Provenance Detail
+            if (undefined !== data.provenance_detail && data.provenance_detail !== data.provenance) {
+                provenanceDetail = <li className={liClassName}>{data.provenance_detail}</li>;
+            }
+
+            // Source Status
+            if (undefined !== data.source_status) {
+                status = `Status: ${data.source_status}`;
+                status = <li className={liClassName}>{status}</li>;
+            }
+
+            // Summary
+            if (undefined !== data.summary) {
+                summary = <li className={liClassName}>{data.summary}</li>;
+            }
+
+            // Occasions
+            if (undefined !== data.liturgical_occasions) {
+                occasions = `Liturgical Occasions: ${data.liturgical_occasions}`;
+                occasions = <li className={liClassName}>{occasions}</li>;
+            }
+
+            // Indexing Information -----------------------
+            let notes = '';
+            let i_date = '';
+            let editors = '';
+            let indexers = '';
+            let proofreaders = '';
+
+            // Indexing Date
+            if (undefined !== data.indexing_date) {
+                i_date = `Indexed ${data.indexing_date}`;
+                i_date = <p>{i_date}</p>;
+            }
+
+            // Notes
+            if (undefined !== data.indexing_notes) {
+                notes = `Indexing Notes: ${data.indexing_notes}`;
+                notes = <p>{notes}</p>;
+            }
+
+            // Indexers
+            if (undefined !== data.indexers) {
+                indexers = `Indexers: ${data.indexers.join(', ')}`;
+                indexers = <p>{indexers}</p>;
+            }
+
+            // Editors
+            if (undefined !== data.editors) {
+                editors = `Editors: ${data.editors.join(', ')}`;
+                editors = <p>{editors}</p>;
+            }
+
+            // Proofreaders
+            if (undefined !== data.proofreaders) {
+                proofreaders = `Proofreaders: ${data.proofreaders.join(', ')}`;
+                proofreaders = <p>{proofreaders}</p>;
+            }
+
+            if (true) {
+            // if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
+                indexingInfo = (
+                    <div className="card-block">
+                        <h5 className="card-subtitle">Indexing Information</h5>
+                        <div className="card-block">
+                            {i_date}
+                            {notes}
+                            {editors}
+                            {indexers}
+                            {proofreaders}
+                        </div>
+                    </div>
+                );
+            }
+
+            // Description --------------------------------
+            if (undefined !== data.description) {
+                // TODO: format this better (e.g., convert the newline chars to <br/> ?)
+                description = (
+                    <div className="card-block">
+                        <h5 className="card-subtitle">Description</h5>
+                        <p className="card-block">{data.description}</p>
+                    </div>
+                );
+            }
+        }
+
+        // Build the final structure
+        let post;
+        let commonHeader = (
+            <div className="card-block">
+                <h4 className="card-title">{data.title}</h4>
+                {siglumProvenanceDate}
+            </div>
+        );
+
+        if ('full' === this.props.size) {
+            post = (
+                <div className="card">
+                    {commonHeader}
+                    <ul className="list-group list-group-flush">
+                        {provenanceDetail}
+                        {status}
+                        {summary}
+                        {occasions}
+                    </ul>
+                    {indexingInfo}
+                    {description}
+                </div>
+            );
+        } else {
+            post = (
+                <div className="card">
+                    {commonHeader}
+                </div>
+            );
+        }
+
+        return post;
+    }
+});
+
+
 var ItemViewSimpleResource = React.createClass({
     // An ItemView that displays what the Cantus API calls "simple resources": century, notation,
     // office, portfolio categories, provenance, RISM siglum (pl. sigla), segment, source status
@@ -515,6 +708,10 @@ var ItemView = React.createClass({
                     rendered = <ItemViewGenre data={response} resources={resources} size={this.props.size}/>;
                     break;
 
+                case 'sources':
+                    rendered = <ItemViewSource data={response} resources={resources} size={this.props.size}/>;
+                    break;
+
                 case 'centuries':
                 case 'notations':
                 case 'offices':
@@ -590,12 +787,12 @@ var ItemViewDevelWrapper = React.createClass({
                             <fieldset className="form-group">
                                 <label htmlFor="#ivdw-type">Resource Type (lowercase plural):</label>
                                 <input type="text" className="form-control" id="ivdw-type"
-                                       placeholder="e.g., chants" defaultValue="chants" ref="resType"/>
+                                       placeholder="e.g., chants" defaultValue="sources" ref="resType"/>
                             </fieldset>
                             <fieldset className="form-group">
                                 <label htmlFor="#ivdw-type">Resource ID:</label>
                                 <input type="text" className="form-control" id="ivdw-type"
-                                       placeholder="e.g., 149243" defaultValue="149243" ref="resID"/>
+                                       placeholder="e.g., 149243" defaultValue="123723" ref="resID"/>
                             </fieldset>
                             <fieldset className="form-group">
                                 <div className="radio">
