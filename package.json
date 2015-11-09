@@ -10,10 +10,12 @@
                "email": "christopher@antila.ca",
                "url": "http://christopher.antila.ca/"},
     "repository": {"type": "git", "url": "https://github.com/CANTUS-Project/vitrail.git"},
-    "dependencies": {"zepto-commonjs": ">=1.1",
-                     "react": ">=0.13"},
+    "dependencies": {
+        "react": "0.14.x",
+        "react-dom": "0.14.x"
+    },
     "devDependencies": {
-        "jest-cli": "*",
+        "jest-cli": "0.4.x",
         "babelify": "6.2.x",
         "browserify": "11.0.x",
         "watchify": "3.3.x"

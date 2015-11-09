@@ -24,11 +24,12 @@
 
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import {Vitrail} from './vitrail.src.js';
 
 
-React.render(
+ReactDOM.render(
     React.createElement(Vitrail,
-                        {rootUrl: 'http://localhost:8888/'}),
+                        {rootUrl: 'http://abbot.adjectivenoun.ca:8888/'}),
     document.getElementsByTagName('body')[0]
 );
