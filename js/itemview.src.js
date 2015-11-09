@@ -25,6 +25,10 @@
 
 import React from "react";
 
+import getters from './nuclear/getters';
+import reactor from './nuclear/reactor';
+import {SIGNALS} from './nuclear/signals';
+
 
 var ItemViewChant = React.createClass({
     // TODO: description
@@ -619,112 +623,70 @@ var ItemView = React.createClass({
     // TODO: description
     //
 
-    propTypes: {
-        // a CantusJS instance
-        cantusjs: React.PropTypes.object.isRequired,
-        // type of the resource to display
-        resourceType: React.PropTypes.string,
-        // ID of the resource to display
-        resourceID: React.PropTypes.string,
-        // Whether to display the resource with "compact" or "full" formatting.
-        size: React.PropTypes.oneOf(['compact', 'full'])
-    },
-    getDefaultProps: function() {
-        return {resourceType: null, resourceID: null, size: 'full'};
-    },
-    getInitialState: function() {
-        return {response: null, resources: null};
-    },
-    getNewData: function(resourceType, resourceID) {
-        // Request new data from CantusJS.
-        //
-
-        let settings = {
-            type: resourceType,
-            id: resourceID
-        };
-
-        this.props.cantusjs.get(settings).then(this.cantusjsThen).catch(this.cantusjsCatch);
-    },
-    cantusjsThen: function(response) {
-        // Called when an AJAX request returns successfully.
-        //
-
-        this.setState({
-            response:  response[response.sort_order[0]],
-            resources: response.resources[response.sort_order[0]]
-        });
-    },
-    cantusjsCatch: function(response) {
-        // Called when an AJAX request returns unsuccessfully.
-        //
-
-        console.error(response);
-        this.setState({response: response.response});
-    },
-    componentDidMount: function() {
-        if (null !== this.props.resourceType && null !== this.props.resourceID) {
-            this.getNewData(this.props.resourceType, this.props.resourceID);
-        }
-    },
-    componentWillReceiveProps: function(nextProps) {
-        if (nextProps.resourceType !== this.props.resourceType ||
-            nextProps.resourceID !== this.props.resourceID) {
-            if (null !== nextProps.resourceType && null !== nextProps.resourceID) {
-                this.getNewData(nextProps.resourceType, nextProps.resourceID);
-            }
-            this.setState(this.getInitialState());
-        }
+    mixins: [reactor.ReactMixin],
+    getDataBindings() {
+        return {theItem: getters.currentItemView};
     },
     render: function() {
-        let type = this.props.resourceType;  // TODO: regularize this somewhere so it can be specified as plural or singular
-        let id = this.props.resourceID;
-        let response = this.state.response;
 
-        if (null === type || null === id) {
+        // TODO: professionalize this
+        if (0 === this.state.theItem.size) {
+            return (<div>empty lolz</div>);
+        }
+
+        // "item" will contain only fields for this item
+        // "resources" will contain only URLs for this item
+        let itemID = this.state.theItem.get('sort_order').get(0);
+        // console.log(itemID);
+        let item = this.state.theItem.get(itemID).toObject();
+        // console.log(item);
+        // console.log(item.get('type'));
+        let resources = this.state.theItem.get('resources').get(itemID).toObject();
+        // console.log(resources);
+
+        if (null === item.type || null === item.id) {
             return (<div>empty type or ID</div>);
-        } else if (null === response) {
+        } else if (null === item) {
             return (<div>waiting on Abbot</div>);
-        } else if ('string' === typeof response) {
-            return (<div className="alert alert-warning">{response}</div>);
+        } else if ('string' === typeof item) {
+            return (<div className="alert alert-warning">{item}</div>);
         } else {
-            let resources = this.state.resources;
             let rendered = null;  // this holds the rendered component
 
-            switch (type) {
-                case 'chants':
-                    rendered = <ItemViewChant data={response} resources={resources} size={this.props.size}/>;
+            switch (item.type) {
+                case 'chant':
+                    rendered = <ItemViewChant data={item} resources={resources} size={this.props.size}/>;
                     break;
 
-                case 'feasts':
-                    rendered = <ItemViewFeast data={response} resources={resources} size={this.props.size}/>;
+                case 'feast':
+                    rendered = <ItemViewFeast data={item} resources={resources} size={this.props.size}/>;
                     break;
 
-                case 'indexers':
-                    rendered = <ItemViewIndexer data={response} resources={resources} size={this.props.size}/>;
+                case 'indexer':
+                    rendered = <ItemViewIndexer data={item} resources={resources} size={this.props.size}/>;
                     break;
 
-                case 'genres':
-                    rendered = <ItemViewGenre data={response} resources={resources} size={this.props.size}/>;
+                case 'genre':
+                    rendered = <ItemViewGenre data={item} resources={resources} size={this.props.size}/>;
                     break;
 
-                case 'sources':
-                    rendered = <ItemViewSource data={response} resources={resources} size={this.props.size}/>;
+                case 'source':
+                    rendered = <ItemViewSource data={item} resources={resources} size={this.props.size}/>;
                     break;
 
-                case 'centuries':
-                case 'notations':
-                case 'offices':
-                case 'portfolia':
-                case 'provenances':
-                case 'sigla':
-                case 'segments':
-                case 'source_statii':
-                    rendered = <ItemViewSimpleResource data={response} resources={resources} size={this.props.size}/>;
+                case 'century':
+                case 'notation':
+                case 'office':
+                case 'portfolio':
+                case 'provenance':
+                case 'siglum':
+                case 'segment':
+                case 'source_status':
+                    rendered = <ItemViewSimpleResource data={item} resources={resources} size={this.props.size}/>;
                     break;
 
                 default:
-                    rendered = <div className="alert alert-info">Resource type not implemented: {type}.</div>;
+                    rendered = <div className="alert alert-info">Resource type not implemented: {item.type}.</div>;
                     break;
             }
 
@@ -739,7 +701,7 @@ var ItemViewDevelWrapper = React.createClass({
     //
 
     getInitialState: function() {
-        return {type: null, id: null, size: 'full'};
+        return {size: 'full'};
     },
     componentDidMount: function() {
         let fakeEvent = {preventDefault: function() {}};
@@ -750,10 +712,7 @@ var ItemViewDevelWrapper = React.createClass({
 
         // TODO: make this actually use the user-written type and ID
         event.preventDefault();  // stop the default GET form submission
-        this.setState({
-            type: this.refs.resType.getDOMNode().value,
-            id: this.refs.resID.getDOMNode().value
-        });
+        SIGNALS.loadInItemView(this.refs.resType.value, this.refs.resID.value);
     },
     onChangeSizeRadioButton: function(event) {
         this.setState({size: event.target.value});
@@ -818,8 +777,7 @@ var ItemViewDevelWrapper = React.createClass({
                         </form>
                     </div>
                     <div className="card-block">
-                        <ItemView cantusjs={window['temporaryCantusJS']} resourceType={this.state.type}
-                                  resourceID={this.state.id} size={this.state.size}/>
+                        <ItemView size={this.state.size}/>
                     </div>
                 </div>
             </div>

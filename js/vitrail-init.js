@@ -27,6 +27,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route} from 'react-router';
 
+import reactor from './nuclear/reactor';
+import stores from './nuclear/stores';
+
+// TODO: we won't need this eventually (after testing)
+// import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
+
 import cantusModule from './cantusjs/cantus.src';
 import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
 import {ItemViewDevelWrapper} from './itemview.src';
@@ -35,6 +41,10 @@ import TemplateSearch from './templatesearch.src';
 
 // TODO: move this to the models
 window['temporaryCantusJS'] = new cantusModule.Cantus('http://abbot.adjectivenoun.ca:8888/');
+
+reactor.registerStores({
+    'currentItemView': stores.CurrentItemView,
+});
 
 
 ReactDOM.render(
