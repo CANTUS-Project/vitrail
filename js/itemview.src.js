@@ -620,7 +620,10 @@ var ItemViewSimpleResource = React.createClass({
 
 
 var ItemView = React.createClass({
-    // TODO: description
+    // Container for ItemView. This component automatically selects the proper sub-component for
+    // the resource type, and shows it over the rest of the screen.
+    //
+    // When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
     //
 
     mixins: [reactor.ReactMixin],
@@ -690,7 +693,11 @@ var ItemView = React.createClass({
                     break;
             }
 
-            return rendered;
+            return (
+                <div className="itemview">
+                    {rendered}
+                </div>
+            );
         }
     }
 });

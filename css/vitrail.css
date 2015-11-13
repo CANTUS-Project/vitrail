@@ -29,3 +29,24 @@
      */
     font-style: italic;
 }
+
+.itemview {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    overflow-y: scroll;
+}
+
+.itemview > .card {
+    background-color: #fff;
+    max-width: 50rem;
+}
