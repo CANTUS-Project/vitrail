@@ -135,7 +135,7 @@ var TemplateSearchField = React.createClass({
 
         return (
             <fieldset className="form-group row">
-                <label className="col-sm-2">{displayName}</label>
+                <label className="col-sm-2 text-right">{displayName}</label>
                 <div className="col-sm-10">
                     <input id={fieldID}
                            type="text"
@@ -156,6 +156,9 @@ var TemplateSearchFields = React.createClass({
     // Contained by TemplateSearchTemplate.
     // Contains a bunch of TemplateSearchField.
     //
+    // State:
+    // - isCollapsed (bool) Whether the fields are actually shown (if "false," the default) or the
+    //   component should be collapsed to save space.
 
     propTypes: {
         // A function that accepts two arguments: field name (according to the Cantus API) and its
@@ -168,7 +171,14 @@ var TemplateSearchFields = React.createClass({
             field: React.PropTypes.string,
             displayName: React.PropTypes.string,
             contents: React.PropTypes.string
-        })).isRequired
+        })).isRequired,
+    },
+    getInitialState: function() {
+        return {isCollapsed: false};
+    },
+    toggleCollapsion: function() {
+        // Toggle this.state.isCollapsed
+        this.setState({isCollapsed: !this.state.isCollapsed});
     },
     updateFieldContents: function(event) {
         // Accepts change event for one of the "TemplateSearchField" components, then calls the
@@ -182,23 +192,29 @@ var TemplateSearchFields = React.createClass({
         this.props.updateField(fieldName, event.target.value);
     },
     render: function() {
-        let renderedFields = [];
-        let fieldNames = this.props.fieldNames;
-        fieldNames.forEach(function(field, index) {
-            let fieldKey = `template-field-${index}`;
-
-            renderedFields.push(<TemplateSearchField key={fieldKey}
-                                                     field={field.field}
-                                                     displayName={field.displayName}
-                                                     contents={field.contents}
-                                                     updateFieldContents={this.updateFieldContents}
-                                                     />);
-        }, this);
+        let buttonText = 'Collapse Fields';
+        let fieldStyle = {};
+        if (this.state.isCollapsed) {
+            fieldStyle['display'] = 'none';
+            buttonText = 'Expand Fields';
+        }
 
         return (
             <div className="card">
-                <div className="card-block">
-                    <form>{renderedFields}</form>
+                <div className="card-header">
+                    <button className="btn btn-primary-outline" onClick={this.toggleCollapsion}>{buttonText}</button>
+                </div>
+                <div className="card-block" style={fieldStyle}>
+                    <form>
+                        {this.props.fieldNames.map((field, index) =>
+                            <TemplateSearchField key={`template-field${index}`}
+                                                 field={field.field}
+                                                 displayName={field.displayName}
+                                                 contents={field.contents}
+                                                 updateFieldContents={this.updateFieldContents}
+                                                 />
+                        )}
+                    </form>
                 </div>
             </div>
         );
