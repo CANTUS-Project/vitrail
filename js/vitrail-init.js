@@ -56,7 +56,7 @@ ReactDOM.render(
                 <Route path="basicsearchdevel" component={BasicSearch}/>
                 <Route path="template" component={TemplateSearch}/>
                 <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
-                    <Route path="show/:type/:rid" component={ItemView}/>
+                    <Route path=":type/:rid" component={ItemView}/>
                 </Route>
                 <Route path="workspace" component={NotImplemented}/>
                 <Route path="bookview" component={NotImplemented}/>
