@@ -756,21 +756,21 @@ var ItemViewDevelWrapper = React.createClass({
     //
 
     getInitialState: function() {
-        return {size: 'full'};
+        return {size: 'full', type: 'source', id: '123723'};
     },
-    componentDidMount: function() {
-        let fakeEvent = {preventDefault: function() {}};
-        this.submitTypeAndId(fakeEvent);
-    },
-    submitTypeAndId: function(event) {
-        // Call this when the "Submit" button is clicked for this wrapper thing.
-
-        // TODO: make this actually use the user-written type and ID
+    doNothing: function(event) {
+        // Call this when the "Submit" button is clicked for this wrapper thing. It just cancels the
+        // default form submission with POST.
         event.preventDefault();  // stop the default GET form submission
-        SIGNALS.loadInItemView(this.refs.resType.value, this.refs.resID.value);
     },
     onChangeSizeRadioButton: function(event) {
         this.setState({size: event.target.value});
+    },
+    onChangeType: function(event) {
+        this.setState({type: event.target.value});
+    },
+    onChangeId: function(event) {
+        this.setState({id: event.target.value});
     },
     render: function() {
 
@@ -781,6 +781,9 @@ var ItemViewDevelWrapper = React.createClass({
             fullSizeChecked = false;
             compactSizeChecked = true;
         }
+
+        // Set the URL for the Link
+        let linkUrl = `/itemviewdevel/${this.state.type}/${this.state.id}`;
 
         return (
             <div>
@@ -793,16 +796,16 @@ var ItemViewDevelWrapper = React.createClass({
                 <div className="card">
                     <div className="card-block">
                         <h2 className="card-title">ItemView Development Wrapper</h2>
-                        <form onSubmit={this.submitTypeAndId}>
+                        <form onSubmit={this.doNothing}>
                             <fieldset className="form-group">
-                                <label htmlFor="#ivdw-type">Resource Type (lowercase plural):</label>
+                                <label htmlFor="#ivdw-type">Resource Type (lowercase):</label>
                                 <input type="text" className="form-control" id="ivdw-type"
-                                       placeholder="e.g., chants" defaultValue="sources" ref="resType"/>
+                                       value={this.state.type} onChange={this.onChangeType}/>
                             </fieldset>
                             <fieldset className="form-group">
                                 <label htmlFor="#ivdw-type">Resource ID:</label>
                                 <input type="text" className="form-control" id="ivdw-type"
-                                       placeholder="e.g., 149243" defaultValue="123723" ref="resID"/>
+                                       value={this.state.id} onChange={this.onChangeId}/>
                             </fieldset>
                             <fieldset className="form-group">
                                 <div className="radio">
@@ -828,12 +831,10 @@ var ItemViewDevelWrapper = React.createClass({
                                     </label>
                                 </div>
                             </fieldset>
-                            <button type="submit" className="btn btn-primary">Show</button>
+                            <Link to={linkUrl} className="btn btn-primary">Show</Link>
                         </form>
                     </div>
-                    <div className="card-block">
-                        {this.props.children}
-                    </div>
+                    {this.props.children}
                 </div>
             </div>
         );
