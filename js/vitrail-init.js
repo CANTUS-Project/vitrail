@@ -35,7 +35,7 @@ import stores from './nuclear/stores';
 
 import cantusModule from './cantusjs/cantus.src';
 import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
-import {ItemViewDevelWrapper} from './itemview.src';
+import {ItemViewDevelWrapper, ItemView} from './itemview.src';
 import TemplateSearch from './templatesearch.src';
 
 
@@ -47,6 +47,7 @@ reactor.registerStores({
 });
 
 
+// NOTE: for the ItemView URLs below, "rid" is the resource ID to display
 ReactDOM.render(
     (
         <Router>
@@ -54,7 +55,9 @@ ReactDOM.render(
                 <Route path="onebox" component={OneboxSearch}/>
                 <Route path="basicsearchdevel" component={BasicSearch}/>
                 <Route path="template" component={TemplateSearch}/>
-                <Route path="itemviewdevel" component={ItemViewDevelWrapper}/>
+                <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
+                    <Route path="show/:type/:rid" component={ItemView}/>
+                </Route>
                 <Route path="workspace" component={NotImplemented}/>
                 <Route path="bookview" component={NotImplemented}/>
             </Route>

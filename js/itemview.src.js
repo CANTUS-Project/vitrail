@@ -625,10 +625,31 @@ var ItemView = React.createClass({
     //
     // When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
     //
+    // Props:
+    // - size (str) "compact" or "full" for the corresponding representation
+    // - type (str) The type of resource to display.
+    // - rid (str) The resource ID to display.
+    //
 
-    mixins: [reactor.ReactMixin],
-    getDataBindings() {
-        return {theItem: getters.currentItemView};
+    propTypes: {
+        size: React.PropTypes.oneOf(['compact', 'full']),
+        params: React.PropTypes.shape({
+            type: React.PropTypes.string.isRequired,
+            rid: React.PropTypes.string.isRequired,
+        }).isRequired,
+    },
+    getDefaultProps: function() {
+        return {size: 'full'};
+    },
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() { return {theItem: getters.currentItemView}; },  // connection to NuclearJS
+    componentDidMount: function() {
+        // Ask the NuclearJS reactor to load our data.
+        SIGNALS.loadInItemView(this.props.params.type, this.props.params.rid);
+    },
+    componentWillReceiveProps: function(nextProps) {
+        // Ask the NuclearJS reactor to load our data.
+        SIGNALS.loadInItemView(nextProps.params.type, nextProps.params.rid);
     },
     render: function() {
 
@@ -784,7 +805,7 @@ var ItemViewDevelWrapper = React.createClass({
                         </form>
                     </div>
                     <div className="card-block">
-                        <ItemView size={this.state.size}/>
+                        {this.props.children}
                     </div>
                 </div>
             </div>
