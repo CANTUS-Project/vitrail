@@ -23,7 +23,9 @@
 //-------------------------------------------------------------------------------------------------
 
 
-import React from "react";
+import React from 'react';
+
+import {Link} from 'react-router';
 
 import getters from './nuclear/getters';
 import reactor from './nuclear/reactor';
@@ -161,7 +163,7 @@ var ItemViewChant = React.createClass({
         let post = '';
         if ('full' === this.props.size) {
             post = (
-                <div className="card">
+                <div className="card inner-itemview">
                     <div className="card-block">
                         <h4 className="card-title">{data.incipit}</h4>
                         <h6 className="card-subtitle text-muted">
@@ -186,7 +188,7 @@ var ItemViewChant = React.createClass({
             );
         } else {
             post = (
-                <div className="card">
+                <div className="card inner-itemview">
                     <div className="card-block">
                         <h4 className="card-title">{data.incipit}</h4>
                         <h6 className="card-subtitle text-muted">
@@ -245,7 +247,7 @@ var ItemViewFeast = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card">
+            <div className="card inner-itemview">
                 <div className="card-block">
                     <h4 className="card-title">{data.name}</h4>
                     {codeAndDate}
@@ -313,7 +315,7 @@ var ItemViewIndexer = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card">
+            <div className="card inner-itemview">
                 <div className="card-block">
                     {name}
                     {institution}
@@ -366,7 +368,7 @@ var ItemViewGenre = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card">
+            <div className="card inner-itemview">
                 <div className="card-block">
                     <h4 className="card-title">{data.name}</h4>
                     {massOrOffice}
@@ -548,7 +550,7 @@ var ItemViewSource = React.createClass({
 
         if ('full' === this.props.size) {
             post = (
-                <div className="card">
+                <div className="card inner-itemview">
                     {commonHeader}
                     <ul className="list-group list-group-flush">
                         {provenanceDetail}
@@ -562,7 +564,7 @@ var ItemViewSource = React.createClass({
             );
         } else {
             post = (
-                <div className="card">
+                <div className="card inner-itemview">
                     {commonHeader}
                 </div>
             );
@@ -606,7 +608,7 @@ var ItemViewSimpleResource = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card">
+            <div className="card inner-itemview">
                 <div className="card-block">
                     <h4 className="card-title">{data.name}</h4>
                     {description}
@@ -649,77 +651,102 @@ var ItemView = React.createClass({
     },
     componentWillReceiveProps: function(nextProps) {
         // Ask the NuclearJS reactor to load our data.
-        SIGNALS.loadInItemView(nextProps.params.type, nextProps.params.rid);
+        if (nextProps.params.type !== this.props.params.type ||
+            nextProps.params.ris !== this.props.params.rid) {
+            SIGNALS.loadInItemView(nextProps.params.type, nextProps.params.rid);
+        }
     },
     render: function() {
 
-        // TODO: professionalize this
-        if (0 === this.state.theItem.size) {
-            return (<div>empty lolz</div>);
-        }
-
-        // "item" will contain only fields for this item
-        // "resources" will contain only URLs for this item
-        let itemID = this.state.theItem.get('sort_order').get(0);
-        // console.log(itemID);
-        let item = this.state.theItem.get(itemID).toObject();
-        // console.log(item);
-        // console.log(item.get('type'));
-        let resources = this.state.theItem.get('resources').get(itemID).toObject();
-        // console.log(resources);
-
-        if (null === item.type || null === item.id) {
-            return (<div>empty type or ID</div>);
-        } else if (null === item) {
-            return (<div>waiting on Abbot</div>);
-        } else if ('string' === typeof item) {
-            return (<div className="alert alert-warning">{item}</div>);
-        } else {
-            let rendered = null;  // this holds the rendered component
-
-            switch (item.type) {
-                case 'chant':
-                    rendered = <ItemViewChant data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                case 'feast':
-                    rendered = <ItemViewFeast data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                case 'indexer':
-                    rendered = <ItemViewIndexer data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                case 'genre':
-                    rendered = <ItemViewGenre data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                case 'source':
-                    rendered = <ItemViewSource data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                case 'century':
-                case 'notation':
-                case 'office':
-                case 'portfolio':
-                case 'provenance':
-                case 'siglum':
-                case 'segment':
-                case 'source_status':
-                    rendered = <ItemViewSimpleResource data={item} resources={resources} size={this.props.size}/>;
-                    break;
-
-                default:
-                    rendered = <div className="alert alert-info">Resource type not implemented: {item.type}.</div>;
-                    break;
+        // Find the URL path to the parent component.
+        // Only the last element in this.props.routes will refer to this ItemView, so we'll "go up"
+        // a level in components if we take the "path" member of everything but that last one.
+        let pathToParent = this.props.routes.reduce(function(prev, cur, i, array) {
+            if (i === array.length - 1) {
+                return prev;
+            } else {
+                return prev + cur.path;
             }
+        }, '');
 
-            return (
-                <div className="itemview">
-                    {rendered}
+        let rendered = '';  // this holds the rendered component
+
+        if (0 === this.state.theItem.size) {
+            rendered = (
+                <div className="card inner-itemview">
+                    <div className="card-block">
+                        <div className="alert alert-warning" role="alert">
+                            No data to display. The resource type or ID may be invalid.
+                        </div>
+                        <ul className="list-group">
+                            <li className="list-group-item">Component: ItemView</li>
+                            <li className="list-group-item">Resource Type: {this.props.params.type}</li>
+                            <li className="list-group-item">Resource ID: {this.props.params.rid}</li>
+                        </ul>
+                    </div>
                 </div>
             );
+        } else {
+            // "item" will contain only fields for this item
+            // "resources" will contain only URLs for this item
+            let itemID = this.state.theItem.get('sort_order').get(0);
+            let item = this.state.theItem.get(itemID).toObject();
+            let resources = this.state.theItem.get('resources').get(itemID).toObject();
+
+            if (null === item.type || null === item.id) {
+                rendered = <div>empty type or ID</div>;
+            } else if (null === item) {
+                rendered = <div>waiting on Abbot</div>;
+            } else if ('string' === typeof item) {
+                rendered = <div className="alert alert-warning">{item}</div>;
+            } else {
+                switch (item.type) {
+                    case 'chant':
+                        rendered = <ItemViewChant data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    case 'feast':
+                        rendered = <ItemViewFeast data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    case 'indexer':
+                        rendered = <ItemViewIndexer data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    case 'genre':
+                        rendered = <ItemViewGenre data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    case 'source':
+                        rendered = <ItemViewSource data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    case 'century':
+                    case 'notation':
+                    case 'office':
+                    case 'portfolio':
+                    case 'provenance':
+                    case 'siglum':
+                    case 'segment':
+                    case 'source_status':
+                        rendered = <ItemViewSimpleResource data={item} resources={resources} size={this.props.size}/>;
+                        break;
+
+                    default:
+                        rendered = <div className="alert alert-info">Resource type not implemented: {item.type}.</div>;
+                        break;
+                }
+            }
         }
+
+        return (
+            <div className="itemview">
+                <div className="itemview-button-container">
+                    <Link className="btn btn-primary " to={pathToParent}>Close</Link>
+                    {rendered}
+                </div>
+            </div>
+        );
     }
 });
 

@@ -46,7 +46,13 @@
     overflow-y: scroll;
 }
 
-.itemview > .card {
+.itemview-button-container button {
+    /* TODO: make this actually put the button on the right */
+    position: relative;
+    right: 0px;
+}
+
+.inner-itemview {
     background-color: #fff;
     max-width: 50rem;
 }

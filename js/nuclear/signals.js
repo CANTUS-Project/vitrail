@@ -38,6 +38,9 @@ const SIGNAL_NAMES = {
 
 const SIGNALS = {
     loadInItemView: function(type, id) {
+        // Load a resource in the ItemView, given a type and ID.
+        //
+
         if (undefined === type || undefined === id) {
             let msg = 'loadInItemView() requires "type" and "id" arguments';
             console.error(msg);
@@ -50,10 +53,14 @@ const SIGNALS = {
         let settings = {type: type, id: id};
         cantusjs.get(settings)
         .then(function(response) {reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response)})
-        .catch(function(response) {console.error(response)});  // TODO: handle the error better
-
-        // TODO: make the request here, and do the dispatch as part of the then() function
-        // reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
+        .catch(function(response) {
+            if (404 === response.code) {
+                reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
+            } else {
+                // TODO: handle other errors better
+                console.error(response)
+            }
+        });
     },
 };
 
