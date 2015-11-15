@@ -35,7 +35,7 @@ import stores from './nuclear/stores';
 
 import cantusModule from './cantusjs/cantus.src';
 import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
-import {ItemViewDevelWrapper, ItemView} from './itemview.src';
+import {ItemViewDevelWrapper, ItemViewOverlay} from './itemview.src';
 import TemplateSearch from './templatesearch.src';
 
 
@@ -56,7 +56,7 @@ ReactDOM.render(
                 <Route path="basicsearchdevel" component={BasicSearch}/>
                 <Route path="template" component={TemplateSearch}/>
                 <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
-                    <Route path=":type/:rid" component={ItemView}/>
+                    <Route path=":type/:rid" component={ItemViewOverlay}/>
                 </Route>
                 <Route path="workspace" component={NotImplemented}/>
                 <Route path="bookview" component={NotImplemented}/>

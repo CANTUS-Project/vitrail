@@ -622,23 +622,23 @@ var ItemViewSimpleResource = React.createClass({
 
 
 var ItemView = React.createClass({
-    // Container for ItemView. This component automatically selects the proper sub-component for
-    // the resource type, and shows it over the rest of the screen.
+    // Wrapper for the type-specific ItemView components.
     //
-    // When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
+    // According to the props, this component emits the signal that causes NuclearJS and CantusJS
+    // to load the required data. This component also chooses the proper subcomponent. The result is
+    // outputted in the page as expected; if you want the ItemView to appear in front of the page's
+    // other content, use ItemviewOverlay.
     //
     // Props:
-    // - size (str) "compact" or "full" for the corresponding representation
+    // - size (str) "compact" or "full" for the corresponding representation. Default is "full."
     // - type (str) The type of resource to display.
     // - rid (str) The resource ID to display.
     //
 
     propTypes: {
         size: React.PropTypes.oneOf(['compact', 'full']),
-        params: React.PropTypes.shape({
-            type: React.PropTypes.string.isRequired,
-            rid: React.PropTypes.string.isRequired,
-        }).isRequired,
+        type: React.PropTypes.string.isRequired,
+        rid: React.PropTypes.string.isRequired,
     },
     getDefaultProps: function() {
         return {size: 'full'};
@@ -647,27 +647,15 @@ var ItemView = React.createClass({
     getDataBindings() { return {theItem: getters.currentItemView}; },  // connection to NuclearJS
     componentDidMount: function() {
         // Ask the NuclearJS reactor to load our data.
-        SIGNALS.loadInItemView(this.props.params.type, this.props.params.rid);
+        SIGNALS.loadInItemView(this.props.type, this.props.rid);
     },
     componentWillReceiveProps: function(nextProps) {
         // Ask the NuclearJS reactor to load our data.
-        if (nextProps.params.type !== this.props.params.type ||
-            nextProps.params.ris !== this.props.params.rid) {
-            SIGNALS.loadInItemView(nextProps.params.type, nextProps.params.rid);
+        if (nextProps.type !== this.props.type || nextProps.ris !== this.props.rid) {
+            SIGNALS.loadInItemView(nextProps.type, nextProps.rid);
         }
     },
     render: function() {
-
-        // Find the URL path to the parent component.
-        // Only the last element in this.props.routes will refer to this ItemView, so we'll "go up"
-        // a level in components if we take the "path" member of everything but that last one.
-        let pathToParent = this.props.routes.reduce(function(prev, cur, i, array) {
-            if (i === array.length - 1) {
-                return prev;
-            } else {
-                return prev + cur.path;
-            }
-        }, '');
 
         let rendered = '';  // this holds the rendered component
 
@@ -680,8 +668,8 @@ var ItemView = React.createClass({
                         </div>
                         <ul className="list-group">
                             <li className="list-group-item">Component: ItemView</li>
-                            <li className="list-group-item">Resource Type: {this.props.params.type}</li>
-                            <li className="list-group-item">Resource ID: {this.props.params.rid}</li>
+                            <li className="list-group-item">Resource Type: {this.props.type}</li>
+                            <li className="list-group-item">Resource ID: {this.props.rid}</li>
                         </ul>
                     </div>
                 </div>
@@ -739,11 +727,51 @@ var ItemView = React.createClass({
             }
         }
 
+        return rendered;
+    }
+});
+
+
+var ItemViewOverlay = React.createClass({
+    // Wrapper for the ItemView component that causes its content to appear in front of all other
+    // content on the page.
+    //
+    // When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
+    //
+    // Props:
+    // - params.type (str) The type of resource to display. Provided by react-router from the URL.
+    // - params.rid (str) The resource ID to display. Provided by react-router from the URL.
+    //
+
+    propTypes: {
+        params: React.PropTypes.shape({
+            type: React.PropTypes.string.isRequired,
+            rid: React.PropTypes.string.isRequired,
+        }).isRequired,
+    },
+    getDefaultProps: function() {
+        return {params: {type: '', rid: ''}};
+    },
+    render: function() {
+        console.log(this.props);
+        // Find the URL path to the parent component.
+        // Only the last element in this.props.routes will refer to this ItemView, so we'll "go up"
+        // a level in components if we take the "path" member of everything but that last one.
+        let pathToParent = this.props.routes.reduce(function(prev, cur, i, array) {
+            if (i === array.length - 1) {
+                return prev;
+            } else {
+                return prev + cur.path;
+            }
+        }, '');
+
+        let itemview = <ItemView type={this.props.params.type} rid={this.props.params.rid} size="full"/>;
+
         return (
             <div className="itemview">
                 <div className="itemview-button-container">
                     <Link className="btn btn-primary " to={pathToParent}>Close</Link>
-                    {rendered}
+                    {itemview}
                 </div>
             </div>
         );
@@ -842,5 +870,5 @@ var ItemViewDevelWrapper = React.createClass({
 });
 
 
-export {ItemViewDevelWrapper, ItemView};
+export {ItemViewDevelWrapper, ItemView, ItemViewOverlay};
 export default ItemView;
