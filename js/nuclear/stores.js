@@ -38,12 +38,22 @@ const STORES = {
             this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadInItemView);
         },
     }),
+
+    SearchResultFormat: Store({
+        // Should search results be displayed as "table" or collection of "ItemView?"
+        getInitialState() { return 'ItemView'; },
+        initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, setSearchResultFormat); },
+    }),
 };
 
 
 // Load data for display in an ItemViewOverlay. Needless to say, this function doesn't cause the
 // data to be displayed, which still requires visiting the appropriate URL.
 function loadInItemView(previousState, payload) { return toImmutable(payload); };
+
+
+// Function to set the format of search results.
+function setSearchResultFormat(previousState, payload) { return payload; };
 
 
 export default STORES;

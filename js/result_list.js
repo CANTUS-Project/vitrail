@@ -26,6 +26,8 @@
 import React from 'react';
 import {Link} from 'react-router';
 
+import reactor from './nuclear/reactor';
+import getters from './nuclear/getters';
 import {ItemView} from './itemview.src';
 
 
@@ -100,8 +102,10 @@ var Result = React.createClass({
 var ResultList = React.createClass({
     //
     // Props:
+    // - ???
+    //
+    // NuclearJS State:
     // - renderAs (str) Whether to render the results in a "table" or with "ItemView" components.
-    //   Deafults to "ItemView".
     //
 
     propTypes: {
@@ -110,10 +114,14 @@ var ResultList = React.createClass({
         headers: React.PropTypes.object,
         // the order in which to display results
         sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
-        renderAs: React.PropTypes.oneOf(['table', 'ItemView']),
     },
     getDefaultProps: function() {
-        return {dontRender: [], data: null, headers: null, sortOrder: [], renderAs: 'ItemView'};
+        return {dontRender: [], data: null, headers: null, sortOrder: []};
+    },
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {theItem: getters.currentItemView};
     },
     render: function() {
         let tableHeader = [];
@@ -121,7 +129,7 @@ var ResultList = React.createClass({
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (null !== this.props.data && null !== this.props.headers) {
-            if ('table' === this.props.renderAs) {
+            if ('table' === this.state.renderAs) {
                 var columns = this.props.headers.fields.split(',');
                 var extraFields = this.props.headers.extra_fields;
                 if (null !== extraFields) {

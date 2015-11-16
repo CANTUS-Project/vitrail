@@ -24,4 +24,5 @@
 
 export default {
     currentItemView: ['currentItemView'],
+    searchResultFormat: ['searchResultFormat'],
 };

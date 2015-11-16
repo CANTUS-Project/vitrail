@@ -33,6 +33,7 @@ import reactor from './reactor';
 
 const SIGNAL_NAMES = {
     LOAD_IN_ITEMVIEW: 1,
+    SET_SEARCH_RESULT_FORMAT: 2,
 };
 
 
@@ -61,6 +62,18 @@ const SIGNALS = {
                 console.error(response)
             }
         });
+    },
+
+    setSearchResultFormat: function(to) {
+        // Set the format of search results to "table" or "ItemView". Other arguments won't change
+        // the result format, and will cause an error message to appear in the console.
+        if (to) {
+            if ('table' === to || 'ItemView' === to) {
+                reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORM, to);
+            } else {
+                console.error(`Unknown search result format: "${to}"`);
+            }
+        }
     },
 };
 

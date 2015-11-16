@@ -44,6 +44,7 @@ window['temporaryCantusJS'] = new cantusModule.Cantus('http://abbot.adjectivenou
 
 reactor.registerStores({
     'currentItemView': stores.CurrentItemView,
+    'searchResultFormat': stores.SearchResultFormat,
 });
 
 
