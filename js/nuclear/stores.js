@@ -26,21 +26,24 @@ import {Store, toImmutable} from 'nuclear-js';
 import {SIGNAL_NAMES} from './signals';
 
 
-var CurrentItemView = Store({
-    // The resource currently displayed in an ItemView.
-    //
+const STORES = {
+    CurrentItemView: Store({
+        // The resource currently displayed in an ItemView.
+        //
 
-    getInitialState() {
-        return toImmutable({});
-    },
-    initialize() {
-        this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadInItemView);
-    }
-});
+        getInitialState() {
+            return toImmutable({});
+        },
+        initialize() {
+            this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadInItemView);
+        },
+    }),
+};
 
+
+// Load data for display in an ItemViewOverlay. Needless to say, this function doesn't cause the
+// data to be displayed, which still requires visiting the appropriate URL.
 function loadInItemView(previousState, payload) { return toImmutable(payload); };
 
 
-export default {
-    CurrentItemView: CurrentItemView
-};
+export default STORES;
