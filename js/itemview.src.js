@@ -175,7 +175,10 @@ var ItemViewChant = React.createClass({
             post = (
                 <div className="card inner-itemview">
                     <div className="card-block">
-                        <h4 className="card-title">{data.incipit}</h4>
+                        <h4 className="card-title">
+                            {data.incipit}
+                            <span className="label label-info pull-right">Chant</span>
+                        </h4>
                         <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
                     </div>
                     <ul className="list-group list-group-flush">
@@ -198,7 +201,10 @@ var ItemViewChant = React.createClass({
             post = (
                 <div className="card inner-itemview">
                     <div className="card-block">
-                        <h4 className="card-title">{data.incipit}</h4>
+                        <h4 className="card-title">
+                            {data.incipit}
+                            <span className="label label-info pull-right">Chant</span>
+                        </h4>
                         <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
                         {feastAndOffice}<br/>
                         {sourceFolioSequence}
@@ -255,7 +261,10 @@ var ItemViewFeast = React.createClass({
         let post = (
             <div className="card inner-itemview">
                 <div className="card-block">
-                    <h4 className="card-title">{data.name}</h4>
+                    <h4 className="card-title">
+                        {data.name}
+                        <span className="label label-info pull-right">Feast</span>
+                    </h4>
                     {codeAndDate}
                     {description}
                 </div>
@@ -295,9 +304,19 @@ var ItemViewIndexer = React.createClass({
         // Name
         let name = '';
         if (undefined !== data.family_name && undefined !== data.given_name) {
-            name = <h4 className="card-title">{data.given_name}&nbsp;{data.family_name}</h4>;
+            name = (
+                <h4 className="card-title">
+                    {data.given_name}&nbsp;{data.family_name}
+                    <span className="label label-info pull-right">Indexer</span>
+                </h4>
+            );
         } else {
-            name = <h4 className="card-title">{data.display_name}</h4>;
+            name = (
+                <h4 className="card-title">
+                    {data.display_name}
+                    <span className="label label-info pull-right">Indexer</span>
+                </h4>
+            );
         }
 
         let institution = '';
@@ -376,7 +395,10 @@ var ItemViewGenre = React.createClass({
         let post = (
             <div className="card inner-itemview">
                 <div className="card-block">
-                    <h4 className="card-title">{data.name}</h4>
+                    <h4 className="card-title">
+                        {data.name}
+                        <span className="label label-info pull-right">Genre</span>
+                    </h4>
                     {massOrOffice}
                     {description}
                 </div>
@@ -549,7 +571,10 @@ var ItemViewSource = React.createClass({
         let post;
         let commonHeader = (
             <div className="card-block">
-                <h4 className="card-title">{data.title}</h4>
+                <h4 className="card-title">
+                    {data.title}
+                    <span className="label label-info pull-right">Source</span>
+                </h4>
                 {siglumProvenanceDate}
             </div>
         );
@@ -616,7 +641,10 @@ var ItemViewSimpleResource = React.createClass({
         let post = (
             <div className="card inner-itemview">
                 <div className="card-block">
-                    <h4 className="card-title">{data.name}</h4>
+                    <h4 className="card-title">
+                        {data.name}
+                        <span className="label label-info pull-right">{data.type}</span>
+                    </h4>
                     {description}
                 </div>
             </div>
