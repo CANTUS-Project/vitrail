@@ -624,30 +624,44 @@ var ItemViewSimpleResource = React.createClass({
 var ItemView = React.createClass({
     // Wrapper for the type-specific ItemView components.
     //
-    // According to the props, this component emits the signal that causes NuclearJS and CantusJS
-    // to load the required data. This component also chooses the proper subcomponent. The result is
-    // outputted in the page as expected; if you want the ItemView to appear in front of the page's
-    // other content, use ItemviewOverlay.
+    // If the "type" and "rid" props are provided, this component emits the signal that causes
+    // NuclearJS and CantusJS to load the required data. If the "data" and "resources" props are
+    // provided, this component provides them directly to the appropriate subcomponent. If you
+    // provide too few or too many props, the ItemView displays a message to that effect.
+    //
+    // This component also chooses the proper subcomponent. The result is outputted in the page as
+    // expected. Use ItemViewOverlay for make the ItemView appear in front of other content.
     //
     // Props:
     // - size (str) "compact" or "full" for the corresponding representation. Default is "full."
     // - type (str) The type of resource to display.
     // - rid (str) The resource ID to display.
+    // - data (obj) A resource's fields.
+    // - resources (obj) A resource's resource URLs.
     //
 
     propTypes: {
         size: React.PropTypes.oneOf(['compact', 'full']),
-        type: React.PropTypes.string.isRequired,
-        rid: React.PropTypes.string.isRequired,
+        type: React.PropTypes.string,
+        rid: React.PropTypes.string,
+        data: React.PropTypes.object,
+        resources: React.PropTypes.object,
     },
     getDefaultProps: function() {
         return {size: 'full'};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
-    getDataBindings() { return {theItem: getters.currentItemView}; },  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        if ('nuclearjs' === this.whatShouldWeDisplay()) {
+            return {theItem: getters.currentItemView};
+        }
+    },
     componentDidMount: function() {
         // Ask the NuclearJS reactor to load our data.
-        SIGNALS.loadInItemView(this.props.type, this.props.rid);
+        if ('nuclearjs' === this.whatShouldWeDisplay()) {
+            SIGNALS.loadInItemView(this.props.type, this.props.rid);
+        }
     },
     componentWillReceiveProps: function(nextProps) {
         // Ask the NuclearJS reactor to load our data.
@@ -655,21 +669,62 @@ var ItemView = React.createClass({
             SIGNALS.loadInItemView(nextProps.type, nextProps.rid);
         }
     },
+    whatShouldWeDisplay: function() {
+        // Examine the props to determine whether we should connect to "nuclearjs" state, display
+        // the "props" data already provided, or there is an "error" in the props.
+        //
+        if (undefined !== this.props.type && undefined !== this.props.rid &&
+            undefined === this.props.data && undefined === this.props.resources) {
+            return 'nuclearjs';
+        } else
+        if (undefined === this.props.type && undefined === this.props.rid &&
+            undefined !== this.props.data && undefined !== this.props.resources) {
+            return 'props';
+        } else {
+            return 'error';
+        }
+    },
+    canWeDisplaySomething: function() {
+        // Check the props and state to determine whether we have enough information to display.
+        //
+
+        let whatToDisplay = this.whatShouldWeDisplay();
+        if ('nuclearjs' === whatToDisplay) {
+            if (null === this.state || 0 === this.state.theItem.size) {
+                return false;
+            } else {
+                return true;
+            }
+        } else if ('props' === whatToDisplay) {
+            // the checks in whatShouldWeDisplay() are sufficient for this
+            return true;
+        } else {
+            return false;
+        }
+    },
     render: function() {
 
-        let rendered = '';  // this holds the rendered component
+        let rendered;  // this holds the rendered component
 
-        if (0 === this.state.theItem.size) {
+        if (!this.canWeDisplaySomething()) {
+            let errMsg = '';
+            if ('error' === this.whatShouldWeDisplay) {
+                errMsg = 'Developer error with the props.';
+            } else {
+                errMsg = 'No data: maybe the type or ID are wrong, or the Cantus server is broken?';
+            }
             rendered = (
                 <div className="card inner-itemview">
                     <div className="card-block">
                         <div className="alert alert-warning" role="alert">
-                            No data to display. The resource type or ID may be invalid.
+                            {errMsg}
                         </div>
                         <ul className="list-group">
                             <li className="list-group-item">Component: ItemView</li>
-                            <li className="list-group-item">Resource Type: {this.props.type}</li>
-                            <li className="list-group-item">Resource ID: {this.props.rid}</li>
+                            <li className="list-group-item">Type: {this.props.type}</li>
+                            <li className="list-group-item">ID: {this.props.rid}</li>
+                            <li className="list-group-item">Data: {this.props.data}</li>
+                            <li className="list-group-item">Resources: {this.props.resources}</li>
                         </ul>
                     </div>
                 </div>
@@ -677,53 +732,52 @@ var ItemView = React.createClass({
         } else {
             // "item" will contain only fields for this item
             // "resources" will contain only URLs for this item
-            let itemID = this.state.theItem.get('sort_order').get(0);
-            let item = this.state.theItem.get(itemID).toObject();
-            let resources = this.state.theItem.get('resources').get(itemID).toObject();
-
-            if (null === item.type || null === item.id) {
-                rendered = <div>empty type or ID</div>;
-            } else if (null === item) {
-                rendered = <div>waiting on Abbot</div>;
-            } else if ('string' === typeof item) {
-                rendered = <div className="alert alert-warning">{item}</div>;
+            let itemID, item, resources;
+            if ('nuclearjs' === this.whatShouldWeDisplay()) {
+                itemID = this.state.theItem.get('sort_order').get(0);
+                item = this.state.theItem.get(itemID).toObject();
+                resources = this.state.theItem.get('resources').get(itemID).toObject();
             } else {
-                switch (item.type) {
-                    case 'chant':
-                        rendered = <ItemViewChant data={item} resources={resources} size={this.props.size}/>;
-                        break;
+                itemID = this.props.data.id;
+                item = this.props.data;
+                resources = this.props.resources;
+            }
 
-                    case 'feast':
-                        rendered = <ItemViewFeast data={item} resources={resources} size={this.props.size}/>;
-                        break;
+            switch (item.type) {
+                case 'chant':
+                    rendered = <ItemViewChant data={item} resources={resources} size={this.props.size}/>;
+                    break;
 
-                    case 'indexer':
-                        rendered = <ItemViewIndexer data={item} resources={resources} size={this.props.size}/>;
-                        break;
+                case 'feast':
+                    rendered = <ItemViewFeast data={item} resources={resources} size={this.props.size}/>;
+                    break;
 
-                    case 'genre':
-                        rendered = <ItemViewGenre data={item} resources={resources} size={this.props.size}/>;
-                        break;
+                case 'indexer':
+                    rendered = <ItemViewIndexer data={item} resources={resources} size={this.props.size}/>;
+                    break;
 
-                    case 'source':
-                        rendered = <ItemViewSource data={item} resources={resources} size={this.props.size}/>;
-                        break;
+                case 'genre':
+                    rendered = <ItemViewGenre data={item} resources={resources} size={this.props.size}/>;
+                    break;
 
-                    case 'century':
-                    case 'notation':
-                    case 'office':
-                    case 'portfolio':
-                    case 'provenance':
-                    case 'siglum':
-                    case 'segment':
-                    case 'source_status':
-                        rendered = <ItemViewSimpleResource data={item} resources={resources} size={this.props.size}/>;
-                        break;
+                case 'source':
+                    rendered = <ItemViewSource data={item} resources={resources} size={this.props.size}/>;
+                    break;
 
-                    default:
-                        rendered = <div className="alert alert-info">Resource type not implemented: {item.type}.</div>;
-                        break;
-                }
+                case 'century':
+                case 'notation':
+                case 'office':
+                case 'portfolio':
+                case 'provenance':
+                case 'siglum':
+                case 'segment':
+                case 'source_status':
+                    rendered = <ItemViewSimpleResource data={item} resources={resources} size={this.props.size}/>;
+                    break;
+
+                default:
+                    rendered = <div className="alert alert-info">Resource type not implemented: {item.type}.</div>;
+                    break;
             }
         }
 
@@ -871,4 +925,3 @@ var ItemViewDevelWrapper = React.createClass({
 
 
 export {ItemViewDevelWrapper, ItemView, ItemViewOverlay};
-export default ItemView;
