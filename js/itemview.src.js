@@ -49,6 +49,16 @@ var ItemViewChant = React.createClass({
         let data = this.props.data;
         let resources = this.props.resources;
 
+        // Genre and Cantus ID
+        let genreAndCantusid = '';
+        if (data.genre && data.cantus_id) {
+            genreAndCantusid = `${data.genre}\u2014Cantus\u00A0ID\u00A0${data.cantus_id}`;
+        } else if (data.genre) {
+            genreAndCantusid = data.genre;
+        } else if (data.cantus_id) {
+            genreAndCantusid = data.cantus_id;
+        }
+
         // Feast and Office
         let feastAndOffice = '';
         if ('full' === this.props.size) {
@@ -166,9 +176,7 @@ var ItemViewChant = React.createClass({
                 <div className="card inner-itemview">
                     <div className="card-block">
                         <h4 className="card-title">{data.incipit}</h4>
-                        <h6 className="card-subtitle text-muted">
-                            {data.genre}&mdash;Cantus&nbsp;ID&nbsp;{data.cantus_id}
-                        </h6>
+                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
                     </div>
                     <ul className="list-group list-group-flush">
                         {feastAndOffice}
@@ -191,9 +199,7 @@ var ItemViewChant = React.createClass({
                 <div className="card inner-itemview">
                     <div className="card-block">
                         <h4 className="card-title">{data.incipit}</h4>
-                        <h6 className="card-subtitle text-muted">
-                            {data.genre}&mdash;Cantus&nbsp;ID&nbsp;{data.cantus_id}
-                        </h6>
+                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
                         {feastAndOffice}<br/>
                         {sourceFolioSequence}
                     </div>
