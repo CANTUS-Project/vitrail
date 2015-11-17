@@ -35,25 +35,39 @@ const STORES = {
             return toImmutable({});
         },
         initialize() {
-            this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadInItemView);
+            this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, justReturnThePayload);
         },
     }),
 
     SearchResultFormat: Store({
         // Should search results be displayed as "table" or collection of "ItemView?"
         getInitialState() { return 'ItemView'; },
-        initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, setSearchResultFormat); },
+        initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, justReturnThePayload); },
+    }),
+
+    SearchResultsPerPage: Store({
+        // The number of results to show per search result page.
+        getInitialState() { return 10; },
+        initialize() { this.on(SIGNAL_NAMES.SET_PER_PAGE, justReturnThePayload); },
+    }),
+
+    SearchResultsPages: Store({
+        // The number of pages in the currently-displayed search results.
+        getInitialState() { return 0; },
+        initialize() { this.on(SIGNAL_NAMES.SET_PAGES, justReturnThePayload); },
+    }),
+
+    SearchResultsPage: Store({
+        // Current page of search results being displayed.
+        getInitialState() { return 1; },
+        initialize() { this.on(SIGNAL_NAMES.SET_PAGE, justReturnThePayload); },
     }),
 };
 
 
-// Load data for display in an ItemViewOverlay. Needless to say, this function doesn't cause the
-// data to be displayed, which still requires visiting the appropriate URL.
-function loadInItemView(previousState, payload) { return toImmutable(payload); };
-
-
-// Function to set the format of search results.
-function setSearchResultFormat(previousState, payload) { return payload; };
+// Sometimes this is all we need. NOTE that Stores using this function should do validity checking
+// in the signal function.
+function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
 
 
 export default STORES;

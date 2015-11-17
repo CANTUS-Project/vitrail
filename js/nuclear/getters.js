@@ -22,7 +22,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+
+// Submit these to reactor.evaluate().
+// Key are whatever; values use the names of Stores registered in vitrail-init.js.
+
+
 export default {
     currentItemView: ['currentItemView'],
     searchResultFormat: ['searchResultFormat'],
+    searchResultsPages: ['searchResultsPages'],
+    searchResultsPage: ['searchResultsPage'],
+    searchResultsPerPage: ['searchResultsPerPage'],
 };

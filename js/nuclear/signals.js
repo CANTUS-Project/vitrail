@@ -31,9 +31,27 @@ import reactor from './reactor';
 // const cantusjs = window['temporaryCantusJS'];
 
 
+function isWholeNumber(num) {
+    // Verify that "num" is a whole number (an integer 0 or greater).
+    let outcome = false;
+
+    if (num) {
+        if ('number' === typeof num) {
+            if (num >= 0) {
+                if (0 === num % 1) {
+                    outcome = true;
+    }}}}
+
+    return outcome;
+};
+
+
 const SIGNAL_NAMES = {
     LOAD_IN_ITEMVIEW: 1,
     SET_SEARCH_RESULT_FORMAT: 2,
+    SET_PER_PAGE: 3,
+    SET_PAGES: 4,
+    SET_PAGE: 5,
 };
 
 
@@ -73,6 +91,46 @@ const SIGNALS = {
             } else {
                 console.error(`Unknown search result format: "${to}"`);
             }
+        }
+    },
+
+    setPages: function(to) {
+        // Set the number of pages in the current search results.
+        // NOTE this also resets the "current page" to 1.
+        if (isWholeNumber(to)) {
+            reactor.dispatch(SIGNAL_NAMES.SET_PAGES, to);
+            reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
+        } else {
+            console.error(`setPages() must be given a whole number, not ${to}`);
+        }
+    },
+
+    setPage: function(to) {
+        // Set the current page in the current search results.
+        if (isWholeNumber(to)) {
+            let numOfPages = reactor.evaluate(getters.searchResultsPages);
+            if (to <= numOfPages) {
+                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
+            } else {
+                console.error(`Can't set page to ${to}: only ${numOfPages} exist.`);
+            }
+        } else {
+            console.error(`setPage() must be given a whole number, not ${to}`);
+        }
+    },
+
+    setPerPage: function(to) {
+        // Set the number of results per page for search results.
+        // NOTE this also resets the "current page" to 1.
+        if (isWholeNumber(to)) {
+            if (0 < to && to < 101) {
+                reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
+                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
+            } else {
+                console.error(`Resources per page must be between 1 and 100 (got ${to})`);
+            }
+        } else {
+            console.error(`setPerPage() must be given a whole number, not ${to}`);
         }
     },
 };
