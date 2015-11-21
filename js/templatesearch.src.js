@@ -436,10 +436,7 @@ var TemplateSearch = React.createClass({
                 </div>
                 <div>
                     <ResultListFrame dontRender={dontRender}
-                                     perPage={this.state.perPage}
-                                     page={this.state.page}
                                      searchQuery={this.state.currentSearch}
-                                     changePage={this.changePage}
                                      cantus={window['temporaryCantusJS']}
                                      doGenericGet={false}
                     />
