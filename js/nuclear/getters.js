@@ -33,5 +33,6 @@ export default {
     searchResultsPages: ['searchResultsPages'],
     searchResultsPage: ['searchResultsPage'],
     searchResultsPerPage: ['searchResultsPerPage'],
-    resourceType: ['resourceType'],
+    resourceType: [['searchQuery'], (query) => query.get('type')],
+    searchQuery: ['searchQuery'],
 };

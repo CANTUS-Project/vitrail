@@ -38,7 +38,7 @@ const SIGNAL_NAMES = {
     SET_PER_PAGE: 3,
     SET_PAGES: 4,
     SET_PAGE: 5,
-    SET_RESOURCE_TYPE: 6,
+    SET_SEARCH_QUERY: 6,
 };
 
 
@@ -112,13 +112,26 @@ const SIGNALS = {
 
     setResourceType: function(to) {
         // Set the resource type to search for to "to".
-        // NOTE: resets current page to 1
         //
         if (to !== reactor.evaluate(getters.resourceType)) {
-            reactor.batch(() => {
-                reactor.dispatch(SIGNAL_NAMES.SET_RESOURCE_TYPE, to);
-                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-            });
+            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
+        }
+    },
+
+    setSearchQuery: function(params) {
+        // Set the search query parameters given in "params".
+        // If "params" is an object, its members are assumed to be field names and the values are
+        //    verified to be strings, which are assumed to be the sought field values. Members that
+        //    are not valid field names for CantusJS are silently ignored.
+        // If "params" is the string "clear", all current search parameters are cleared, and the
+        //    resourceType is also reset to "all".
+        //
+        if ('object' === typeof params) {
+            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, params);
+        } else if ('clear' === params) {
+            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, 'clear');
+        } else {
+            console.error('signals.setSearchQuery() was called with incorrect input.');
         }
     },
 };

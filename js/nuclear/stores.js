@@ -63,6 +63,18 @@ const RESOURCE_TYPES = {
 };
 
 
+const VALID_FIELDS = ['id', 'name', 'description', 'mass_or_office', 'date', 'feast_code',
+    'incipit', 'source', 'marginalia', 'folio', 'sequence', 'office', 'genre', 'position',
+    'cantus_id', 'feast', 'mode', 'differentia', 'finalis', 'full_text',
+    'full_text_manuscript', 'full_text_simssa', 'volpiano', 'notes', 'cao_concordances',
+    'siglum', 'proofreader', 'melody_id', 'title', 'rism', 'provenance', 'century',
+    'notation_style', 'editors', 'indexers', 'summary', 'liturgical_occasion',
+    'indexing_notes', 'indexing_date', 'display_name', 'given_name', 'family_name',
+    'institution', 'city', 'country', 'source_id', 'office_id', 'genre_id', 'feast_id',
+    'provenance_id', 'century_id','notation_style_id', 'any', 'type'
+];
+
+
 // Sometimes this is all we need. NOTE that Stores using this function should do validity checking
 // in the signal function.
 function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
@@ -137,19 +149,47 @@ const SETTERS = {
         }
     },
 
-    setResourceType: function(previous, next) {
-        // Set the resource type to search for.
-        // NOTE: this is always converted to the plural form.
-        if ('string' === typeof next) {
-            if (undefined !== RESOURCE_TYPES[next]) {
-                return RESOURCE_TYPES[next];
-            } else {
-                console.error(`setResourceType() received invalid type (${next})`);
+    setSearchQuery: function(previous, next) {
+        // Amend the search query. If "next" is the string "clear" then the search query is cleared.
+        //
+        let post = previous.toObject();
+
+        if ('clear' === next) {
+            // return toImmutable({type: 'all'});
+            return STORES.SearchQuery.getInitialState();
+        } else if ('object' === typeof next) {
+            // iterate all the members in "next"
+            for (let field in next) {
+                // check the field
+                if (!VALID_FIELDS.includes(field)) {
+                    continue;
+                }
+
+                // check the value is a string (if not, print an error and continue)
+                if ('string' !== typeof next[field]) {
+                    console.error(`setSearchQuery() has ${field} field with improper type`);
+                    continue;
+                }
+
+                // if the field is "type" check that it's a valid type (if not, print error and continue)
+                if ('type' === field) {
+                    if (undefined !== RESOURCE_TYPES[next.type]) {
+                        post.type = RESOURCE_TYPES[next.type];
+                    } else {
+                        console.error(`setSearchQuery() received invalid type (${next.type})`);
+                    }
+
+                // set the field
+                } else {
+                    post[field] = next[field];
+                }
             }
+
+            return toImmutable(post);
         } else {
-            console.error('setResourceType() must be given a string');
+            console.error('setSearchQuery() requires an object or "clear"');
+            return previous;
         }
-        return previous;
     },
 };
 
@@ -191,10 +231,13 @@ const STORES = {
         initialize() { this.on(SIGNAL_NAMES.SET_PAGE, SETTERS.setPage); },
     }),
 
-    ResourceType: Store({
-        // The resource type to search for, or "all".
-        getInitialState() { return 'all'; },
-        initialize() {this.on(SIGNAL_NAMES.SET_RESOURCE_TYPE, SETTERS.setResourceType); },
+    SearchQuery: Store({
+        // The current search query, stored as an object that can be sent straight to CantusJS.
+        getInitialState() { return toImmutable({type: 'all'}); },
+        initialize() {
+            this.on(SIGNAL_NAMES.SET_SEARCH_QUERY, SETTERS.setSearchQuery);
+            this.on(SIGNAL_NAMES.SET_RESOURCE_TYPE, SETTERS.setSearchQuery);
+        },
     }),
 };
 
