@@ -31,7 +31,7 @@ import reactor from './nuclear/reactor';
 import stores from './nuclear/stores';
 
 // TODO: we won't need this eventually (after testing)
-// import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
+import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
 import cantusModule from './cantusjs/cantus.src';
 import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
@@ -44,7 +44,7 @@ window['temporaryCantusJS'] = new cantusModule.Cantus('http://abbot.adjectivenou
 
 reactor.registerStores({
     'currentItemView': stores.CurrentItemView,
-    'searchResultFormat': stores.SearchResultFormat,
+    'searchResultsFormat': stores.SearchResultsFormat,
     'searchResultsPages': stores.SearchResultsPages,
     'searchResultsPage': stores.SearchResultsPage,
     'searchResultsPerPage': stores.SearchResultsPerPage,

@@ -24,26 +24,12 @@
 
 
 import reactor from './reactor';
+import getters from './getters';
 
 
 // TODO: switch over to a CantusJS instance maintained in this file only
-// const cantusjs = new cantusModule.Cantus('http://abbot.adjectivenoun.ca:8888/');
+// const cantusjs = next cantusModule.Cantus('http://abbot.adjectivenoun.ca:8888/');
 // const cantusjs = window['temporaryCantusJS'];
-
-
-function isWholeNumber(num) {
-    // Verify that "num" is a whole number (an integer 0 or greater).
-    let outcome = false;
-
-    if (num) {
-        if ('number' === typeof num) {
-            if (num >= 0) {
-                if (0 === num % 1) {
-                    outcome = true;
-    }}}}
-
-    return outcome;
-};
 
 
 const SIGNAL_NAMES = {
@@ -55,6 +41,7 @@ const SIGNAL_NAMES = {
 };
 
 
+// TODO: all these verification functions should be in the Stores
 const SIGNALS = {
     loadInItemView: function(type, id) {
         // Load a resource in the ItemView, given a type and ID.
@@ -85,52 +72,40 @@ const SIGNALS = {
     setSearchResultFormat: function(to) {
         // Set the format of search results to "table" or "ItemView". Other arguments won't change
         // the result format, and will cause an error message to appear in the console.
-        if (to) {
-            if ('table' === to || 'ItemView' === to) {
-                reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORM, to);
-            } else {
-                console.error(`Unknown search result format: "${to}"`);
-            }
+        //
+        if (to !== reactor.evaluate(getters.searchResultsFormat)) {
+            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORM, to);
         }
     },
 
-    setPages: function(to) {
-        // Set the number of pages in the current search results.
-        // NOTE this also resets the "current page" to 1.
-        if (isWholeNumber(to)) {
-            reactor.dispatch(SIGNAL_NAMES.SET_PAGES, to);
-            reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-        } else {
-            console.error(`setPages() must be given a whole number, not ${to}`);
-        }
-    },
-
+    // pagination
     setPage: function(to) {
-        // Set the current page in the current search results.
-        if (isWholeNumber(to)) {
-            let numOfPages = reactor.evaluate(getters.searchResultsPages);
-            if (to <= numOfPages) {
-                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-            } else {
-                console.error(`Can't set page to ${to}: only ${numOfPages} exist.`);
-            }
-        } else {
-            console.error(`setPage() must be given a whole number, not ${to}`);
+        // Set the currently displayed page of search results to "to."
+        //
+        if (to !== reactor.evaluate(getters.searchResultsPage)) {
+            reactor.dispatch(SIGNAL_NAMES.SET_PAGE, to);
         }
     },
-
+    setPages: function(to) {
+        // Set the total number of pages in the search results to "to."
+        // NOTE: resets current page to 1
+        //
+        if (to !== reactor.evaluate(getters.searchResultsPages)) {
+            reactor.batch(() => {
+                reactor.dispatch(SIGNAL_NAMES.SET_PAGES, to);
+                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
+            });
+        }
+    },
     setPerPage: function(to) {
-        // Set the number of results per page for search results.
-        // NOTE this also resets the "current page" to 1.
-        if (isWholeNumber(to)) {
-            if (0 < to && to < 101) {
+        // Set the number of search results per page to "to."
+        // NOTE: resets current page to 1
+        //
+        if (to !== reactor.evaluate(getters.searchResultsPerPage)) {
+            reactor.batch(() => {
                 reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
                 reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-            } else {
-                console.error(`Resources per page must be between 1 and 100 (got ${to})`);
-            }
-        } else {
-            console.error(`setPerPage() must be given a whole number, not ${to}`);
+            });
         }
     },
 };

@@ -26,6 +26,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 
+import signals from './nuclear/signals';
 import reactor from './nuclear/reactor';
 import getters from './nuclear/getters';
 import {ItemView} from './itemview.src';
@@ -213,17 +214,43 @@ var ResultList = React.createClass({
 });
 
 var Paginator = React.createClass({
-    propTypes: {
-        changePage: React.PropTypes.func.isRequired,
-        currentPage: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
-        totalPages: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
-        searchQuery: React.PropTypes.string
-    },
-    getDefaultProps: function() {
-        return {currentPage: 1, totalPages: 1};
+    //
+    // State:
+    // - page (int) Current page in the search results.
+    // - totalPages (int) Total number of result pages.
+    //
+
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            page: getters.searchResultsPage,
+            totalPages: getters.searchResultsPages,
+        };
     },
     changePage: function(button) {
-        this.props.changePage(button.target.value);
+        // Determine which page-change button was clicked then emit the setPage() signal.
+        //
+
+        let newPage = this.state.page;
+
+        switch (button.target.value) {
+            case 'previous':
+                newPage -= 1;
+                break;
+            case 'next':
+                newPage += 1;
+                break;
+            case 'first':
+                newPage = 1;
+                break;
+            case 'last':
+                newPage = this.state.totalPages;
+                break;
+        }
+
+        if (newPage < 1 || newPage > this.state.totalPages) { /* do nothing! */ }
+        else { signals.setPage(newPage); }
     },
     render: function() {
         return (
@@ -233,7 +260,7 @@ var Paginator = React.createClass({
                 <button type="button" className="btn btn-secondary" name="pages"
                         value="previous" onClick={this.changePage}>&lt;</button>
                 <button type="button" className="blankOfBlank btn btn-secondary">
-                    {this.props.currentPage} of {this.props.totalPages}
+                    {this.state.page} of {this.state.totalPages}
                 </button>
                 <button type="button" className="btn btn-secondary" name="pages"
                         value="next" onClick={this.changePage}>&gt;</button>
@@ -244,13 +271,44 @@ var Paginator = React.createClass({
     }
 });
 
+
+var PerPageSelector = React.createClass({
+    // Allows users to choose the number of search results shown on a page.
+    //
+
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {perPage: getters.searchResultsPerPage};
+    },
+    onChange(event) {
+        signals.setPerPage(Number(event.target.value));
+    },
+    render: function() {
+        // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
+        return (
+            <fieldset className="form-group row">
+                <label htmlFor="#perPageSelector" className="col-sm-2">Results per page:</label>
+                <div className="col-sm-10">
+                    <input type="number"
+                           name="perPage"
+                           id="perPageSelector"
+                           className="form-control form-control-number"
+                           value={this.state.perPage}
+                           onChange={this.onChange}
+                           />
+                </div>
+            </fieldset>
+        );
+    }
+});
+
+
 var ResultListFrame = React.createClass({
     propTypes: {
         changePage: React.PropTypes.func.isRequired,
         resourceType: React.PropTypes.string,
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-        perPage: React.PropTypes.number,
-        page: React.PropTypes.number,
         searchQuery: React.PropTypes.string,
         cantus: React.PropTypes.object,
 
@@ -261,7 +319,12 @@ var ResultListFrame = React.createClass({
     getDefaultProps: function() {
         return {resourceType: "any", dontRender: [], doGenericGet: true};
     },
-    getNewData: function(resourceType, requestPage, perPage, searchQuery) {
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {page: getters.searchResultsPage, perPage: getters.searchResultsPerPage};
+    },
+    getNewData: function(resourceType, searchQuery) {
         // default, unchanging things
         var ajaxSettings = {
             type: resourceType
@@ -270,17 +333,8 @@ var ResultListFrame = React.createClass({
         // TODO: id, fields, sort
 
         // pagination
-        if (undefined === requestPage) {
-            ajaxSettings["page"] = 1;
-        } else {
-            ajaxSettings["page"] = requestPage;
-        }
-
-        if (undefined === perPage) {
-            ajaxSettings["per_page"] = 10;
-        } else {
-            ajaxSettings["per_page"] = perPage;
-        }
+        ajaxSettings["page"] = this.state.page;
+        ajaxSettings["per_page"] = this.state.perPage;
 
         // submit the request
         if (undefined !== searchQuery && "" !== searchQuery) {
@@ -304,8 +358,10 @@ var ResultListFrame = React.createClass({
         var sortOrder = response.sort_order;
         delete response.sort_order;
         var totalPages = Math.ceil(headers.total_results / headers.per_page);
-        this.setState({data: response, headers: headers, page: headers.page, totalPages: totalPages,
+        this.setState({data: response, headers: headers, totalPages: totalPages,
                        sortOrder: sortOrder});
+
+        signals.setPages(totalPages);
     },
     ajaxFailureCallback: function(response) {
         // Called when an AJAX request returns unsuccessfully.
@@ -315,55 +371,19 @@ var ResultListFrame = React.createClass({
             this.setState({errorMessage: response.response});
         }
     },
+    componentWillUpdate: function(nextProps, nextState) {
+        if (nextState.page !== this.state.page ||
+            nextState.perPage !== this.state.perPage ||
+            nextProps.searchQuery !== this.props.searchQuery ||
+            nextProps.resourceType !== this.props.resourceType) {
+            this.getNewData(nextProps.resourceType, nextProps.searchQuery);
+        }
+    },
     componentDidMount: function() { this.getNewData(this.props.resourceType); },
-    componentWillReceiveProps: function(newProps) {
-        // check "perPage" is valid
-        if (newProps.perPage < 1 || newProps.perPage > 100) {
-            return;
-        }
-        // check if "page" is "last"
-        else if ("last" === newProps.page) {
-            this.props.changePage(this.state.totalPages);
-        }
-        // check if "page" is valid
-        else if (newProps.page > this.state.totalPages) {
-            this.props.changePage(this.state.totalPages);
-        }
-        // if the Cantus API query will be different, submit a new query
-        else if (newProps.resourceType !== this.props.resourceType ||
-                 newProps.searchQuery  !== this.props.searchQuery  ||
-                 newProps.perPage      !== this.props.perPage      ||
-                 newProps.page         !== this.props.page) {
-            this.setState({errorMessage: null});
-            this.getNewData(newProps.resourceType,
-                            newProps.page,
-                            newProps.perPage,
-                            newProps.searchQuery);
-        }
-    },
-    shouldComponentUpdate: function(nextProps, nextState) {
-        // this will always change the output
-        if (nextState.errorMessage !== this.state.errorMesssage) {
-            return true;
-        // we'll get another props change in a moment
-        } else if ("last" === nextProps.page) {
-            return false;
-        // this would produce an invalid result
-        } else if (nextProps.page > this.state.totalPages) {
-            return false;
-        // this wouldn't change anything
-        } else if (nextState.data === this.state.data && nextState.headers === this.state.headers &&
-                   nextState.page === this.state.page && nextState.totalPages === this.state.totalPages) {
-            return false;
-        } else {
-            return true;
-        }
-    },
     getInitialState: function() {
-        return {data: null, headers: null, page: 1, totalPages: 1, errorMessage: null};
+        return {data: null, headers: null, totalPages: 1, errorMessage: null};
     },
     render: function() {
-        var currentPage = this.state.page;
         var totalPages = this.state.totalPages;
 
         if (null === this.state.errorMessage) {
@@ -373,7 +393,8 @@ var ResultListFrame = React.createClass({
                                 headers={this.state.headers}
                                 dontRender={this.props.dontRender}
                                 sortOrder = {this.state.sortOrder} />
-                    <Paginator changePage={this.props.changePage} currentPage={this.state.page} totalPages={this.state.totalPages} />
+                    <Paginator/>
+                    <PerPageSelector/>
                 </div>
             );
         } else {

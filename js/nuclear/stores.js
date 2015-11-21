@@ -23,7 +23,84 @@
 //-------------------------------------------------------------------------------------------------
 
 import {Store, toImmutable} from 'nuclear-js';
+
+import getters from './getters';
+import reactor from './reactor';
 import {SIGNAL_NAMES} from './signals';
+
+
+// Sometimes this is all we need. NOTE that Stores using this function should do validity checking
+// in the signal function.
+function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
+
+
+function isWholeNumber(num) {
+    // Verify that "num" is a whole number (an integer 0 or greater).
+    let outcome = false;
+
+    if (num) {
+        if ('number' === typeof num) {
+            if (num >= 0) {
+                if (0 === num % 1) {
+                    outcome = true;
+    }}}}
+
+    return outcome;
+};
+
+
+const SETTERS = {
+    setSearchResultFormat: function(previous, next) {
+        // Set the format of search results to "table" or "ItemView". Other arguments won't change
+        // the result format, and will cause an error message to appear in the console.
+        if (undefined !== next) {
+            if ('table' === next || 'ItemView' === next) {
+                return next;
+            } else {
+                console.error(`Unknown search result format: "${next}"`);
+                return previous;
+            }
+        }
+    },
+
+    // pagination
+    setPages: function(previous, next) {
+        // Set the number of pages in the current search results.
+        if (isWholeNumber(next)) {
+            return next;
+        } else {
+            console.error(`setPages() must be given a whole number, not ${next}`);
+            return previous;
+        }
+    },
+    setPage: function(previous, next) {
+        // Set the current page in the current search results.
+        if (isWholeNumber(next)) {
+            let numOfPages = reactor.evaluate(getters.searchResultsPages);
+            if (next <= numOfPages || 1 === next) {
+                return next;
+            } else {
+                console.error(`Can't set page to ${next}: only ${numOfPages} exist.`);
+                return previous;
+            }
+        } else {
+            console.error(`setPage() must be given a whole number, not ${next}`);
+            return previous;
+        }
+    },
+    setPerPage: function(previous, next) {
+        // Set the number of results per page for search results.
+        if (isWholeNumber(next)) {
+            if (0 < next && next < 101) {
+                return next;
+            } else {
+                console.error(`Resources per page must be between 1 and 100 (got ${next})`);
+            }
+        } else {
+            console.error(`setPerPage() must be given a whole number, not ${next}`);
+        }
+    },
+};
 
 
 const STORES = {
@@ -39,7 +116,7 @@ const STORES = {
         },
     }),
 
-    SearchResultFormat: Store({
+    SearchResultsFormat: Store({
         // Should search results be displayed as "table" or collection of "ItemView?"
         getInitialState() { return 'ItemView'; },
         initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, justReturnThePayload); },
@@ -48,26 +125,22 @@ const STORES = {
     SearchResultsPerPage: Store({
         // The number of results to show per search result page.
         getInitialState() { return 10; },
-        initialize() { this.on(SIGNAL_NAMES.SET_PER_PAGE, justReturnThePayload); },
+        initialize() { this.on(SIGNAL_NAMES.SET_PER_PAGE, SETTERS.setPerPage); },
     }),
 
     SearchResultsPages: Store({
         // The number of pages in the currently-displayed search results.
         getInitialState() { return 0; },
-        initialize() { this.on(SIGNAL_NAMES.SET_PAGES, justReturnThePayload); },
+        initialize() { this.on(SIGNAL_NAMES.SET_PAGES, SETTERS.setPages); },
     }),
 
     SearchResultsPage: Store({
         // Current page of search results being displayed.
         getInitialState() { return 1; },
-        initialize() { this.on(SIGNAL_NAMES.SET_PAGE, justReturnThePayload); },
+        initialize() { this.on(SIGNAL_NAMES.SET_PAGE, SETTERS.setPage); },
     }),
 };
 
 
-// Sometimes this is all we need. NOTE that Stores using this function should do validity checking
-// in the signal function.
-function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
-
-
+export {STORES, SETTERS, isWholeNumber};
 export default STORES;

@@ -29,7 +29,7 @@
 
 export default {
     currentItemView: ['currentItemView'],
-    searchResultFormat: ['searchResultFormat'],
+    searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: ['searchResultsPages'],
     searchResultsPage: ['searchResultsPage'],
     searchResultsPerPage: ['searchResultsPerPage'],
