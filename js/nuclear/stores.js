@@ -29,6 +29,40 @@ import reactor from './reactor';
 import {SIGNAL_NAMES} from './signals';
 
 
+const RESOURCE_TYPES = {
+    // actual conversions
+    'siglum': 'sigla',
+    'office': 'offices',
+    'indexer': 'indexers',
+    'century': 'centuries',
+    'source_status': 'source_statii',
+    'chant': 'chants',
+    'source': 'sources',
+    'cantusid': 'cantusids',
+    'portfolio': 'portfolia',
+    'segment': 'segments',
+    'feast': 'feasts',
+    'notation': 'notations',
+    'genre': 'genres',
+    'provenance': 'provenances',
+    // these make it safe to look up an already-plural type name
+    'sigla': 'sigla',
+    'offices': 'offices',
+    'indexers': 'indexers',
+    'centuries': 'centuries',
+    'source_statii': 'source_statii',
+    'chants': 'chants',
+    'sources': 'sources',
+    'cantusids': 'cantusids',
+    'portfolia': 'portfolia',
+    'segments': 'segments',
+    'feasts': 'feasts',
+    'notations': 'notations',
+    'genres': 'genres',
+    'provenances': 'provenances'
+};
+
+
 // Sometimes this is all we need. NOTE that Stores using this function should do validity checking
 // in the signal function.
 function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
@@ -95,10 +129,27 @@ const SETTERS = {
                 return next;
             } else {
                 console.error(`Resources per page must be between 1 and 100 (got ${next})`);
+                return previous;
             }
         } else {
             console.error(`setPerPage() must be given a whole number, not ${next}`);
+            return previous;
         }
+    },
+
+    setResourceType: function(previous, next) {
+        // Set the resource type to search for.
+        // NOTE: this is always converted to the plural form.
+        if ('string' === typeof next) {
+            if (undefined !== RESOURCE_TYPES[next]) {
+                return RESOURCE_TYPES[next];
+            } else {
+                console.error(`setResourceType() received invalid type (${next})`);
+            }
+        } else {
+            console.error('setResourceType() must be given a string');
+        }
+        return previous;
     },
 };
 
@@ -138,6 +189,12 @@ const STORES = {
         // Current page of search results being displayed.
         getInitialState() { return 1; },
         initialize() { this.on(SIGNAL_NAMES.SET_PAGE, SETTERS.setPage); },
+    }),
+
+    ResourceType: Store({
+        // The resource type to search for, or "all".
+        getInitialState() { return 'all'; },
+        initialize() {this.on(SIGNAL_NAMES.SET_RESOURCE_TYPE, SETTERS.setResourceType); },
     }),
 };
 

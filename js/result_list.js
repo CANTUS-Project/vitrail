@@ -306,8 +306,6 @@ var PerPageSelector = React.createClass({
 
 var ResultListFrame = React.createClass({
     propTypes: {
-        changePage: React.PropTypes.func.isRequired,
-        resourceType: React.PropTypes.string,
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
         searchQuery: React.PropTypes.string,
         cantus: React.PropTypes.object,
@@ -317,18 +315,20 @@ var ResultListFrame = React.createClass({
         doGenericGet: React.PropTypes.bool
     },
     getDefaultProps: function() {
-        return {resourceType: "any", dontRender: [], doGenericGet: true};
+        return {dontRender: [], doGenericGet: true};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {page: getters.searchResultsPage, perPage: getters.searchResultsPerPage};
-    },
-    getNewData: function(resourceType, searchQuery) {
-        // default, unchanging things
-        var ajaxSettings = {
-            type: resourceType
+        return {
+            page: getters.searchResultsPage,
+            perPage: getters.searchResultsPerPage,
+            resourceType: getters.resourceType,
         };
+    },
+    getNewData: function(searchQuery) {
+        // default, unchanging things
+        var ajaxSettings = {type: this.state.resourceType};
 
         // TODO: id, fields, sort
 
@@ -374,12 +374,11 @@ var ResultListFrame = React.createClass({
     componentWillUpdate: function(nextProps, nextState) {
         if (nextState.page !== this.state.page ||
             nextState.perPage !== this.state.perPage ||
-            nextProps.searchQuery !== this.props.searchQuery ||
-            nextProps.resourceType !== this.props.resourceType) {
-            this.getNewData(nextProps.resourceType, nextProps.searchQuery);
+            nextProps.searchQuery !== this.props.searchQuery) {
+            this.getNewData(nextProps.searchQuery);
         }
     },
-    componentDidMount: function() { this.getNewData(this.props.resourceType); },
+    componentDidMount: function() { this.getNewData(); },
     getInitialState: function() {
         return {data: null, headers: null, totalPages: 1, errorMessage: null};
     },

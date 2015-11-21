@@ -38,6 +38,7 @@ const SIGNAL_NAMES = {
     SET_PER_PAGE: 3,
     SET_PAGES: 4,
     SET_PAGE: 5,
+    SET_RESOURCE_TYPE: 6,
 };
 
 
@@ -104,6 +105,18 @@ const SIGNALS = {
         if (to !== reactor.evaluate(getters.searchResultsPerPage)) {
             reactor.batch(() => {
                 reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
+                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
+            });
+        }
+    },
+
+    setResourceType: function(to) {
+        // Set the resource type to search for to "to".
+        // NOTE: resets current page to 1
+        //
+        if (to !== reactor.evaluate(getters.resourceType)) {
+            reactor.batch(() => {
+                reactor.dispatch(SIGNAL_NAMES.SET_RESOURCE_TYPE, to);
                 reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
             });
         }

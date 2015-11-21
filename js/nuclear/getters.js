@@ -33,4 +33,5 @@ export default {
     searchResultsPages: ['searchResultsPages'],
     searchResultsPage: ['searchResultsPage'],
     searchResultsPerPage: ['searchResultsPerPage'],
+    resourceType: ['resourceType'],
 };

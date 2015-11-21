@@ -48,6 +48,7 @@ reactor.registerStores({
     'searchResultsPages': stores.SearchResultsPages,
     'searchResultsPage': stores.SearchResultsPage,
     'searchResultsPerPage': stores.SearchResultsPerPage,
+    'resourceType': stores.ResourceType,
 });
 
 
