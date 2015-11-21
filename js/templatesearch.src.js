@@ -23,8 +23,11 @@
 //-------------------------------------------------------------------------------------------------
 
 
-import React from "react";
-import {ResultListFrame} from "./vitrail.src";
+import React from 'react';
+import {ResultListFrame} from './vitrail.src';
+import getters from './nuclear/getters';
+import reactor from './nuclear/reactor';
+import signals from './nuclear/signals';
 
 
 function encloseWithQuotes(query) {
@@ -46,14 +49,13 @@ function encloseWithQuotes(query) {
 
 var TemplateTypeSelector = React.createClass({
     // Type selection component for the TemplateSearch.
-    propTypes: {
-        // A function that deals with changing the resource type when it is called with a string,
-        // either "chants", "sources", "indexers", or "feasts".
-        chooseNewType: React.PropTypes.func.isRequired,
-        activeType: React.PropTypes.string
-    },
-    getDefaultProps: function() {
-        return {activeType: null};
+
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            resourceType: getters.resourceType,
+        };
     },
     chooseNewType: function(event) {
         let newType = 'chants';
@@ -72,7 +74,19 @@ var TemplateTypeSelector = React.createClass({
                 break;
         }
 
-        this.props.chooseNewType(newType);
+        signals.setResourceType(newType);
+    },
+    supportedTypes: ['chants', 'feasts', 'indexers', 'sources'],
+    componentWillMount: function() {
+        // If the TemplateSearch initializes and the "resourceType" isn't one of the types for which
+        // we have a template, we'll set it to "chants." If we set it with the signal, NuclearJS
+        // will tell all the other components about it, but our initial rendering will still use the
+        // state from before this function was called, and will ignore the updated state NuclearJS
+        // offered... so we have to *both* call the signal *and* set our own state.
+        if (!this.supportedTypes.includes(this.state.resourceType)) {
+            signals.setResourceType('chants');
+        }
+        this.setState({resourceType: 'chants'});
     },
     render: function() {
         let className = 'btn btn-secondary-outline';
@@ -85,9 +99,9 @@ var TemplateTypeSelector = React.createClass({
             'feasts': {'className': className, 'aria-pressed': 'false'}
         };
 
-        if (null !== this.props.activeType) {
-            buttonProps[this.props.activeType]['aria-pressed'] = 'true';
-            buttonProps[this.props.activeType]['className'] = classNameActive;
+        if (this.supportedTypes.includes(this.state.resourceType)) {
+            buttonProps[this.state.resourceType]['aria-pressed'] = 'true';
+            buttonProps[this.state.resourceType]['className'] = classNameActive;
         }
 
         return (
@@ -231,8 +245,13 @@ var TemplateSearchTemplate = React.createClass({
         // A function that accepts two arguments: field name (according to the Cantus API) and its
         // new contents.
         updateField: React.PropTypes.func.isRequired,
-        // The resource type for the template.
-        type: React.PropTypes.oneOf(['chants', 'feasts', 'indexers', 'sources'])
+    },
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            resourceType: getters.resourceType,
+        };
     },
     updateField: function(name, value) {
         // Given the name of a field that was modified, and its new value, update our internal state
@@ -243,6 +262,7 @@ var TemplateSearchTemplate = React.createClass({
         this.props.updateField(name, value);
     },
     getInitialState: function() {
+        // TODO: this belongs in NuclearJS
         // - contents: An object to store template field contents. This starts off empty, and has
         //             members added as this.updateField() is called. When this.props.type is
         //             changed, "contents" is replaced with an empty object.
@@ -257,16 +277,10 @@ var TemplateSearchTemplate = React.createClass({
             return '';
         }
     },
-    componentWillReceiveProps: function(nextProps) {
-        // If the nextProps.type is different from this.props.type, we should empty this.contents.
-        if (nextProps.type !== this.props.type) {
-            this.setState({contents: {}});
-        }
-    },
     render: function() {
         let fieldNames = [];
 
-        switch (this.props.type) {
+        switch (this.state.resourceType) {
             case 'chants':
                 fieldNames = [
                     {'field': 'incipit', 'displayName': 'Incipit'},
@@ -355,9 +369,8 @@ var TemplateSearch = React.createClass({
         // - searchFor (object): members are fields with strings as values
         // - page
         // - perPage
-        // - resourceType: the currently-active template ('chants', 'sources', 'indexers', 'feasts')
         // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
-        return {page: 1, perPage: 10, searchFor: {}, resourceType: 'chants', currentSearch: ''};
+        return {page: 1, perPage: 10, searchFor: {}, currentSearch: ''};
     },
     changePage: function(direction) {
         // Give this function a string, either "first," "previous," "next," or "last," to
@@ -382,14 +395,6 @@ var TemplateSearch = React.createClass({
         this.setState({page: newPage, errorMessage: null});
     },
     changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
-    changeResourceType: function(resourceType) {
-        // A function that deals with changing the resource type when it is called with a string,
-        // either "chants", "sources", "indexers", or "feasts".
-        // TODO: rewrite this
-        // TODO: when you rewrite this, make sure you clear the "searchFor" object when you change type
-        this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null,
-                       searchFor: {}});
-    },
     submitSearch: function() {
         let searchFor = this.state.searchFor;
         let query = '';
@@ -422,18 +427,15 @@ var TemplateSearch = React.createClass({
                 <div className="card">
                     <div className="card-block">
                         <h2 className="card-title">Template Search</h2>
-                        <TemplateTypeSelector chooseNewType={this.changeResourceType}
-                                              activeType={this.state.resourceType}
-                                              />
+                        <TemplateTypeSelector/>
                     </div>
-                    <TemplateSearchTemplate type={this.state.resourceType} updateField={this.updateField}/>
+                    <TemplateSearchTemplate updateField={this.updateField}/>
                     <div className="card-block">
                         <button className="btn btn-primary-outline" onClick={this.submitSearch}>Search</button>
                     </div>
                 </div>
                 <div>
-                    <ResultListFrame resourceType={this.state.resourceType}
-                                     dontRender={dontRender}
+                    <ResultListFrame dontRender={dontRender}
                                      perPage={this.state.perPage}
                                      page={this.state.page}
                                      searchQuery={this.state.currentSearch}
