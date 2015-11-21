@@ -74,6 +74,7 @@ var TemplateTypeSelector = React.createClass({
                 break;
         }
 
+        signals.setSearchQuery('clear');
         signals.setResourceType(newType);
     },
     supportedTypes: ['chants', 'feasts', 'indexers', 'sources'],
@@ -135,17 +136,41 @@ var TemplateSearchField = React.createClass({
         field: React.PropTypes.string.isRequired,
         // The field name displayed in the GUI. If omitted, the "field" is displayed.
         displayName: React.PropTypes.string,
-        // You know... the field contents.
-        contents: React.PropTypes.string,
-        // And a function to call when the contents change!
-        updateFieldContents: React.PropTypes.func.isRequired
     },
     getDefaultProps: function() {
         return {displayName: null, contents: ''};
     },
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            searchQuery: getters.searchQuery,
+        };
+    },
+    onChange: function(event) {
+        let post = {};
+        post[this.props.field] = event.target.value;
+        signals.setSearchQuery(post);
+    },
+    shouldComponentUpdate: function(nextProps, nextState) {
+        // We should only update if *our* field changes value.
+        let field = this.props.field;
+        if (this.state.searchQuery.get(field) !== nextState.searchQuery.get(field)) {
+            return true;
+        } else if (this.props !== nextProps) {
+            return true;
+        } else {
+            return false;
+        }
+    },
     render: function() {
         let displayName = this.props.displayName || this.props.field;
         let fieldID = `template-field-${this.props.field}`;
+        let contents = '';
+
+        if (this.state.searchQuery.has(this.props.field)) {
+            contents = this.state.searchQuery.get(this.props.field);
+        }
 
         return (
             <fieldset className="form-group row">
@@ -154,8 +179,8 @@ var TemplateSearchField = React.createClass({
                     <input id={fieldID}
                            type="text"
                            className="form-control"
-                           value={this.props.contents}
-                           onChange={this.props.updateFieldContents}
+                           value={contents}
+                           onChange={this.onChange}
                            />
                 </div>
             </fieldset>
@@ -175,9 +200,6 @@ var TemplateSearchFields = React.createClass({
     //   component should be collapsed to save space.
 
     propTypes: {
-        // A function that accepts two arguments: field name (according to the Cantus API) and its
-        // new contents.
-        updateField: React.PropTypes.func.isRequired,
         // A list of objects, each with three members: 'field', 'displayName', and 'contents'.
         // These are the internal and GUI names for the fields required in this template, plus the
         // current contents of the field.
@@ -193,17 +215,6 @@ var TemplateSearchFields = React.createClass({
     toggleCollapsion: function() {
         // Toggle this.state.isCollapsed
         this.setState({isCollapsed: !this.state.isCollapsed});
-    },
-    updateFieldContents: function(event) {
-        // Accepts change event for one of the "TemplateSearchField" components, then calls the
-        // updateField() function with appropriate arguments to pass changes "up."
-
-        // Find the proper name of the modified field. Target is a TemplateSearchField, and its
-        // @id starts with "template-field-".
-        let fieldName = event.target.id.slice('template-field-'.length);
-
-        // Now let our bosses know that a field changed!
-        this.props.updateField(fieldName, event.target.value);
     },
     render: function() {
         let buttonText = 'Collapse Fields';
@@ -224,8 +235,6 @@ var TemplateSearchFields = React.createClass({
                             <TemplateSearchField key={`template-field${index}`}
                                                  field={field.field}
                                                  displayName={field.displayName}
-                                                 contents={field.contents}
-                                                 updateFieldContents={this.updateFieldContents}
                                                  />
                         )}
                     </form>
@@ -241,41 +250,12 @@ var TemplateSearchTemplate = React.createClass({
     // leaves TemplateSearch much cleaner.
     //
 
-    propTypes: {
-        // A function that accepts two arguments: field name (according to the Cantus API) and its
-        // new contents.
-        updateField: React.PropTypes.func.isRequired,
-    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
         return {
             resourceType: getters.resourceType,
         };
-    },
-    updateField: function(name, value) {
-        // Given the name of a field that was modified, and its new value, update our internal state
-        // then tell our boss it was updated.
-        let contents = this.state.contents;
-        contents[name] = value;
-        this.setState({contents: contents});
-        this.props.updateField(name, value);
-    },
-    getInitialState: function() {
-        // TODO: this belongs in NuclearJS
-        // - contents: An object to store template field contents. This starts off empty, and has
-        //             members added as this.updateField() is called. When this.props.type is
-        //             changed, "contents" is replaced with an empty object.
-        return {contents: {}};
-    },
-    getFieldContents: function(name) {
-        // Return the currently-held contens of the "name" field or an empty string if the field has
-        // not been set.
-        if (undefined !== this.state.contents[name]) {
-            return this.state.contents[name];
-        } else {
-            return '';
-        }
     },
     render: function() {
         let fieldNames = [];
@@ -351,68 +331,37 @@ var TemplateSearchTemplate = React.createClass({
                 break;
         }
 
-        // Map the "contents" into every field
-        fieldNames.map(function (field) {
-            field['contents'] = this.getFieldContents(field.field);
-            return field;
-        }, this);
-
-        return <TemplateSearchFields updateField={this.updateField}
-                                     fieldNames={fieldNames}
-                                     /> ;
+        return <TemplateSearchFields fieldNames={fieldNames}/> ;
     }
 });
 
 
 var TemplateSearch = React.createClass({
+    //
+
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            searchQuery: getters.searchQuery,
+        };
+    },
     getInitialState: function() {
-        // - searchFor (object): members are fields with strings as values
-        // - page
-        // - perPage
         // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
-        return {page: 1, perPage: 10, searchFor: {}, currentSearch: ''};
+        return {currentSearch: ''};
     },
-    changePage: function(direction) {
-        // Give this function a string, either "first," "previous," "next," or "last," to
-        // determine which way to change the page. Or supply a page number directly.
-        let newPage = 1;
-        let curPage = this.state.page;
-
-        if ("next" === direction) {
-            newPage = curPage + 1;
-        } else if ("previous" === direction) {
-            if (curPage > 1) {
-                newPage = curPage - 1;
-            }
-        } else if ("first" === direction) {
-            // it's already 1
-        } else if ("last" === direction) {
-            newPage = "last";
-        } else {
-            newPage = direction;
-        }
-
-        this.setState({page: newPage, errorMessage: null});
-    },
-    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
     submitSearch: function() {
-        let searchFor = this.state.searchFor;
+        let searchFor = this.state.searchQuery
         let query = '';
 
-        for (let field in searchFor) {
-            query += ` ${field}:${encloseWithQuotes(searchFor[field])}`;
+        for (let field of searchFor.keys()) {
+            query += ` ${field}:${encloseWithQuotes(searchFor.get(field))}`;
         }
 
         // remove leading space
         query = query.slice(1);
 
         this.setState({currentSearch: query, page: 1, errorMessage: null});
-    },
-    updateField: function(fieldName, newContents) {
-        // Update the searched-for value of "fieldName" to "newContents".
-        let searchFor = this.state.searchFor;
-        searchFor[fieldName] = newContents;
-        this.setState({'searchFor': searchFor});
     },
     render: function() {
         // TODO: find a better way to manage the state, because this is stupid.
@@ -429,7 +378,7 @@ var TemplateSearch = React.createClass({
                         <h2 className="card-title">Template Search</h2>
                         <TemplateTypeSelector/>
                     </div>
-                    <TemplateSearchTemplate updateField={this.updateField}/>
+                    <TemplateSearchTemplate/>
                     <div className="card-block">
                         <button className="btn btn-primary-outline" onClick={this.submitSearch}>Search</button>
                     </div>
