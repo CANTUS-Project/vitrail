@@ -23,56 +23,11 @@
 //-------------------------------------------------------------------------------------------------
 
 import {Store, toImmutable} from 'nuclear-js';
+import cantusjs from '../cantusjs/cantus.src';
 
 import getters from './getters';
 import reactor from './reactor';
 import {SIGNAL_NAMES} from './signals';
-
-
-const RESOURCE_TYPES = {
-    // actual conversions
-    'siglum': 'sigla',
-    'office': 'offices',
-    'indexer': 'indexers',
-    'century': 'centuries',
-    'source_status': 'source_statii',
-    'chant': 'chants',
-    'source': 'sources',
-    'cantusid': 'cantusids',
-    'portfolio': 'portfolia',
-    'segment': 'segments',
-    'feast': 'feasts',
-    'notation': 'notations',
-    'genre': 'genres',
-    'provenance': 'provenances',
-    // these make it safe to look up an already-plural type name
-    'sigla': 'sigla',
-    'offices': 'offices',
-    'indexers': 'indexers',
-    'centuries': 'centuries',
-    'source_statii': 'source_statii',
-    'chants': 'chants',
-    'sources': 'sources',
-    'cantusids': 'cantusids',
-    'portfolia': 'portfolia',
-    'segments': 'segments',
-    'feasts': 'feasts',
-    'notations': 'notations',
-    'genres': 'genres',
-    'provenances': 'provenances'
-};
-
-
-const VALID_FIELDS = ['id', 'name', 'description', 'mass_or_office', 'date', 'feast_code',
-    'incipit', 'source', 'marginalia', 'folio', 'sequence', 'office', 'genre', 'position',
-    'cantus_id', 'feast', 'mode', 'differentia', 'finalis', 'full_text',
-    'full_text_manuscript', 'full_text_simssa', 'volpiano', 'notes', 'cao_concordances',
-    'siglum', 'proofreader', 'melody_id', 'title', 'rism', 'provenance', 'century',
-    'notation_style', 'editors', 'indexers', 'summary', 'liturgical_occasion',
-    'indexing_notes', 'indexing_date', 'display_name', 'given_name', 'family_name',
-    'institution', 'city', 'country', 'source_id', 'office_id', 'genre_id', 'feast_id',
-    'provenance_id', 'century_id','notation_style_id', 'any', 'type'
-];
 
 
 // Sometimes this is all we need. NOTE that Stores using this function should do validity checking
@@ -161,7 +116,7 @@ const SETTERS = {
             // iterate all the members in "next"
             for (let field in next) {
                 // check the field
-                if (!VALID_FIELDS.includes(field)) {
+                if (!cantusjs.VALID_FIELDS.includes(field)) {
                     continue;
                 }
 
@@ -173,8 +128,9 @@ const SETTERS = {
 
                 // if the field is "type" check that it's a valid type (if not, print error and continue)
                 if ('type' === field) {
-                    if (undefined !== RESOURCE_TYPES[next.type]) {
-                        post.type = RESOURCE_TYPES[next.type];
+                    let type = cantusjs.convertTypeNumber(next.type, 'plural');
+                    if (undefined !== type) {
+                        post.type = type;
                     } else {
                         console.error(`setSearchQuery() received invalid type (${next.type})`);
                     }
