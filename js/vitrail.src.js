@@ -25,9 +25,9 @@
 
 import React from 'react';
 import {Link} from 'react-router';
-import TemplateSearch from './templatesearch.src';
+import {TemplateSearch} from './templatesearch.src';
 import {ItemViewDevelWrapper} from './itemview.src';
-import ResultListFrame from './result_list';
+import {ResultListFrame} from './result_list';
 
 
 var SearchBox = React.createClass({

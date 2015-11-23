@@ -27,8 +27,8 @@ import React from 'react';
 
 import {Link} from 'react-router';
 
-import getters from './nuclear/getters';
-import reactor from './nuclear/reactor';
+import {getters} from './nuclear/getters';
+import {reactor} from './nuclear/reactor';
 import {SIGNALS} from './nuclear/signals';
 
 

@@ -22,10 +22,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-import cantusjs from '../cantusjs/cantus.src';
+import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
-import reactor from './reactor';
-import getters from './getters';
+import {reactor} from './reactor';
+import {getters} from './getters';
 
 
 const CANTUS = new cantusjs.Cantus('http://abbot.adjectivenoun.ca:8888/');

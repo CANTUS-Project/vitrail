@@ -23,10 +23,10 @@
 //-------------------------------------------------------------------------------------------------
 
 import {Store, toImmutable} from 'nuclear-js';
-import cantusjs from '../cantusjs/cantus.src';
+import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
-import getters from './getters';
-import reactor from './reactor';
+import {getters} from './getters';
+import {reactor} from './reactor';
 import {SIGNAL_NAMES} from './signals';
 
 

@@ -27,7 +27,7 @@
 // Key are whatever; values use the names of Stores registered in vitrail-init.js.
 
 
-export default {
+const getters = {
     currentItemView: ['currentItemView'],
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: ['searchResultsPages'],
@@ -38,3 +38,6 @@ export default {
     searchResults: [['searchResults'], (res) => { if (res.get('results')) return res.get('results'); else return null; }],
     searchError: [['searchResults'], (res) => { if (res.get('error')) return res.get('error'); else return null; }],
 };
+
+export {getters};
+export default getters;

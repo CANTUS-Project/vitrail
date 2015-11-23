@@ -26,9 +26,9 @@
 import React from 'react';
 import {Link} from 'react-router';
 
-import signals from './nuclear/signals';
-import reactor from './nuclear/reactor';
-import getters from './nuclear/getters';
+import {signals} from './nuclear/signals';
+import {reactor} from './nuclear/reactor';
+import {getters} from './nuclear/getters';
 import {ItemView} from './itemview.src';
 
 
@@ -349,4 +349,5 @@ var ResultListFrame = React.createClass({
 });
 
 
+export {ResultListFrame};
 export default ResultListFrame;

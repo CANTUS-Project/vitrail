@@ -27,16 +27,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route} from 'react-router';
 
-import reactor from './nuclear/reactor';
-import stores from './nuclear/stores';
+import {reactor} from './nuclear/reactor';
+import {STORES as stores} from './nuclear/stores';
 
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
-import cantusModule from './cantusjs/cantus.src';
+import {cantusjs as cantusModule} from './cantusjs/cantus.src';
 import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
 import {ItemViewDevelWrapper, ItemViewOverlay} from './itemview.src';
-import TemplateSearch from './templatesearch.src';
+import {TemplateSearch} from './templatesearch.src';
 
 
 reactor.registerStores({

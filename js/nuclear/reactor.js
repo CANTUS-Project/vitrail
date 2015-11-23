@@ -24,23 +24,12 @@
 
 
 import {Reactor} from 'nuclear-js';
-import {SIGNAL_NAMES} from './signals';
 
 
 const reactor = new Reactor({
     debug: true,
-    // dispatch: function(signal, payload) {
-    //     // This is a wrapper over our parent method that double-checks the signal name exists.
-    //     //
-    //     // TODO: see if you can get this to work
-    //
-    //     if (undefined === signal) {
-    //         console.error('Signal is undefined!');
-    //     } else {
-    //         this.__prototype__.dispatch(signal, payload);
-    //     }
-    // },
 });
 
 
+export {reactor};
 export default reactor;

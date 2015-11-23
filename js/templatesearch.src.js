@@ -25,9 +25,9 @@
 
 import React from 'react';
 import {ResultListFrame} from './vitrail.src';
-import getters from './nuclear/getters';
-import reactor from './nuclear/reactor';
-import signals from './nuclear/signals';
+import {getters} from './nuclear/getters';
+import {reactor} from './nuclear/reactor';
+import {SIGNALS as signals} from './nuclear/signals';
 
 
 function encloseWithQuotes(query) {
