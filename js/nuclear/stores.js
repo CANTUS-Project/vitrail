@@ -140,7 +140,7 @@ const SETTERS = {
         }
     },
 
-    loadSearchResults: function(previous, next) {
+    loadSearchResults(previous, next) {
         // Load the search results.
         //
         if (undefined === next.code) {

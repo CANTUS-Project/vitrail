@@ -28,6 +28,8 @@ import {log} from '../js/log';
 import {reactor} from '../js/nuclear/reactor';
 
 // unmocked
+jest.dontMock('nuclear-js');
+const nuclear = require('nuclear-js');
 jest.dontMock('../js/nuclear/stores');
 const stores = require('../js/nuclear/stores');
 
@@ -164,5 +166,28 @@ describe('SETTERS.setPerPage()', () => {
         let actual = stores.SETTERS.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
+    });
+});
+
+
+describe('SETTERS.loadSearchResults()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it('deals with a successful request', () => {
+        let previous = 'whatever';
+        let next = {incipit: 'deus ex machina'};
+        let expected = nuclear.toImmutable({error: null, results: next});
+        let actual = stores.SETTERS.loadSearchResults(previous, next);
+        expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
+        expect(actual.equals(expected)).toBe(true);
+    });
+
+    it('deals with an unsuccessful request', () => {
+        let previous = nuclear.toImmutable({results: 42});
+        let next = {code: 500};
+        let expected = nuclear.toImmutable({results: 42, error: next});
+        let actual = stores.SETTERS.loadSearchResults(previous, next);
+        expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
+        expect(actual.equals(expected)).toBe(true);
     });
 });
