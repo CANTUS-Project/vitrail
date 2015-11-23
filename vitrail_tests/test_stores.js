@@ -66,6 +66,31 @@ describe('isWholeNumber()', function() {
 });
 
 
+describe('SETTERS.setSearchResultFormat()', () => {
+    it('returns "next" when it is "table"', () => {
+        let previous = 4;
+        let next = 'table';
+        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        expect(actual).toBe(next);
+    });
+
+    it('returns "next" when it is "ItemView"', () => {
+        let previous = 4;
+        let next = 'ItemView';
+        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        expect(actual).toBe(next);
+    });
+
+    it('returns "previous" when "next" is invalid', () => {
+        let previous = 4;
+        let next = 'shout to to my friends';
+        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+});
+
+
 describe('SETTERS.setPage()', () => {
     it(`returns "next" when it's a whole number less than the number of pages`, () => {
         reactor.evaluate.mockReturnValue(10);
