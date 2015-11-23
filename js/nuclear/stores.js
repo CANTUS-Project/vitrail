@@ -26,6 +26,7 @@ import {Store, toImmutable} from 'nuclear-js';
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
 import {getters} from './getters';
+import {log} from '../log';
 import {reactor} from './reactor';
 import {SIGNAL_NAMES} from './signals';
 
@@ -65,18 +66,18 @@ const SETTERS = {
     },
 
     // pagination
-    setPage: function(previous, next) {
+    setPage(previous, next) {
         // Set the current page in the current search results.
         if (isWholeNumber(next)) {
             let numOfPages = reactor.evaluate(getters.searchResultsPages);
             if (next <= numOfPages || 1 === next) {
                 return next;
             } else {
-                console.error(`Can't set page to ${next}: only ${numOfPages} exist.`);
+                log.warn(`Can't set page to ${next}: only ${numOfPages} exist.`);
                 return previous;
             }
         } else {
-            console.error(`setPage() must be given a whole number, not ${next}`);
+            log.warn(`setPage() must be given a whole number, not ${next}`);
             return previous;
         }
     },

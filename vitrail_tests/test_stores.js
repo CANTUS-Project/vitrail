@@ -23,8 +23,11 @@
 //-------------------------------------------------------------------------------------------------
 
 
-import {reactor} from '../js/nuclear/reactor';  // mocked
+// mocked
+import {log} from '../js/log';
+import {reactor} from '../js/nuclear/reactor';
 
+// unmocked
 jest.dontMock('../js/nuclear/stores');
 const stores = require('../js/nuclear/stores');
 
@@ -59,5 +62,42 @@ describe('isWholeNumber()', function() {
         let input = 4;
         let expected = true;
         expect(stores.isWholeNumber(input)).toBe(expected);
+    });
+});
+
+
+describe('SETTERS.setPage()', () => {
+    it(`returns "next" when it's a whole number less than the number of pages`, () => {
+        reactor.evaluate.mockReturnValue(10);
+        let previous = 3;
+        let next = 5;
+        let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(next);
+    });
+
+    it(`returns "next" when it's 1, but number of pages is 0`, () => {
+        reactor.evaluate.mockReturnValue(0);
+        let previous = 3;
+        let next = 1;
+        let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(next);
+    });
+
+    it(`returns "previous" when "next" is greater than the number of pages`, () => {
+        reactor.evaluate.mockReturnValue(10);
+        let previous = 3;
+        let next = 400;
+        let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`returns "previous" when "next" is not a number`, () => {
+        reactor.evaluate.mockReturnValue(10);
+        let previous = 3;
+        let next = 'one hundred';
+        let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
     });
 });
