@@ -81,17 +81,17 @@ const SETTERS = {
             return previous;
         }
     },
-    setPerPage: function(previous, next) {
+    setPerPage(previous, next) {
         // Set the number of results per page for search results.
         if (isWholeNumber(next)) {
             if (0 < next && next < 101) {
                 return next;
             } else {
-                console.error(`Resources per page must be between 1 and 100 (got ${next})`);
+                log.warn(`Resources per page must be between 1 and 100 (got ${next})`);
                 return previous;
             }
         } else {
-            console.error(`setPerPage() must be given a whole number, not ${next}`);
+            log.warn(`Invariant violation: setPerPage() requires a whole number`);
             return previous;
         }
     },

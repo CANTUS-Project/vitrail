@@ -67,6 +67,8 @@ describe('isWholeNumber()', function() {
 
 
 describe('SETTERS.setSearchResultFormat()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
     it('returns "next" when it is "table"', () => {
         let previous = 4;
         let next = 'table';
@@ -92,6 +94,8 @@ describe('SETTERS.setSearchResultFormat()', () => {
 
 
 describe('SETTERS.setPage()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
     it(`returns "next" when it's a whole number less than the number of pages`, () => {
         reactor.evaluate.mockReturnValue(10);
         let previous = 3;
@@ -122,6 +126,42 @@ describe('SETTERS.setPage()', () => {
         let previous = 3;
         let next = 'one hundred';
         let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+});
+
+
+describe('SETTERS.setPerPage()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it(`returns "next" when it's valid input`, () => {
+        let previous = 3;
+        let next = 5;
+        let actual = stores.SETTERS.setPerPage(previous, next);
+        expect(actual).toBe(next);
+    });
+
+    it(`returns "previous" when "next" is 0`, () => {
+        let previous = 3;
+        let next = 0;
+        let actual = stores.SETTERS.setPerPage(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`returns "previous" when "next" is greater than 100`, () => {
+        let previous = 3;
+        let next = 400;
+        let actual = stores.SETTERS.setPerPage(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`returns "previous" when "next" is not a number`, () => {
+        let previous = 3;
+        let next = 'one hundred';
+        let actual = stores.SETTERS.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
