@@ -87,17 +87,6 @@ const SIGNALS = {
             reactor.dispatch(SIGNAL_NAMES.SET_PAGE, to);
         }
     },
-    setPages: function(to) {
-        // Set the total number of pages in the search results to "to."
-        // NOTE: resets current page to 1
-        //
-        if (to !== reactor.evaluate(getters.searchResultsPages)) {
-            reactor.batch(() => {
-                reactor.dispatch(SIGNAL_NAMES.SET_PAGES, to);
-                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-            });
-        }
-    },
     setPerPage: function(to) {
         // Set the number of search results per page to "to."
         // NOTE: resets current page to 1
@@ -135,7 +124,7 @@ const SIGNALS = {
         }
     },
 
-    submitSearchQuery: function() {
+    submitSearchQuery() {
         // Submit a search query to the Cantus server with the settings currently in NuclearJS.
         //
 
@@ -144,8 +133,8 @@ const SIGNALS = {
         let ajaxSettings = querySettings.toObject();
 
         // pagination
-        ajaxSettings['page'] = reactor.evaluate(getters.searchResultsPage);
-        ajaxSettings['per_page'] = reactor.evaluate(getters.searchResultsPerPage);
+        ajaxSettings['page'] = reactor.evaluate(getters.searchPage);
+        ajaxSettings['per_page'] = reactor.evaluate(getters.searchPerPage);
 
         // submit the request
         if (querySettings.count() > 1) {

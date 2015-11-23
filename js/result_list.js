@@ -331,10 +331,10 @@ var ResultListFrame = React.createClass({
 
         let results = '';
         if (null !== this.state.results) {
-            results = <ResultList data={this.state.results.toObject()}
-                                  headers={this.state.results.get('headers').toObject()}
+            results = <ResultList data={this.state.results.toJS()}
+                                  headers={this.state.results.get('headers').toJS()}
                                   dontRender={this.props.dontRender}
-                                  sortOrder={['307242']}/>
+                                  sortOrder={this.state.results.get('sort_order').toJS()}/>
         }
 
         return (

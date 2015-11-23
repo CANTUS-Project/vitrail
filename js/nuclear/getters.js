@@ -27,17 +27,50 @@
 // Key are whatever; values use the names of Stores registered in vitrail-init.js.
 
 
+const formatters = {
+    // Formatting functions for the getters that have a formatting function.
+    //
+
+    searchResultsPages(results) {
+        if (null !== results.get('results')) {
+            return Math.ceil(results.get('results').get('headers').get('total_results') /
+                             results.get('results').get('headers').get('per_page'));
+        } else {
+            return 0;
+        }
+    },
+
+    searchResultsPage(results) {
+        if (null !== results.get('results')) {
+            return results.get('results').get('headers').get('page');
+        } else {
+            return 0;
+        }
+    },
+
+    searchResultsPerPage(results) {
+        if (null !== results.get('results')) {
+            return results.get('results').get('headers').get('per_page');
+        } else {
+            return 0;
+        }
+    },
+};
+
+
 const getters = {
     currentItemView: ['currentItemView'],
     searchResultsFormat: ['searchResultsFormat'],
-    searchResultsPages: ['searchResultsPages'],
-    searchResultsPage: ['searchResultsPage'],
-    searchResultsPerPage: ['searchResultsPerPage'],
+    searchResultsPages: [['searchResults'], formatters.searchResultsPages],
+    searchResultsPage: [['searchResults'], formatters.searchResultsPage],  // current displayed page of results (not currently-requested page)
+    searchResultsPerPage: [['searchResults'], formatters.searchResultsPerPage],  // current displayed per-page of results (not currently-requested per-page)
     resourceType: [['searchQuery'], (query) => query.get('type')],
     searchQuery: ['searchQuery'],
+    searchPage: ['searchPage'],
+    searchPerPage: ['searchPerPage'],
     searchResults: [['searchResults'], (res) => { if (res.get('results')) return res.get('results'); else return null; }],
     searchError: [['searchResults'], (res) => { if (res.get('error')) return res.get('error'); else return null; }],
 };
 
-export {getters};
+export {getters, formatters};
 export default getters;

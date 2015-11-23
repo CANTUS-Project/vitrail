@@ -65,15 +65,6 @@ const SETTERS = {
     },
 
     // pagination
-    setPages: function(previous, next) {
-        // Set the number of pages in the current search results.
-        if (isWholeNumber(next)) {
-            return next;
-        } else {
-            console.error(`setPages() must be given a whole number, not ${next}`);
-            return previous;
-        }
-    },
     setPage: function(previous, next) {
         // Set the current page in the current search results.
         if (isWholeNumber(next)) {
@@ -151,7 +142,7 @@ const SETTERS = {
     loadSearchResults: function(previous, next) {
         // Load the search results.
         //
-        if (undefined === next.get('code')) {
+        if (undefined === next.code) {
             // request was successful
             return toImmutable({error: null, results: next});
         } else {
@@ -181,20 +172,14 @@ const STORES = {
         initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, justReturnThePayload); },
     }),
 
-    SearchResultsPerPage: Store({
-        // The number of results to show per search result page.
+    SearchPerPage: Store({
+        // Currently-requested number of results to show per search result page.
         getInitialState() { return 10; },
         initialize() { this.on(SIGNAL_NAMES.SET_PER_PAGE, SETTERS.setPerPage); },
     }),
 
-    SearchResultsPages: Store({
-        // The number of pages in the currently-displayed search results.
-        getInitialState() { return 0; },
-        initialize() { this.on(SIGNAL_NAMES.SET_PAGES, SETTERS.setPages); },
-    }),
-
-    SearchResultsPage: Store({
-        // Current page of search results being displayed.
+    SearchPage: Store({
+        // Currently-requested page of search results being displayed.
         getInitialState() { return 1; },
         initialize() { this.on(SIGNAL_NAMES.SET_PAGE, SETTERS.setPage); },
     }),

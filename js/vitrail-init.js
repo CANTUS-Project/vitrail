@@ -42,9 +42,8 @@ import {TemplateSearch} from './templatesearch.src';
 reactor.registerStores({
     'currentItemView': stores.CurrentItemView,
     'searchResultsFormat': stores.SearchResultsFormat,
-    'searchResultsPages': stores.SearchResultsPages,
-    'searchResultsPage': stores.SearchResultsPage,
-    'searchResultsPerPage': stores.SearchResultsPerPage,
+    'searchPerPage': stores.SearchPerPage,
+    'searchPage': stores.SearchPage,
     'searchQuery': stores.SearchQuery,
     'searchResults': stores.SearchResults,
 });
