@@ -96,13 +96,12 @@ const SETTERS = {
         }
     },
 
-    setSearchQuery: function(previous, next) {
+    setSearchQuery(previous, next) {
         // Amend the search query. If "next" is the string "clear" then the search query is cleared.
         //
-        let post = previous.toObject();
+        let post = previous;
 
         if ('clear' === next) {
-            // return toImmutable({type: 'all'});
             return STORES.SearchQuery.getInitialState();
         } else if ('object' === typeof next) {
             // iterate all the members in "next"
@@ -114,7 +113,7 @@ const SETTERS = {
 
                 // check the value is a string (if not, print an error and continue)
                 if ('string' !== typeof next[field]) {
-                    console.error(`setSearchQuery() has ${field} field with improper type`);
+                    log.warn(`Invariant violation: setSearchQuery() has ${field} that isn't a string`);
                     continue;
                 }
 
@@ -122,20 +121,20 @@ const SETTERS = {
                 if ('type' === field) {
                     let type = cantusjs.convertTypeNumber(next.type, 'plural');
                     if (undefined !== type) {
-                        post.type = type;
+                        post = post.set('type', type);
                     } else {
-                        console.error(`setSearchQuery() received invalid type (${next.type})`);
+                        log.warn(`setSearchQuery() received invalid type (${next.type})`);
                     }
 
                 // set the field
                 } else {
-                    post[field] = next[field];
+                    post = post.set(field, next[field]);
                 }
             }
 
-            return toImmutable(post);
+            return post;
         } else {
-            console.error('setSearchQuery() requires an object or "clear"');
+            log.warn('Invariant violation: setSearchQuery() requires an object or "clear"');
             return previous;
         }
     },

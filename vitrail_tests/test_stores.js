@@ -28,6 +28,7 @@ import {log} from '../js/log';
 import {reactor} from '../js/nuclear/reactor';
 
 // unmocked
+jest.dontMock('../js/cantusjs/cantus.src');
 jest.dontMock('nuclear-js');
 const nuclear = require('nuclear-js');
 jest.dontMock('../js/nuclear/stores');
@@ -166,6 +167,42 @@ describe('SETTERS.setPerPage()', () => {
         let actual = stores.SETTERS.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
+    });
+});
+
+
+describe('SETTERS.setSearchQuery', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it('returns initial state when called with "clear"', () => {
+        let actual = stores.SETTERS.setSearchQuery('asdf', 'clear');
+        expect(actual.equals(stores.STORES.SearchQuery.getInitialState())).toBe(true);
+    });
+
+    it('returns "previous" when called with invalid "next"', () => {
+        let previous = 42;
+        let next = 600;
+        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        expect(actual).toBe(previous);
+        expect(log.warn).toBeCalled();
+    });
+
+    it('works with one invalid field name, one non-string field value, one proper field, and proper type', () => {
+        let previous = nuclear.toImmutable({alreadyHere: true});
+        let next = {force: 'a', feast: 9, incipit: 'bonsoir', type: 'chant'};
+        let expected = nuclear.toImmutable({alreadyHere: true, incipit: 'bonsoir', type: 'chants'});
+        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        expect(actual.equals(expected)).toBe(true);
+        expect(log.warn).toBeCalled();  // for "feast" set to 9 instead of a string
+    });
+
+    it('works with one proper field and improper type', () => {
+        let previous = nuclear.toImmutable({alreadyHere: true});
+        let next = {incipit: 'bonsoir', type: 'blueberry'};
+        let expected = nuclear.toImmutable({alreadyHere: true, incipit: 'bonsoir'});
+        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        expect(actual.equals(expected)).toBe(true);
+        expect(log.warn).toBeCalled();  // for "feast" set to 9 instead of a string
     });
 });
 
