@@ -305,113 +305,46 @@ var PerPageSelector = React.createClass({
 
 
 var ResultListFrame = React.createClass({
-    propTypes: {
-        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-        searchQuery: React.PropTypes.string,
-        cantus: React.PropTypes.object,
+    //
 
-        // When the "searchQuery" is empty and "doGenericGet" is true, this component renders the
-        // results of a GET to the resource-type-specific URL. This is true by default.
-        doGenericGet: React.PropTypes.bool
-    },
-    getDefaultProps: function() {
-        return {dontRender: [], doGenericGet: true};
-    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
         return {
             page: getters.searchResultsPage,
             perPage: getters.searchResultsPerPage,
-            resourceType: getters.resourceType,
+            searchQuery: getters.searchQuery,
+            results: getters.searchResults,
+            error: getters.searchError,
         };
     },
-    getNewData: function(searchQuery) {
-        // default, unchanging things
-        var ajaxSettings = {type: this.state.resourceType};
-
-        // TODO: id, fields, sort
-
-        // pagination
-        ajaxSettings["page"] = this.state.page;
-        ajaxSettings["per_page"] = this.state.perPage;
-
-        // submit the request
-        if (undefined !== searchQuery && "" !== searchQuery) {
-            // search query
-            ajaxSettings["any"] = searchQuery;
-            this.props.cantus.search(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.ajaxFailureCallback);
-        } else if (this.props.doGenericGet) {
-            // browse query
-            this.props.cantus.get(ajaxSettings).then(this.ajaxSuccessCallback).catch(this.ajaxFailureCallback);
-        } else {
-            // Since this function is only called if the query-affecting parameters are changed,
-            // we know it's safe at this point to clear the state that's displayed. If we didn't
-            // reset our "state," the displayed data would not correspond to our new props.
-            this.setState(this.getInitialState);
-        }
-    },
-    ajaxSuccessCallback: function(response) {
-        // Called when an AJAX request returns successfully.
-        var headers = response.headers;
-        delete response.headers;
-        var sortOrder = response.sort_order;
-        delete response.sort_order;
-        var totalPages = Math.ceil(headers.total_results / headers.per_page);
-        this.setState({data: response, headers: headers, totalPages: totalPages,
-                       sortOrder: sortOrder});
-
-        signals.setPages(totalPages);
-    },
-    ajaxFailureCallback: function(response) {
-        // Called when an AJAX request returns unsuccessfully.
-        if (404 === response.code) {
-            this.setState({errorMessage: 404});
-        } else {
-            this.setState({errorMessage: response.response});
-        }
-    },
-    componentWillUpdate: function(nextProps, nextState) {
-        if (nextState.page !== this.state.page ||
-            nextState.perPage !== this.state.perPage ||
-            nextProps.searchQuery !== this.props.searchQuery) {
-            this.getNewData(nextProps.searchQuery);
-        }
-    },
-    componentDidMount: function() { this.getNewData(); },
-    getInitialState: function() {
-        return {data: null, headers: null, totalPages: 1, errorMessage: null};
-    },
     render: function() {
-        var totalPages = this.state.totalPages;
 
-        if (null === this.state.errorMessage) {
-            return (
-                <div className="resultListFrame">
-                    <ResultList data={this.state.data}
-                                headers={this.state.headers}
-                                dontRender={this.props.dontRender}
-                                sortOrder = {this.state.sortOrder} />
-                    <Paginator/>
-                    <PerPageSelector/>
-                </div>
-            );
-        } else {
-            let errorMessage = '';
-            if (null !== this.state.errorMessage) {
-                if (404 == this.state.errorMessage) {
-                    errorMessage = <div className="alert alert-warning">No results were found for your search.</div>;
-                } else {
-                    errorMessage = <div className="alert alert-danger"><strong>Error:&nbsp;</strong>{this.state.errorMessage}</div>;
-                }
+        let errorMessage = '';
+        if (null !== this.state.error) {
+            if (404 === this.state.error.get('code')) {
+                errorMessage = <div className="alert alert-warning">No results were found for your search.</div>;
+            } else {
+                errorMessage = <div className="alert alert-danger"><strong>Error:&nbsp;</strong>{this.state.error.get('message')}</div>;
             }
-
-            return (
-                <div className="resultListFrame">
-                    {errorMessage}
-                </div>
-            );
         }
+
+        let results = '';
+        if (null !== this.state.results) {
+            results = <ResultList data={this.state.results.toObject()}
+                                  headers={this.state.results.get('headers').toObject()}
+                                  dontRender={this.props.dontRender}
+                                  sortOrder={['307242']}/>
+        }
+
+        return (
+            <div className="resultListFrame">
+                {errorMessage}
+                {results}
+                <Paginator/>
+                <PerPageSelector/>
+            </div>
+        );
     }
 });
 

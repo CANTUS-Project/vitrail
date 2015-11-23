@@ -35,4 +35,6 @@ export default {
     searchResultsPerPage: ['searchResultsPerPage'],
     resourceType: [['searchQuery'], (query) => query.get('type')],
     searchQuery: ['searchQuery'],
+    searchResults: [['searchResults'], (res) => { if (res.get('results')) return res.get('results'); else return null; }],
+    searchError: [['searchResults'], (res) => { if (res.get('error')) return res.get('error'); else return null; }],
 };

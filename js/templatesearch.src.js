@@ -350,19 +350,6 @@ var TemplateSearch = React.createClass({
         // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
         return {currentSearch: ''};
     },
-    submitSearch: function() {
-        let searchFor = this.state.searchQuery
-        let query = '';
-
-        for (let field of searchFor.keys()) {
-            query += ` ${field}:${encloseWithQuotes(searchFor.get(field))}`;
-        }
-
-        // remove leading space
-        query = query.slice(1);
-
-        this.setState({currentSearch: query, page: 1, errorMessage: null});
-    },
     render: function() {
         // TODO: find a better way to manage the state, because this is stupid.
 
@@ -380,15 +367,11 @@ var TemplateSearch = React.createClass({
                     </div>
                     <TemplateSearchTemplate/>
                     <div className="card-block">
-                        <button className="btn btn-primary-outline" onClick={this.submitSearch}>Search</button>
+                        <button className="btn btn-primary-outline" onClick={signals.submitSearchQuery}>Search</button>
                     </div>
                 </div>
                 <div>
-                    <ResultListFrame dontRender={dontRender}
-                                     searchQuery={this.state.currentSearch}
-                                     cantus={window['temporaryCantusJS']}
-                                     doGenericGet={false}
-                    />
+                    <ResultListFrame dontRender={dontRender}/>
                 </div>
             </div>
         );

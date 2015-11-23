@@ -147,6 +147,18 @@ const SETTERS = {
             return previous;
         }
     },
+
+    loadSearchResults: function(previous, next) {
+        // Load the search results.
+        //
+        if (undefined === next.get('code')) {
+            // request was successful
+            return toImmutable({error: null, results: next});
+        } else {
+            // request was not successful
+            return toImmutable({error: next, results: previous.get('results')});
+        }
+    },
 };
 
 
@@ -194,6 +206,15 @@ const STORES = {
             this.on(SIGNAL_NAMES.SET_SEARCH_QUERY, SETTERS.setSearchQuery);
             this.on(SIGNAL_NAMES.SET_RESOURCE_TYPE, SETTERS.setSearchQuery);
         },
+    }),
+
+    SearchResults: Store({
+        // The current search results.
+        // This is the object returned from CantusJS without modification.
+        // Getters results appropriately-formatted results.
+        //
+        getInitialState() { return toImmutable({error: null, results: null}); },
+        initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
     }),
 };
 

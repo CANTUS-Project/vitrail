@@ -22,14 +22,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import cantusjs from '../cantusjs/cantus.src';
 
 import reactor from './reactor';
 import getters from './getters';
 
 
-// TODO: switch over to a CantusJS instance maintained in this file only
-// const cantusjs = next cantusModule.Cantus('http://abbot.adjectivenoun.ca:8888/');
-// const cantusjs = window['temporaryCantusJS'];
+const CANTUS = new cantusjs.Cantus('http://abbot.adjectivenoun.ca:8888/');
 
 
 const SIGNAL_NAMES = {
@@ -39,6 +38,7 @@ const SIGNAL_NAMES = {
     SET_PAGES: 4,
     SET_PAGE: 5,
     SET_SEARCH_QUERY: 6,
+    LOAD_SEARCH_RESULTS: 7,
 };
 
 
@@ -132,6 +132,28 @@ const SIGNALS = {
             reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, 'clear');
         } else {
             console.error('signals.setSearchQuery() was called with incorrect input.');
+        }
+    },
+
+    submitSearchQuery: function() {
+        // Submit a search query to the Cantus server with the settings currently in NuclearJS.
+        //
+
+        // default, unchanging things
+        const querySettings = reactor.evaluate(getters.searchQuery);
+        let ajaxSettings = querySettings.toObject();
+
+        // pagination
+        ajaxSettings['page'] = reactor.evaluate(getters.searchResultsPage);
+        ajaxSettings['per_page'] = reactor.evaluate(getters.searchResultsPerPage);
+
+        // submit the request
+        if (querySettings.count() > 1) {
+            // search query
+            CANTUS.search(ajaxSettings).then(r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r));
+        } else {
+            // browse query
+            CANTUS.get(ajaxSettings).then(r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r));
         }
     },
 };
