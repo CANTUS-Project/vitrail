@@ -3,8 +3,8 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               __tests__/test_signals.js
-// Purpose:                Tests for js/nuclear/signals.js
+// Filename:               vitrail_tests/test_stores.js
+// Purpose:                Tests for js/nuclear/stores.js
 //
 // Copyright (C) 2015 Christopher Antila
 //
@@ -23,40 +23,41 @@
 //-------------------------------------------------------------------------------------------------
 
 
-jest.dontMock('../js/nuclear/signals');
-const signals = require('../js/nuclear/signals');
+import {reactor} from '../js/nuclear/reactor';  // mocked
 
+jest.dontMock('../js/nuclear/stores');
+const stores = require('../js/nuclear/stores');
 
 
 describe('isWholeNumber()', function() {
 
     it('false with undefined input', function() {
-        var input = undefined;
-        var expected = false;
-        expect(signals.isWholeNumber(input)).toBe(expected);
+        let input = undefined;
+        let expected = false;
+        expect(stores.isWholeNumber(input)).toBe(expected);
     });
 
     it('false with input that is not a number', function() {
-        var input = 'four';
-        var expected = false;
-        expect(signals.isWholeNumber(input)).toBe(expected);
+        let input = 'four';
+        let expected = false;
+        expect(stores.isWholeNumber(input)).toBe(expected);
     });
 
     it('false with input that is less than zero', function() {
-        var input = -4;
-        var expected = false;
-        expect(signals.isWholeNumber(input)).toBe(expected);
+        let input = -4;
+        let expected = false;
+        expect(stores.isWholeNumber(input)).toBe(expected);
     });
 
     it('false with input that is not an integer', function() {
-        var input = 4.5;
-        var expected = false;
-        expect(signals.isWholeNumber(input)).toBe(expected);
+        let input = 4.5;
+        let expected = false;
+        expect(stores.isWholeNumber(input)).toBe(expected);
     });
 
     it('true with a whole number', function() {
-        var input = 4;
-        var expected = true;
-        expect(signals.isWholeNumber(input)).toBe(expected);
+        let input = 4;
+        let expected = true;
+        expect(stores.isWholeNumber(input)).toBe(expected);
     });
 });
