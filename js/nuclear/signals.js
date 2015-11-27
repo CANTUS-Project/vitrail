@@ -54,11 +54,8 @@ const SIGNALS = {
             throw new Error(msg);
         }
 
-        // TODO: make this not be stupid
-        let cantusjs = window['temporaryCantusJS'];
-
         let settings = {type: type, id: id};
-        cantusjs.get(settings)
+        CANTUS.get(settings)
         .then(function(response) {reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response)})
         .catch(function(response) {
             if (404 === response.code) {
