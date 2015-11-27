@@ -304,6 +304,58 @@ var PerPageSelector = React.createClass({
 });
 
 
+var ErrorMessage = React.createClass({
+    //
+
+    propTypes: {
+        code: React.PropTypes.number,
+        reason: React.PropTypes.string,
+        response: React.PropTypes.string,
+    },
+    render() {
+        let alertType = 'warning';
+        let message = '';
+
+        if (404 === this.props.code) {
+            message = <p>The search returned no results.</p>;
+        } else if (502 === this.props.code) {
+            message = (
+                <div>
+                    <p>
+                        Part of the CANTUS server is not working. You may try the same search
+                        again in a few minutes, but it may also be a programming error.
+                    </p>
+                    <p>
+                        Technical information: Abbot returned 502.
+                    </p>
+                </div>
+            );
+        } else if (this.props.code < 500) {
+            alertType = 'danger';
+            message = (
+                <div>
+                    <strong>Client Error</strong>
+                    <p>This probably means that something in the browser made a mistake.</p>
+                    <p>Technical information: {this.props.response}</p>
+                </div>
+            );
+        } else {
+            alertType = 'danger';
+            message = (
+                <div>
+                    <strong>Server Error</strong>
+                    <p>This probably means that something in the server made a mistake.</p>
+                    <p>Technical information: {this.props.response}</p>
+                </div>
+            );
+        }
+
+        alertType = `alert alert-${alertType}`;
+        return <div className={alertType}>{message}</div>;
+    },
+});
+
+
 var ResultListFrame = React.createClass({
     //
 
@@ -322,11 +374,10 @@ var ResultListFrame = React.createClass({
 
         let errorMessage = '';
         if (null !== this.state.error) {
-            if (404 === this.state.error.get('code')) {
-                errorMessage = <div className="alert alert-warning">No results were found for your search.</div>;
-            } else {
-                errorMessage = <div className="alert alert-danger"><strong>Error:&nbsp;</strong>{this.state.error.get('message')}</div>;
-            }
+            errorMessage = <ErrorMessage code={this.state.error.get('code')}
+                                         reason={this.state.error.get('reason')}
+                                         response={this.state.error.get('response')}
+                                         />;
         }
 
         let results = '';
