@@ -3,7 +3,7 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               js/templatesearch.src.js
+// Filename:               js/react/template_search.js
 // Purpose:                TemplateSearch React component for Vitrail.
 //
 // Copyright (C) 2015 Christopher Antila
@@ -24,10 +24,10 @@
 
 
 import React from 'react';
-import {ResultListFrame} from './vitrail.src';
-import {getters} from './nuclear/getters';
-import {reactor} from './nuclear/reactor';
-import {SIGNALS as signals} from './nuclear/signals';
+import {ResultListFrame} from './vitrail';
+import {getters} from '../nuclear/getters';
+import {reactor} from '../nuclear/reactor';
+import {SIGNALS as signals} from '../nuclear/signals';
 
 
 function encloseWithQuotes(query) {

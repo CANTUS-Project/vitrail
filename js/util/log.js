@@ -3,7 +3,7 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               js/log.js
+// Filename:               js/util/log.js
 // Purpose:                Logging and error handling for vitrail.
 //
 // Copyright (C) 2015 Christopher Antila
@@ -23,7 +23,7 @@
 //-------------------------------------------------------------------------------------------------
 
 
-import {reactor} from './nuclear/reactor';
+import {reactor} from '../nuclear/reactor';
 const DEBUG = reactor.debug;
 
 

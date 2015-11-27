@@ -24,7 +24,7 @@
 
 
 // mocked
-import {log} from '../js/log';
+import {log} from '../js/util/log';
 import {reactor} from '../js/nuclear/reactor';
 
 // unmocked

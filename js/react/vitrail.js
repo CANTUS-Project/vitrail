@@ -3,7 +3,7 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               js/vitrail.src.js
+// Filename:               js/react/vitrail.js
 // Purpose:                Core React components for Vitrail.
 //
 // Copyright (C) 2015 Christopher Antila
@@ -25,8 +25,8 @@
 
 import React from 'react';
 import {Link} from 'react-router';
-import {TemplateSearch} from './templatesearch.src';
-import {ItemViewDevelWrapper} from './itemview.src';
+import {TemplateSearch} from './template_search';
+import {ItemViewDevelWrapper} from './itemview';
 import {ResultListFrame} from './result_list';
 
 

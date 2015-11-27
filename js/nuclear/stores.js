@@ -26,7 +26,7 @@ import {Store, toImmutable} from 'nuclear-js';
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
 import {getters} from './getters';
-import {log} from '../log';
+import {log} from '../util/log';
 import {reactor} from './reactor';
 import {SIGNAL_NAMES} from './signals';
 

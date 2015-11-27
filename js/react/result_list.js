@@ -3,7 +3,7 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               js/result_list.js
+// Filename:               js/react/result_list.js
 // Purpose:                ResultList React components for Vitrail.
 //
 // Copyright (C) 2015 Christopher Antila
@@ -26,10 +26,10 @@
 import React from 'react';
 import {Link} from 'react-router';
 
-import {signals} from './nuclear/signals';
-import {reactor} from './nuclear/reactor';
-import {getters} from './nuclear/getters';
-import {ItemView} from './itemview.src';
+import {signals} from '../nuclear/signals';
+import {reactor} from '../nuclear/reactor';
+import {getters} from '../nuclear/getters';
+import {ItemView} from './itemview';
 
 
 var ResultColumn = React.createClass({

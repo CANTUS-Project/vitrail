@@ -33,10 +33,9 @@ import {STORES as stores} from './nuclear/stores';
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
-import {cantusjs as cantusModule} from './cantusjs/cantus.src';
-import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './vitrail.src.js';
-import {ItemViewDevelWrapper, ItemViewOverlay} from './itemview.src';
-import {TemplateSearch} from './templatesearch.src';
+import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './react/vitrail';
+import {ItemViewDevelWrapper, ItemViewOverlay} from './react/itemview';
+import {TemplateSearch} from './react/template_search';
 
 
 reactor.registerStores({

@@ -3,7 +3,7 @@
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
-// Filename:               js/itemview.src.js
+// Filename:               js/react/itemview.js
 // Purpose:                ItemView React component for Vitrail.
 //
 // Copyright (C) 2015 Christopher Antila
@@ -27,9 +27,9 @@ import React from 'react';
 
 import {Link} from 'react-router';
 
-import {getters} from './nuclear/getters';
-import {reactor} from './nuclear/reactor';
-import {SIGNALS} from './nuclear/signals';
+import {getters} from '../nuclear/getters';
+import {reactor} from '../nuclear/reactor';
+import {SIGNALS} from '../nuclear/signals';
 
 
 var ItemViewChant = React.createClass({
