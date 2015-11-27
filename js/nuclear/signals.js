@@ -133,13 +133,15 @@ const SIGNALS = {
         ajaxSettings['page'] = reactor.evaluate(getters.searchPage);
         ajaxSettings['per_page'] = reactor.evaluate(getters.searchPerPage);
 
+        let resultsLoader = r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r);
+
         // submit the request
         if (querySettings.count() > 1) {
             // search query
-            CANTUS.search(ajaxSettings).then(r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r));
+            CANTUS.search(ajaxSettings).then(resultsLoader).catch(resultsLoader);
         } else {
             // browse query
-            CANTUS.get(ajaxSettings).then(r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r));
+            CANTUS.get(ajaxSettings).then(resultsLoader).catch(resultsLoader);
         }
     },
 };
