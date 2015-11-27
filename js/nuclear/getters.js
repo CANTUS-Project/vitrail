@@ -55,6 +55,10 @@ const formatters = {
             return 0;
         }
     },
+
+    resourceType(query) { return query.get('type'); },
+    searchResults(results) { return results.get('results'); },
+    searchError(results) { return results.get('error'); },
 };
 
 
@@ -64,12 +68,12 @@ const getters = {
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
     searchResultsPage: [['searchResults'], formatters.searchResultsPage],  // current displayed page of results (not currently-requested page)
     searchResultsPerPage: [['searchResults'], formatters.searchResultsPerPage],  // current displayed per-page of results (not currently-requested per-page)
-    resourceType: [['searchQuery'], (query) => query.get('type')],
+    resourceType: [['searchQuery'], formatters.resourceType],
     searchQuery: ['searchQuery'],
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
-    searchResults: [['searchResults'], (res) => { if (res.get('results')) return res.get('results'); else return null; }],
-    searchError: [['searchResults'], (res) => { if (res.get('error')) return res.get('error'); else return null; }],
+    searchResults: [['searchResults'], formatters.searchResults],
+    searchError: [['searchResults'], formatters.searchError],
 };
 
 export {getters, formatters};
