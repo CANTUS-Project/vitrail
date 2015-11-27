@@ -841,7 +841,6 @@ var ItemViewOverlay = React.createClass({
         return {params: {type: '', rid: ''}};
     },
     render: function() {
-        console.log(this.props);
         // Find the URL path to the parent component.
         // Only the last element in this.props.routes will refer to this ItemView, so we'll "go up"
         // a level in components if we take the "path" member of everything but that last one.
