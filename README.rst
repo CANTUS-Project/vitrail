@@ -40,6 +40,24 @@ the following tasks:
    whenever they're changed.
 1. Starts an HTTP server on port 8000.
 
+How To: Upgrade Bootstrap
+-------------------------
+
+When there's a new release of Bootstrap, rebuild Bootstrap and *Vitrail* will automatically use it.
+
+1. Change to the ``bootstrap`` directory.
+1. Run ``git reset --hard`` to remove your previous build artifacts.
+1. Run ``git fetch`` to download new commits and tags.
+1. Run ``git tag --list`` for a list of tagged releases.
+1. Run something like ``git checkout tags/v4.0.0-alpha.2`` to checkout the desired release.
+1. Run ``npm install`` to update NPM dependencies. If it doesn't work, try to remove the
+  ``node_modules`` directory and run ``npm install`` again.
+1. Run ``bundle install`` to update Ruby dependencies.
+1. Run ``grunt dist`` to compile the new release.
+1. Because of the symlinks in Vitrail's ``css`` directory, the newly-compiled files will be used
+   automatically. However, if you used the ``build_deploy_bundle.py`` script you will obviously
+   need to re-run the script to collect the newly-compiled files.
+
 How To: Deploy
 --------------
 
