@@ -115,6 +115,15 @@ describe('SETTERS.setPage()', () => {
         expect(actual).toBe(next);
     });
 
+    it(`returns "next" when it is a string with an integer in it`, () => {
+        reactor.evaluate.mockReturnValue(10);
+        let previous = 3;
+        let next = '4';
+        let expected = 4;
+        let actual = stores.SETTERS.setPage(previous, next);
+        expect(actual).toBe(expected);
+    });
+
     it(`returns "previous" when "next" is greater than the number of pages`, () => {
         reactor.evaluate.mockReturnValue(10);
         let previous = 3;
@@ -143,6 +152,14 @@ describe('SETTERS.setPerPage()', () => {
         let next = 5;
         let actual = stores.SETTERS.setPerPage(previous, next);
         expect(actual).toBe(next);
+    });
+
+    it(`returns "next" when it's a string with a number in it`, () => {
+        let previous = 3;
+        let next = '5';
+        let expected = 5;
+        let actual = stores.SETTERS.setPerPage(previous, next);
+        expect(actual).toBe(expected);
     });
 
     it(`returns "previous" when "next" is 0`, () => {

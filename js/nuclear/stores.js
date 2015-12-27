@@ -68,6 +68,7 @@ const SETTERS = {
     // pagination
     setPage(previous, next) {
         // Set the current page in the current search results.
+        next = parseInt(next, 10);
         if (isWholeNumber(next)) {
             let numOfPages = reactor.evaluate(getters.searchResultsPages);
             if (next <= numOfPages || 1 === next) {
@@ -83,6 +84,7 @@ const SETTERS = {
     },
     setPerPage(previous, next) {
         // Set the number of results per page for search results.
+        next = parseInt(next, 10);
         if (isWholeNumber(next)) {
             if (0 < next && next < 101) {
                 return next;
