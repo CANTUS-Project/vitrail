@@ -24,8 +24,9 @@
 
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
-import {reactor} from './reactor';
 import {getters} from './getters';
+import {log} from '../util/log';
+import {reactor} from './reactor';
 
 
 const CANTUS = new cantusjs.Cantus('http://abbot.adjectivenoun.ca:8888/');
@@ -50,7 +51,7 @@ const SIGNALS = {
 
         if (undefined === type || undefined === id) {
             let msg = 'loadInItemView() requires "type" and "id" arguments';
-            console.error(msg);
+            log.error(msg);
             throw new Error(msg);
         }
 
@@ -62,7 +63,7 @@ const SIGNALS = {
                 reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
             } else {
                 // TODO: handle other errors better
-                console.error(response)
+                log.error(response)
             }
         });
     },
@@ -89,10 +90,8 @@ const SIGNALS = {
         // NOTE: resets current page to 1
         //
         if (to !== reactor.evaluate(getters.searchResultsPerPage)) {
-            reactor.batch(() => {
-                reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
-                reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
-            });
+            reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
+            reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
         }
     },
 
@@ -117,31 +116,34 @@ const SIGNALS = {
         } else if ('clear' === params) {
             reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, 'clear');
         } else {
-            console.error('signals.setSearchQuery() was called with incorrect input.');
+            log.warn('signals.setSearchQuery() was called with incorrect input.');
         }
     },
 
+    loadSearchResults(result) {
+        // This could be an inner function, but it's here to ease testing of submitSearchQuery().
+        reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, result);
+    },
     submitSearchQuery() {
         // Submit a search query to the Cantus server with the settings currently in NuclearJS.
         //
 
         // default, unchanging things
-        const querySettings = reactor.evaluate(getters.searchQuery);
-        let ajaxSettings = querySettings.toObject();
+        let ajaxSettings = reactor.evaluate(getters.searchQuery).toObject();
 
         // pagination
         ajaxSettings['page'] = reactor.evaluate(getters.searchPage);
         ajaxSettings['per_page'] = reactor.evaluate(getters.searchPerPage);
 
-        let resultsLoader = r => reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, r);
-
         // submit the request
-        if (querySettings.count() > 1) {
+        // type, page, per_page will always be there. If "ajax Settings" has more members, that
+        // means there are extra query parameters and it's a SEARCH request
+        if (Object.keys(ajaxSettings).length > 3) {
             // search query
-            CANTUS.search(ajaxSettings).then(resultsLoader).catch(resultsLoader);
+            CANTUS.search(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         } else {
             // browse query
-            CANTUS.get(ajaxSettings).then(resultsLoader).catch(resultsLoader);
+            CANTUS.get(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         }
     },
 };
