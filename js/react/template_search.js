@@ -30,23 +30,6 @@ import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 
 
-function encloseWithQuotes(query) {
-    // Given a string with a search query, remove surrounding whitespace. Then if there is a space
-    // character in the string, ensure the first and last characters are a double quote.
-
-    query = query.trim();
-    if (query.includes(' ')) {
-        if ('"' !== query.slice(0, 1)) {
-            query = '"' + query;
-        }
-        if ('"' !== query.slice(-1)) {
-            query = query + '"';
-        }
-    }
-    return query
-};
-
-
 var TemplateTypeSelector = React.createClass({
     // Type selection component for the TemplateSearch.
 
