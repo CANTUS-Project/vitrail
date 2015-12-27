@@ -1,6 +1,6 @@
 [submodule "js/cantusjs"]
 	path = js/cantusjs
-	url = git@github.com:CANTUS-Project/cantus-js.git
+	url = https://github.com/CANTUS-Project/cantus-js.git
 [submodule "bootstrap"]
 	path = bootstrap
-	url = git@github.com:twbs/bootstrap.git
+	url = https://github.com/twbs/bootstrap.git
