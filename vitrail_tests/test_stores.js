@@ -187,10 +187,17 @@ describe('SETTERS.setSearchQuery', () => {
         expect(log.warn).toBeCalled();
     });
 
-    it('works with one invalid field name, one non-string field value, one proper field, and proper type', () => {
-        let previous = nuclear.toImmutable({alreadyHere: true});
-        let next = {force: 'a', feast: 9, incipit: 'bonsoir', type: 'chant'};
-        let expected = nuclear.toImmutable({alreadyHere: true, incipit: 'bonsoir', type: 'chants'});
+    it('works in a comprehensive test', () => {
+        // in this test...
+        // - one invalid field name
+        // - one non-string field value
+        // - one proper field
+        // - proper type
+        // - set an existing field to zero-length string removes it
+        // - leave existing field untouched
+        let previous = nuclear.toImmutable({city: 'true', date: 'orange'});
+        let next = {force: 'a', feast: 9, incipit: 'bonsoir', type: 'chant', date: ''};
+        let expected = nuclear.toImmutable({city: 'true', incipit: 'bonsoir', type: 'chants'});
         let actual = stores.SETTERS.setSearchQuery(previous, next);
         expect(actual.equals(expected)).toBe(true);
         expect(log.warn).toBeCalled();  // for "feast" set to 9 instead of a string

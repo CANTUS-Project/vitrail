@@ -126,6 +126,10 @@ const SETTERS = {
                         log.warn(`setSearchQuery() received invalid type (${next.type})`);
                     }
 
+                // if the field is being set to an empty string, delete it
+                } else if ('' === next[field]) {
+                    post = post.delete(field);
+
                 // set the field
                 } else {
                     post = post.set(field, next[field]);
