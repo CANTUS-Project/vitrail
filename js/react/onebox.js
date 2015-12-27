@@ -25,23 +25,48 @@
 
 import React from 'react';
 
+import {getters} from '../nuclear/getters';
+import {reactor} from '../nuclear/reactor';
+import {SIGNALS as signals} from '../nuclear/signals';
 import {ResultListFrame} from './result_list';
 
 
 const SearchBox = React.createClass({
-    propTypes: {
-        // "contents" is the initial value in the search box
-        contents: React.PropTypes.string
+    // Generic search box.
+    //
+    // This component is designed to be used as the primary search box visible for the user at the
+    // moment. This box's contents are always given to the SearchQuery store as the "any" field.
+    //
+
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            searchQuery: getters.searchQuery,
+        };
     },
-    getDefaultProps() {
-        return {contents: ''};
+    onChange(event) {
+        signals.setSearchQuery({'any': event.target.value});
+    },
+    shouldComponentUpdate(nextProps, nextState) {
+        // We should only update if *our* field changes value.
+        if (this.state.searchQuery.get('any') !== nextState.searchQuery.get('any')) {
+            return true;
+        } else {
+            return false;
+        }
     },
     render() {
         return (
             <fieldset className="form-group row">
                 <label htmlFor="#searchQuery" className="col-sm-2">Search Query</label>
                 <div className="input-group col-sm-10">
-                    <input id="searchQuery" type="search" className="form-control form-control-search" defaultValue={this.props.contents}/>
+                    <input id="searchQuery"
+                           className="form-control form-control-search"
+                           onChange={this.onChange}
+                           type="search"
+                           value={this.state.searchQuery.get('any')}
+                    />
                     <span className="input-group-btn">
                         <button className="btn btn-secondary" type="submit" value="Search">Search</button>
                     </span>
