@@ -81,6 +81,10 @@ const OneboxSearch = React.createClass({
     // Complete OneboxSearch widget.
     //
 
+    componentWillMount() {
+        // clear the search query
+        signals.setSearchQuery('clear');
+    },
     submitSearch(submitEvent) {
         submitEvent.preventDefault();  // stop the default GET form submission
         signals.submitSearchQuery();

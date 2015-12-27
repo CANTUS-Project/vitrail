@@ -322,6 +322,10 @@ var TemplateSearchTemplate = React.createClass({
 var TemplateSearch = React.createClass({
     //
 
+    componentWillMount() {
+        // clear the search query
+        signals.setSearchQuery('clear');
+    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
