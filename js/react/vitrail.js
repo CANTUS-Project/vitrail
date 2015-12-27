@@ -459,4 +459,4 @@ var Vitrail = React.createClass({
 
 
 export {SearchBox, TypeRadioButton, TypeSelector, PerPageSelector, BasicSearch, Vitrail,
-    OneboxSearch, ResultListFrame};
+    OneboxSearch, ResultListFrame, NotImplemented};
