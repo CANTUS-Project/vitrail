@@ -24,7 +24,7 @@
 
 
 import React from 'react';
-import {ResultListFrame} from './vitrail';
+import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
