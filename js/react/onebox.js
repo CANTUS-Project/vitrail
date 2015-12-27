@@ -78,82 +78,14 @@ const SearchBox = React.createClass({
 
 
 const OneboxSearch = React.createClass({
-    getInitialState: function() {
-        return {page: 1, perPage: 10, currentSearch: '', errorMessage: null};
-    },
-    failedAjaxRequest: function(errorInfo) {
-        // when an AJAX request fails
+    // Complete OneboxSearch widget.
+    //
 
-        // 1.) was there a 404, meaning no search results were found?
-        if (404 === errorInfo.code) {
-            this.setState({errorMessage: "No results were found."});
-        }
-
-        // 2.) otherwise there was another failure
-        else {
-            var errorMessage = "There was an error while contacting the CANTUS server:\n" + errorInfo.response;
-            console.error(errorInfo);
-            this.setState({errorMessage: errorMessage});
-        }
-    },
-    changePage: function(direction) {
-        // Give this function a string, either "first," "previous," "next," or "last," to
-        // determine which way to change the page. Or supply a page number directly.
-        var newPage = 1;
-        var curPage = this.state.page;
-
-        if ("next" === direction) {
-            newPage = curPage + 1;
-        } else if ("previous" === direction) {
-            if (curPage > 1) {
-                newPage = curPage - 1;
-            }
-        } else if ("first" === direction) {
-            // it's already 1
-        } else if ("last" === direction) {
-            newPage = "last";
-        } else {
-            newPage = direction;
-        }
-
-        this.setState({page: newPage, errorMessage: null});
-    },
-    changePerPage: function(newPerPage) { this.setState({perPage: newPerPage, page: 1, errorMessage: null}); },
-    changeResourceType: function(resourceType) {
-        this.setState({resourceType: resourceType, currentSearch: "", page: 1, errorMessage: null});
-    },
-    submitSearch: function(submitEvent) {
+    submitSearch(submitEvent) {
         submitEvent.preventDefault();  // stop the default GET form submission
-        this.setState({currentSearch: submitEvent.target[1].value,
-                       page: 1,
-                       errorMessage: null});
+        signals.submitSearchQuery();
     },
-    render: function() {
-        let mainScreen = null;
-
-        // fields that shouldn't be rendered for users
-        // NB: this must be done before the call to the <ResultListFrame> component
-        let dontRender = ['id'];
-
-        // if there's an error, show an error message
-        if (null !== this.state.errorMessage) {
-            mainScreen = (<p>{this.state.errorMessage}</p>);
-        }
-
-        // otherwise we'll show the usual thing
-        else {
-            mainScreen = (<ResultListFrame resourceType='all'
-                                           dontRender={dontRender}
-                                           perPage={this.state.perPage}
-                                           page={this.state.page}
-                                           searchQuery={this.state.currentSearch}
-                                           changePage={this.changePage}
-                                           onError={this.failedAjaxRequest}
-                                           cantus={window['temporaryCantusJS']}
-            />);
-        }
-
-        // do the rendering
+    render() {
         return (
             <div className="searchForm col-sm-12">
                 <div className="searchSettings card">
@@ -161,11 +93,11 @@ const OneboxSearch = React.createClass({
                         <h2 className="card-title">Onebox Search</h2>
                     </div>
                     <form onSubmit={this.submitSearch}>
-                        <SearchBox contents={this.state.currentSearch} />
+                        <SearchBox/>
                     </form>
                 </div>
                 <div className="searchResults">
-                    {mainScreen}
+                    <ResultListFrame/>
                 </div>
             </div>
         );
