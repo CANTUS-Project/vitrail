@@ -33,8 +33,8 @@ const formatters = {
 
     searchResultsPages(results) {
         if (null !== results.get('results')) {
-            return Math.ceil(results.get('results').get('headers').get('total_results') /
-                             results.get('results').get('headers').get('per_page'));
+            return Math.ceil(parseInt(results.get('results').get('headers').get('total_results'), 10) /
+                             parseInt(results.get('results').get('headers').get('per_page'), 10));
         } else {
             return 0;
         }
@@ -42,7 +42,7 @@ const formatters = {
 
     searchResultsPage(results) {
         if (null !== results.get('results')) {
-            return results.get('results').get('headers').get('page');
+            return parseInt(results.get('results').get('headers').get('page'), 10);
         } else {
             return 0;
         }
@@ -50,7 +50,7 @@ const formatters = {
 
     searchResultsPerPage(results) {
         if (null !== results.get('results')) {
-            return results.get('results').get('headers').get('per_page');
+            return parseInt(results.get('results').get('headers').get('per_page'), 10);
         } else {
             return 0;
         }

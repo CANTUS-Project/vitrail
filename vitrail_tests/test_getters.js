@@ -42,6 +42,11 @@ describe('searchResultsPages()', () => {
         expect(formatters.searchResultsPages(results)).toBe(1);
     });
 
+    it('works when total results is less than perPage (as strings)', () => {
+        let results = Immutable.fromJS({results: {headers: {total_results: '5', per_page: '10'}}});
+        expect(formatters.searchResultsPages(results)).toBe(1);
+    });
+
     it('works when total results equals perPage', () => {
         let results = Immutable.fromJS({results: {headers: {total_results: 10, per_page: 10}}});
         expect(formatters.searchResultsPages(results)).toBe(1);
@@ -64,6 +69,11 @@ describe('searchResultsPage()', () => {
         let results = Immutable.fromJS({results: {headers: {page: 10}}});
         expect(formatters.searchResultsPage(results)).toBe(10);
     });
+
+    it('works when there are results (as a string)', () => {
+        let results = Immutable.fromJS({results: {headers: {page: '10'}}});
+        expect(formatters.searchResultsPage(results)).toBe(10);
+    });
 });
 
 
@@ -75,6 +85,11 @@ describe('searchResultsPerPage()', () => {
 
     it('works when there are results', () => {
         let results = Immutable.fromJS({results: {headers: {per_page: 42}}});
+        expect(formatters.searchResultsPerPage(results)).toBe(42);
+    });
+
+    it('works when there are results (as a string)', () => {
+        let results = Immutable.fromJS({results: {headers: {per_page: '42'}}});
         expect(formatters.searchResultsPerPage(results)).toBe(42);
     });
 });
