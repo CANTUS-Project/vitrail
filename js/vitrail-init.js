@@ -33,8 +33,9 @@ import {STORES as stores} from './nuclear/stores';
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
-import {BasicSearch, NotImplemented, OneboxSearch, Vitrail} from './react/vitrail';
+import {NotImplemented, Vitrail} from './react/vitrail';
 import {ItemViewDevelWrapper, ItemViewOverlay} from './react/itemview';
+import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
 
 
@@ -54,7 +55,6 @@ ReactDOM.render(
         <Router>
             <Route path="/" component={Vitrail}>
                 <Route path="onebox" component={OneboxSearch}/>
-                <Route path="basicsearchdevel" component={BasicSearch}/>
                 <Route path="template" component={TemplateSearch}/>
                 <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
                     <Route path=":type/:rid" component={ItemViewOverlay}/>
