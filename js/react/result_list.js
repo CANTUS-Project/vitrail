@@ -363,9 +363,6 @@ var ResultListFrame = React.createClass({
     getDataBindings() {
         // connection to NuclearJS
         return {
-            page: getters.searchResultsPage,
-            perPage: getters.searchResultsPerPage,
-            searchQuery: getters.searchQuery,
             results: getters.searchResults,
             error: getters.searchError,
         };
