@@ -26,7 +26,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 
-import {signals} from '../nuclear/signals';
+import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {ItemView} from './itemview';
@@ -250,7 +250,7 @@ var Paginator = React.createClass({
         }
 
         if (newPage < 1 || newPage > this.state.totalPages) { /* do nothing! */ }
-        else { signals.setPage(newPage); }
+        else { signals.setPage(newPage); signals.submitSearchQuery(); }
     },
     render: function() {
         return (
