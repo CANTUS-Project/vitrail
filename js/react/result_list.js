@@ -286,6 +286,7 @@ var PerPageSelector = React.createClass({
     },
     onChange(event) {
         signals.setPerPage(Number(event.target.value));
+        signals.submitSearchQuery();
     },
     render: function() {
         // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
