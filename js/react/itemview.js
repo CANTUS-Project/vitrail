@@ -32,10 +32,8 @@ import {reactor} from '../nuclear/reactor';
 import {SIGNALS} from '../nuclear/signals';
 
 
-var ItemViewChant = React.createClass({
-    // TODO: description
-    //
-
+/** ItemView sub-component for Chants. */
+const ItemViewChant = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -218,10 +216,8 @@ var ItemViewChant = React.createClass({
 });
 
 
-var ItemViewFeast = React.createClass({
-    // An ItemView that displays a Feast resource.
-    //
-
+/** ItemView sub-component for Feasts. */
+const ItemViewFeast = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -276,10 +272,8 @@ var ItemViewFeast = React.createClass({
 });
 
 
-var ItemViewIndexer = React.createClass({
-    // An ItemView that displays an Indexer resource.
-    //
-
+/** ItemView sub-component for Indexers. */
+const ItemViewIndexer = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -354,10 +348,8 @@ var ItemViewIndexer = React.createClass({
 });
 
 
-var ItemViewGenre = React.createClass({
-    // An ItemView that displays a Genre resource.
-    //
-
+/** ItemView sub-component for Genres. */
+const ItemViewGenre = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -410,10 +402,8 @@ var ItemViewGenre = React.createClass({
 });
 
 
-var ItemViewSource = React.createClass({
-    // An ItemView that displays a Source resource.
-    //
-
+/** ItemView sub-component for Sources. */
+const ItemViewSource = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -606,11 +596,8 @@ var ItemViewSource = React.createClass({
 });
 
 
-var ItemViewSimpleResource = React.createClass({
-    // An ItemView that displays what the Cantus API calls "simple resources": century, notation,
-    // office, portfolio categories, provenance, RISM siglum (pl. sigla), segment, source status
-    //
-
+/** ItemView sub-component for Simple Resources. */
+const ItemViewSimpleResource = React.createClass({
     propTypes: {
         data: React.PropTypes.object.isRequired,
         resources: React.PropTypes.object.isRequired,
@@ -655,25 +642,25 @@ var ItemViewSimpleResource = React.createClass({
 });
 
 
-var ItemView = React.createClass({
-    // Wrapper for the type-specific ItemView components.
-    //
-    // If the "type" and "rid" props are provided, this component emits the signal that causes
-    // NuclearJS and CantusJS to load the required data. If the "data" and "resources" props are
-    // provided, this component provides them directly to the appropriate subcomponent. If you
-    // provide too few or too many props, the ItemView displays a message to that effect.
-    //
-    // This component also chooses the proper subcomponent. The result is outputted in the page as
-    // expected. Use ItemViewOverlay for make the ItemView appear in front of other content.
-    //
-    // Props:
-    // - size (str) "compact" or "full" for the corresponding representation. Default is "full."
-    // - type (str) The type of resource to display.
-    // - rid (str) The resource ID to display.
-    // - data (obj) A resource's fields.
-    // - resources (obj) A resource's resource URLs.
-    //
-
+/** Wrapper for the type-specific ItemView components.
+ *
+ * If the "type" and "rid" props are provided, this component emits the signal that causes
+ * NuclearJS and CantusJS to load the required data. If the "data" and "resources" props are
+ * provided, this component provides them directly to the appropriate subcomponent. If you
+ * provide too few or too many props, the ItemView displays a message to that effect.
+ *
+ * This component also chooses the proper subcomponent. The result is outputted in the page as
+ * expected. Use ItemViewOverlay for an ItemView that appears in front of other content.
+ *
+ * Props:
+ * @param (str) size - "compact" or "full" for the corresponding representation. Default is "full."
+ * @param (str) type - The type of resource to display.
+ * @param (str) rid - The resource ID to display.
+ * @param (obj) data - A resource's fields.
+ * @param (obj) resources - A resource's resource URLs.
+ *
+ */
+const ItemView = React.createClass({
     propTypes: {
         size: React.PropTypes.oneOf(['compact', 'full']),
         type: React.PropTypes.string,
@@ -820,17 +807,16 @@ var ItemView = React.createClass({
 });
 
 
-var ItemViewOverlay = React.createClass({
-    // Wrapper for the ItemView component that causes its content to appear in front of all other
-    // content on the page.
-    //
-    // When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
-    //
-    // Props:
-    // - params.type (str) The type of resource to display. Provided by react-router from the URL.
-    // - params.rid (str) The resource ID to display. Provided by react-router from the URL.
-    //
-
+/** Wrapper for the ItemView component that causes its content to appear in front of all other
+ *  content on the page.
+ *
+ * When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
+ *
+ * Props:
+ * @param (str) params.type - The type of resource to display. Provided by react-router from the URL.
+ * @param (str) params.rid - The resource ID to display. Provided by react-router from the URL.
+ */
+const ItemViewOverlay = React.createClass({
     propTypes: {
         params: React.PropTypes.shape({
             type: React.PropTypes.string.isRequired,
@@ -866,10 +852,8 @@ var ItemViewOverlay = React.createClass({
 });
 
 
-var ItemViewDevelWrapper = React.createClass({
-    // This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT.
-    //
-
+/** This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT. */
+const ItemViewDevelWrapper = React.createClass({
     getInitialState: function() {
         return {size: 'full', type: 'source', id: '123723'};
     },
