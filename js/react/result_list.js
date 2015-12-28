@@ -308,6 +308,49 @@ var PerPageSelector = React.createClass({
 });
 
 
+/** Radio button group for the "SearchRenderAs" Store.
+ */
+const RenderAsSelector = React.createClass({
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {renderAs: getters.searchRenderAs};
+    },
+    onChange(event) {
+        signals.setRenderAs(event.target.value);
+    },
+    render() {
+        let viewChecked = false;
+        let tableChecked = false;
+
+        if ('table' === this.state.renderAs) {
+            tableChecked = true;
+        } else {
+            viewChecked = true;
+        }
+
+        return (
+            <form>
+                <div className="radio">
+                    <label>
+                        <input type="radio" name="renderAs" id="renderAsView" value="ItemView"
+                               checked={viewChecked} onChange={this.onChange}/>
+                        Render as Views
+                    </label>
+                </div>
+                <div className="radio">
+                    <label>
+                        <input type="radio" name="renderAs" id="renderAsTable" value="table"
+                               checked={tableChecked} onChange={this.onChange}/>
+                        Render as a Table
+                    </label>
+                </div>
+            </form>
+        );
+    }
+});
+
+
 var ErrorMessage = React.createClass({
     //
 
@@ -395,6 +438,7 @@ var ResultListFrame = React.createClass({
                 {results}
                 <Paginator/>
                 <PerPageSelector/>
+                <RenderAsSelector/>
             </div>
         );
     }
