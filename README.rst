@@ -64,4 +64,8 @@ When there's a new release of Bootstrap, rebuild Bootstrap and *Vitrail* will au
 How To: Deploy
 --------------
 
-??????????????????????????????????????
+1. Recursively clone the *Vitrail* repository.
+1. Run ``npm install``.
+1. Run the ``build_deploy_bundle.py`` script.
+1. Copy the "deploy.xz" file to the deployment server.
+1. Set up the deployment server to serve static files from whatever directory you unzip the XZ file.
