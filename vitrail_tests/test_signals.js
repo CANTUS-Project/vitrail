@@ -205,3 +205,14 @@ describe('submitSearchQuery()', () => {
         expect(mockThen.catch.mock.calls[0][0] === SIGNALS.loadSearchResults).toBe(true);
     });
 });
+
+
+describe('setRenderAs()', () => {
+    beforeEach(() => { reactor.dispatch.mockClear(); });
+
+    it('works', () => {
+        const as = 'table';
+        SIGNALS.setRenderAs(as);
+        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_RENDER_AS, as);
+    });
+});

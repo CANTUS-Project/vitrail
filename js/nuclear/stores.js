@@ -156,6 +156,19 @@ const SETTERS = {
             return toImmutable({error: next, results: previous.get('results')});
         }
     },
+
+    /** Set how the ResultList component will render itself.
+     *
+     * @param (str) next - Either "ItemView" or "table"
+     */
+    setRenderAs(previous, next) {
+        if ('ItemView' === next || 'table' === next) {
+            return next;
+        } else {
+            log.warn('Invariant violation: setRenderAs() requires "ItemView" or "table"');
+            return previous;
+        }
+    },
 };
 
 
@@ -206,6 +219,14 @@ const STORES = {
         //
         getInitialState() { return toImmutable({error: null, results: null}); },
         initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
+    }),
+
+    SearchRenderAs: Store({
+        // How to render the search results.
+        // This is for ResultList, and may be either "ItemView" or "table".
+        //
+        getInitialState() { return 'ItemView'; },
+        initialize() { this.on(SIGNAL_NAMES.SET_RENDER_AS, SETTERS.setRenderAs); },
     }),
 };
 

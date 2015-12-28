@@ -252,3 +252,29 @@ describe('SETTERS.loadSearchResults()', () => {
         expect(actual.equals(expected)).toBe(true);
     });
 });
+
+
+describe('SETTERS.setRenderAs()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it('works with "ItemView"', () => {
+        const previous = 'lolz';
+        const next = 'ItemView';
+        const expected = next;
+        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+    });
+
+    it('works with "table"', () => {
+        const previous = 'lolz';
+        const next = 'table';
+        const expected = next;
+        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+    });
+
+    it('does not work with "banana"', () => {
+        const previous = 'lolz';
+        const next = 'banana';
+        const expected = previous;
+        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+    });
+});

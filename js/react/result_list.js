@@ -103,7 +103,10 @@ var Result = React.createClass({
 var ResultList = React.createClass({
     //
     // Props:
-    // - ???
+    // - dontRender
+    // - data
+    // - headers
+    // - sortOrder
     //
     // NuclearJS State:
     // - renderAs (str) Whether to render the results in a "table" or with "ItemView" components.
@@ -122,7 +125,7 @@ var ResultList = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {theItem: getters.currentItemView};
+        return {renderAs: getters.searchRenderAs};
     },
     render: function() {
         let tableHeader = [];

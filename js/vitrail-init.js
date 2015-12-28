@@ -46,6 +46,7 @@ reactor.registerStores({
     'searchPage': stores.SearchPage,
     'searchQuery': stores.SearchQuery,
     'searchResults': stores.SearchResults,
+    'searchRenderAs': stores.SearchRenderAs,
 });
 
 

@@ -74,6 +74,7 @@ const getters = {
     searchPerPage: ['searchPerPage'],
     searchResults: [['searchResults'], formatters.searchResults],
     searchError: [['searchResults'], formatters.searchError],
+    searchRenderAs: ['searchRenderAs'],
 };
 
 export {getters, formatters};

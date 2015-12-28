@@ -40,6 +40,7 @@ const SIGNAL_NAMES = {
     SET_PAGE: 5,
     SET_SEARCH_QUERY: 6,
     LOAD_SEARCH_RESULTS: 7,
+    SET_RENDER_AS: 8,
 };
 
 
@@ -145,6 +146,14 @@ const SIGNALS = {
             // browse query
             CANTUS.get(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         }
+    },
+
+    /** Set the "SearchRenderAs" Store.
+     *
+     * @param (str) as - The string "ItemView" or "table".
+     */
+    setRenderAs(as) {
+        reactor.dispatch(SIGNAL_NAMES.SET_RENDER_AS, as);
     },
 };
 
