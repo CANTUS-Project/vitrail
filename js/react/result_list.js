@@ -133,6 +133,81 @@ const ResultListItemView = React.createClass({
 });
 
 
+/** ResultList sub-component that produces a table.
+ *
+ * Props:
+ * - headers
+ * - data
+ * - dontRender
+ * - sortOrder
+ */
+const ResultListTable = React.createClass({
+    propTypes: {
+        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
+        data: React.PropTypes.object,
+        headers: React.PropTypes.object,
+        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
+    },
+    getDefaultProps: function() {
+        return {dontRender: [], data: null, headers: null, sortOrder: []};
+    },
+    render() {
+        let tableHeader = [];
+        let columns = this.props.headers.fields.split(',');
+        let extraFields = this.props.headers.extra_fields;
+        if (null !== extraFields) {
+            extraFields = extraFields.split(',');
+            columns = columns.concat(extraFields);
+        }
+
+        // remove the field names in "dontRender"
+        for (let field in this.props.dontRender) {
+            let pos = columns.indexOf(this.props.dontRender[field]);
+            if (pos >= 0) {
+                columns.splice(pos, 1);
+            }
+        };
+
+        columns.forEach(function(columnName) {
+            // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
+            let working = columnName.split("_");
+            let polishedName = "";
+            for (let i in working) {
+                let rawr = working[i][0];
+                rawr = rawr.toLocaleUpperCase();
+                polishedName += rawr;
+                polishedName += working[i].slice(1) + " ";
+            }
+            polishedName = polishedName.slice(0, polishedName.length);
+
+            // now we can make the <th> cell itself
+            tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
+        });
+
+        this.props.sortOrder.forEach(function (id) {
+            results.push(<Result
+                key={id}
+                columns={columns}
+                data={this.props.data[id]}
+                resources={this.props.data.resources[id]} />);
+        }, this);
+
+        return (
+            <table className="table table-hover">
+                <thead>
+                    <tr className="resultTableHeader">
+                        {tableHeader}
+                    </tr>
+                </thead>
+                <tbody>
+                    {results}
+                </tbody>
+            </table>
+        );
+    },
+});
+
+
 // TODO: move the NuclearJS stuff from ResultListFrame to ResultList
 // TODO: make ResultList and children use ImmutableJS objects directly
 var ResultList = React.createClass({
@@ -163,64 +238,15 @@ var ResultList = React.createClass({
         return {renderAs: getters.searchRenderAs};
     },
     render: function() {
-        let tableHeader = [];
         let results;
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (null !== this.props.data && null !== this.props.headers) {
             if ('table' === this.state.renderAs) {
-                var columns = this.props.headers.fields.split(',');
-                var extraFields = this.props.headers.extra_fields;
-                if (null !== extraFields) {
-                    extraFields = extraFields.split(',');
-                    columns = columns.concat(extraFields);
-                }
-
-                // remove the field names in "dontRender"
-                for (var field in this.props.dontRender) {
-                    var pos = columns.indexOf(this.props.dontRender[field]);
-                    if (pos >= 0) {
-                        columns.splice(pos, 1);
-                    }
-                };
-
-                columns.forEach(function(columnName) {
-                    // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
-                    var working = columnName.split("_");
-                    var polishedName = "";
-                    for (var i in working) {
-                        var rawr = working[i][0];
-                        rawr = rawr.toLocaleUpperCase();
-                        polishedName += rawr;
-                        polishedName += working[i].slice(1) + " ";
-                    }
-                    polishedName = polishedName.slice(0, polishedName.length);
-
-                    // now we can make the <th> cell itself
-                    tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
-                });
-
-                this.props.sortOrder.forEach(function (id) {
-                    results.push(<Result
-                        key={id}
-                        columns={columns}
-                        data={this.props.data[id]}
-                        resources={this.props.data.resources[id]} />);
-                }, this);
-
-                results = (
-                    <table className="table table-hover">
-                        <thead>
-                            <tr className="resultTableHeader">
-                                {tableHeader}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {results}
-                        </tbody>
-                    </table>
-                );
-
+                results = <ResultListTable dontRender={this.props.dontRender}
+                                           data={this.props.data}
+                                           headers={this.props.headers}
+                                           sortOrder={this.props.sortOrder}/>;
             } else {
                 results = <ResultListItemView data={this.props.data} sortOrder={this.props.sortOrder}/>;
             }
