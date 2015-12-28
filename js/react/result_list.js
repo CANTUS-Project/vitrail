@@ -184,6 +184,7 @@ const ResultListTable = React.createClass({
             tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
         });
 
+        let results = [];
         this.props.sortOrder.forEach(function (id) {
             results.push(<Result
                 key={id}
