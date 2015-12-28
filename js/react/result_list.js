@@ -100,6 +100,41 @@ var Result = React.createClass({
     }
 });
 
+
+/** ResultList sub-component that produces some ItemView elements.
+ *
+ * Props:
+ * - data
+ * - sortOrder
+ */
+const ResultListItemView = React.createClass({
+    propTypes: {
+        data: React.PropTypes.object,
+        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
+    },
+    getDefaultProps() {
+        return {data: null, sortOrder: []};
+    },
+    render() {
+        return (
+            <div className="card-columns">
+                {this.props.sortOrder.map(function(rid) {
+                    return <ItemView
+                        key={rid}
+                        size="compact"
+                        data={this.props.data[rid]}
+                        resources={this.props.data.resources[rid]}
+                        />;
+                    }.bind(this)
+                )}
+            </div>
+        );
+    },
+});
+
+
+// TODO: move the NuclearJS stuff from ResultListFrame to ResultList
+// TODO: make ResultList and children use ImmutableJS objects directly
 var ResultList = React.createClass({
     //
     // Props:
@@ -187,21 +222,7 @@ var ResultList = React.createClass({
                 );
 
             } else {
-                // render with ItemView
-
-                results = (
-                    <div className="card-columns">
-                        {this.props.sortOrder.map(function(rid) {
-                            return <ItemView
-                                key={rid}
-                                size="compact"
-                                data={this.props.data[rid]}
-                                resources={this.props.data.resources[rid]}
-                                />;
-                            }.bind(this)
-                        )}
-                    </div>
-                );
+                results = <ResultListItemView data={this.props.data} sortOrder={this.props.sortOrder}/>;
             }
         }
 
