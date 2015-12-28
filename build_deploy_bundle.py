@@ -62,6 +62,13 @@ if arch_path.exists():
 archive = tarfile.open(ARCHIVE, 'w:xz')
 try:
     for pathname in FILES_IN_ARCHIVE:
-        archive.add(pathname)
+        pathname = pathlib.Path(pathname)
+        if pathname.is_symlink():
+            # symlinks must copy the original file into the symlink's path
+            actual = pathname.resolve()
+            archive.add(str(actual), arcname=str(pathname))
+        else:
+            # regular files can be copied normally
+            archive.add(str(pathname))
 finally:
     archive.close()
