@@ -25,10 +25,10 @@
 // This only tests getter-related functions. Whether the getters themselves are connected correctly
 // is tested in test_nuclear.js.
 
-jest.dontMock('nuclear-js');
-const Immutable = require('nuclear-js').Immutable;
-jest.dontMock('../js/nuclear/getters');
-const formatters = require('../js/nuclear/getters').formatters;
+import nuclear from 'nuclear-js';
+import {formatters} from '../js/nuclear/getters';
+
+const Immutable = nuclear.Immutable;
 
 
 describe('searchResultsPages()', () => {
