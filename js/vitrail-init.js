@@ -22,13 +22,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import init from './nuclear/init';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route} from 'react-router';
-
-import {reactor} from './nuclear/reactor';
-import {STORES as stores} from './nuclear/stores';
 
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
@@ -37,17 +35,6 @@ import {NotImplemented, Vitrail} from './react/vitrail';
 import {ItemViewDevelWrapper, ItemViewOverlay} from './react/itemview';
 import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
-
-
-reactor.registerStores({
-    'currentItemView': stores.CurrentItemView,
-    'searchResultsFormat': stores.SearchResultsFormat,
-    'searchPerPage': stores.SearchPerPage,
-    'searchPage': stores.SearchPage,
-    'searchQuery': stores.SearchQuery,
-    'searchResults': stores.SearchResults,
-    'searchRenderAs': stores.SearchRenderAs,
-});
 
 
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
