@@ -33,7 +33,6 @@ reactor.registerStores({
     'searchPage': stores.stores.SearchPage,
     'searchQuery': stores.stores.SearchQuery,
     'searchResults': stores.stores.SearchResults,
-    'searchRenderAs': stores.stores.SearchRenderAs,
 });
 
 

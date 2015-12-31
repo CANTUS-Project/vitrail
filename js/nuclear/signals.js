@@ -143,14 +143,6 @@ const SIGNALS = {
             CANTUS.get(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         }
     },
-
-    /** Set the "SearchRenderAs" Store.
-     *
-     * @param (str) as - The string "ItemView" or "table".
-     */
-    setRenderAs(as) {
-        reactor.dispatch(SIGNAL_NAMES.SET_RENDER_AS, as);
-    },
 };
 
 

@@ -220,14 +220,6 @@ const STORES = {
         getInitialState() { return toImmutable({error: null, results: null}); },
         initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
     }),
-
-    SearchRenderAs: Store({
-        // How to render the search results.
-        // This is for ResultList, and may be either "ItemView" or "table".
-        //
-        getInitialState() { return 'ItemView'; },
-        initialize() { this.on(SIGNAL_NAMES.SET_RENDER_AS, SETTERS.setRenderAs); },
-    }),
 };
 
 

@@ -220,7 +220,7 @@ var ResultList = React.createClass({
     // - sortOrder
     //
     // NuclearJS State:
-    // - renderAs (str) Whether to render the results in a "table" or with "ItemView" components.
+    // - searchResultsFormat (str) Whether to render the results in a "table" or with "ItemView" components.
     //
 
     propTypes: {
@@ -236,14 +236,14 @@ var ResultList = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {renderAs: getters.searchRenderAs};
+        return {searchResultsFormat: getters.searchResultsFormat};
     },
     render: function() {
         let results;
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (null !== this.props.data && null !== this.props.headers) {
-            if ('table' === this.state.renderAs) {
+            if ('table' === this.state.searchResultsFormat) {
                 results = <ResultListTable dontRender={this.props.dontRender}
                                            data={this.props.data}
                                            headers={this.props.headers}
@@ -356,22 +356,22 @@ var PerPageSelector = React.createClass({
 });
 
 
-/** Radio button group for the "SearchRenderAs" Store.
+/** Radio button group for the "SearchResultsFormat" Store.
  */
 const RenderAsSelector = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {renderAs: getters.searchRenderAs};
+        return {format: getters.searchResultsFormat};
     },
     onChange(event) {
-        signals.setRenderAs(event.target.value);
+        signals.setSearchResultsFormat(event.target.value);
     },
     render() {
         let viewChecked = false;
         let tableChecked = false;
 
-        if ('table' === this.state.renderAs) {
+        if ('table' === this.state.format) {
             tableChecked = true;
         } else {
             viewChecked = true;

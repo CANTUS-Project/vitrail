@@ -64,17 +64,18 @@ const formatters = {
 
 const getters = {
     currentItemView: ['currentItemView'],
+    // related to the query already completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
     searchResultsPage: [['searchResults'], formatters.searchResultsPage],  // current displayed page of results (not currently-requested page)
     searchResultsPerPage: [['searchResults'], formatters.searchResultsPerPage],  // current displayed per-page of results (not currently-requested per-page)
+    searchResults: [['searchResults'], formatters.searchResults],
+    searchError: [['searchResults'], formatters.searchError],
+    // related to the query before submission
     resourceType: [['searchQuery'], formatters.resourceType],
     searchQuery: ['searchQuery'],
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
-    searchResults: [['searchResults'], formatters.searchResults],
-    searchError: [['searchResults'], formatters.searchError],
-    searchRenderAs: ['searchRenderAs'],
 };
 
 export {getters, formatters};
