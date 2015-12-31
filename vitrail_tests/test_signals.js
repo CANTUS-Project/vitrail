@@ -22,116 +22,131 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import init from '../js/nuclear/init';
+
+// mocked
 import {cantusModule as cantusjs} from '../js/cantusjs/cantus.src';
-import {reactor} from '../js/nuclear/reactor';
 import {log} from '../js/util/log';
 
-jest.dontMock('nuclear-js');
-const Immutable = require('nuclear-js').Immutable;
-jest.dontMock('../js/nuclear/getters');
-const getters = require('../js/nuclear/getters');
-jest.dontMock('../js/nuclear/signals');
-const signals = require('../js/nuclear/signals');
-const SIGNALS = signals.SIGNALS;
-const SIGNAL_NAMES = signals.SIGNAL_NAMES;
+// unmocked
+import nuclear from 'nuclear-js';
+const Immutable = nuclear.Immutable;
+
+import getters from '../js/nuclear/getters';
+import reactor from '../js/nuclear/reactor';
+import {SIGNAL_NAMES as signal_names} from '../js/nuclear/signals';
+import {SIGNALS as signals} from '../js/nuclear/signals';
 
 
 describe('setSearchResultFormat()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); reactor.evaluate.mockClear(); });
+    beforeEach(() => { reactor.reset(); });
 
-    it('updates when the value is different', () => {
-        let to = 1;
-        reactor.evaluate.mockReturnValueOnce(2);
-        SIGNALS.setSearchResultFormat(to);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_SEARCH_RESULT_FORM, to);
-    });
-
-    it('does not update when the value is the same', () => {
-        let to = 5;
-        reactor.evaluate.mockReturnValueOnce(5);
-        SIGNALS.setSearchResultFormat(to);
-        expect(reactor.dispatch).not.toBeCalled();
+    it('works', () => {
+        const to = 'table';
+        // make sure it's starting with the other value
+        expect(reactor.evaluate(getters.searchResultsFormat)).toBe('ItemView');
+        signals.setSearchResultFormat(to);
+        expect(reactor.evaluate(getters.searchResultsFormat)).toBe(to);
     });
 });
 
 
 describe('setPage()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); reactor.evaluate.mockClear(); });
+    beforeEach(() => { reactor.reset(); });
 
-    it('updates when the value is different', () => {
-        let to = 1;
-        reactor.evaluate.mockReturnValueOnce(2);
-        SIGNALS.setPage(to);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_PAGE, to);
-    });
-
-    it('does not update when the value is the same', () => {
-        let to = 5;
-        reactor.evaluate.mockReturnValueOnce(5);
-        SIGNALS.setPage(to);
-        expect(reactor.dispatch).not.toBeCalled();
+    it('works', () => {
+        // trick it into thinking there are 10 available pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
+        const to = 3;
+        // make sure it's starting with another value
+        expect(reactor.evaluate(getters.searchPage)).not.toBe(to);
+        signals.setPage(to);
+        expect(reactor.evaluate(getters.searchPage)).toBe(to);
     });
 });
 
 
 describe('setPerPage()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); reactor.evaluate.mockClear(); });
+    beforeEach(() => { reactor.reset(); });
 
     it('updates when the value is different', () => {
-        let to = 42;
-        reactor.evaluate.mockReturnValueOnce(2);
-        SIGNALS.setPerPage(to);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_PAGE, 1);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_PER_PAGE, to);
+        const to = 42;
+        // trick it into thinking there are 10 available pages --- make sure it resets "page" to 1
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
+        signals.setPage(5);
+
+        signals.setPerPage(to);
+
+        expect(reactor.evaluate(getters.searchPerPage)).toBe(to);
+        expect(reactor.evaluate(getters.searchPage)).toBe(1);
     });
 
     it('does not update when the value is the same', () => {
-        let to = 5;
-        reactor.evaluate.mockReturnValueOnce(5);
-        SIGNALS.setPerPage(to);
-        expect(reactor.dispatch).not.toBeCalled();
+        const to = 10;
+        // trick it into thinking there are 10 available pages --- make sure it resets "page" to 1
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
+        signals.setPage(5);
+        // double-check that it is 10 even before we call setPerPage()
+        expect(reactor.evaluate(getters.searchPerPage)).toBe(to);
+
+        signals.setPerPage(to);
+
+        expect(reactor.evaluate(getters.searchPerPage)).toBe(to);
+        expect(reactor.evaluate(getters.searchPage)).toBe(5);
+    });
+
+    it('does not update when the value is invalid', () => {
+        const to = 1000;
+        // trick it into thinking there are 10 available pages --- make sure it resets "page" to 1
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
+        const currentPage = 5;
+        signals.setPage(currentPage);
+
+        signals.setPerPage(to);
+
+        expect(reactor.evaluate(getters.searchPerPage)).not.toBe(to);
+        expect(reactor.evaluate(getters.searchPage)).toBe(currentPage);
     });
 });
 
 
 describe('setResourceType()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); reactor.evaluate.mockClear(); });
+    beforeEach(() => { reactor.reset(); });
 
-    it('updates when the value is different', () => {
-        let to = 1;
-        reactor.evaluate.mockReturnValueOnce(2);
-        SIGNALS.setResourceType(to);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
-    });
+    it('works', () => {
+        const to = 'feast';
+        const expected = 'feasts';  // converted to plural with CantusJS
+        expect(reactor.evaluate(getters.resourceType)).not.toBe(to);
 
-    it('does not update when the value is the same', () => {
-        let to = 5;
-        reactor.evaluate.mockReturnValueOnce(5);
-        SIGNALS.setResourceType(to);
-        expect(reactor.dispatch).not.toBeCalled();
+        signals.setResourceType(to);
+
+        expect(reactor.evaluate(getters.resourceType)).toBe(expected);
     });
 });
 
 
 describe('setSearchQuery()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); });
+    beforeEach(() => { reactor.reset(); });
 
     it('updates when called with an object', () => {
-        let params = {a: 'letter', b: 'number'};
-        SIGNALS.setSearchQuery(params);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_SEARCH_QUERY, params);
+        const params = {incipit: 'letter', genre: 'number'};
+        signals.setSearchQuery(params);
+        const actual = reactor.evaluate(getters.searchQuery);
+        expect(actual.get('incipit')).toBe('letter');
+        expect(actual.get('genre')).toBe('number');
     });
 
     it('updates when called with "clear"', () => {
-        let params = 'clear';
-        SIGNALS.setSearchQuery(params);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_SEARCH_QUERY, params);
+        // first put some stuff in
+        signals.setSearchQuery({incipit: 'letter'});
+        expect(reactor.evaluate(getters.searchQuery).get('incipit')).toBe('letter');
+        // now clear everything
+        signals.setSearchQuery('clear');
+        expect(reactor.evaluate(getters.searchQuery).get('incipit')).toBe(undefined);
     });
 
     it('logs a warning when called with anything else', () => {
-        let params = 5;
-        SIGNALS.setSearchQuery(params);
-        expect(reactor.dispatch).not.toBeCalled();
+        signals.setSearchQuery(5);
         expect(log.warn).toBeCalled();
     });
 });
@@ -139,8 +154,7 @@ describe('setSearchQuery()', () => {
 
 describe('submitSearchQuery()', () => {
     beforeEach(() => {
-        reactor.dispatch.mockClear();
-        reactor.evaluate.mockClear();
+        reactor.reset();
         cantusjs.Cantus.mock.instances[0].search.mockClear();
         cantusjs.Cantus.mock.instances[0].get.mockClear();
     });
@@ -148,8 +162,8 @@ describe('submitSearchQuery()', () => {
     describe('loadSearchResults()', () => {
         it('calls the Reactor', () => {
             const results = {res: 'ults'};
-            SIGNALS.loadSearchResults(results);
-            expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, results);
+            signals.loadSearchResults(results);
+            expect(reactor.evaluate(getters.searchResults).get('res')).toBe('ults');
         });
     });
 
@@ -160,23 +174,23 @@ describe('submitSearchQuery()', () => {
         const mockThen = {catch: jest.genMockFn()};
         mockPromise.then.mockReturnValue(mockThen);
         mockSearch.mockReturnValueOnce(mockPromise);
-        // setup return values from reactor.evaluate()
-        const evalReturn = Immutable.fromJS({type: 'f', a: 1});
-        reactor.evaluate.mockReturnValue(evalReturn);
+        // setup some query
+        const params = {incipit: 'letter', type: 'feasts'};
+        signals.setSearchQuery(params);
         // expected argument to search()
-        const expAjaxSettings = {type: 'f', a: 1, page: evalReturn, per_page: evalReturn};
+        const expAjaxSettings = {type: 'feasts', incipit: 'letter', page: 1, per_page: 10};
 
-        SIGNALS.submitSearchQuery();
+        signals.submitSearchQuery();
 
         expect(mockSearch).toBeCalledWith(expAjaxSettings);
         // NOTE: for some reason, these don't work with the usual expect().toBeCalledWith() checks,
         //       so we'll have to go with this, which is clumsy but at least works
         expect(mockPromise.then.mock.calls.length === 1).toBe(true);
         expect(mockPromise.then.mock.calls[0].length === 1).toBe(true);
-        expect(mockPromise.then.mock.calls[0][0] === SIGNALS.loadSearchResults).toBe(true);
+        expect(mockPromise.then.mock.calls[0][0] === signals.loadSearchResults).toBe(true);
         expect(mockThen.catch.mock.calls.length === 1).toBe(true);
         expect(mockThen.catch.mock.calls[0].length === 1).toBe(true);
-        expect(mockThen.catch.mock.calls[0][0] === SIGNALS.loadSearchResults).toBe(true);
+        expect(mockThen.catch.mock.calls[0][0] === signals.loadSearchResults).toBe(true);
     });
 
     it('calls CANTUS.get() properly', () => {
@@ -187,32 +201,21 @@ describe('submitSearchQuery()', () => {
         mockPromise.then.mockReturnValue(mockThen);
         mockGet.mockReturnValueOnce(mockPromise);
         // setup return values from reactor.evaluate()
-        const evalReturn = Immutable.fromJS({type: 'f'});
-        reactor.evaluate.mockReturnValue(evalReturn);
+        const params = {type: 'feasts'};
+        signals.setSearchQuery(params);
         // expected argument to get()
-        const expAjaxSettings = {type: 'f', page: evalReturn, per_page: evalReturn};
+        const expAjaxSettings = {type: 'feasts', page: 1, per_page: 10};
 
-        SIGNALS.submitSearchQuery();
+        signals.submitSearchQuery();
 
         expect(mockGet).toBeCalledWith(expAjaxSettings);
         // NOTE: for some reason, these don't work with the usual expect().toBeCalledWith() checks,
         //       so we'll have to go with this, which is clumsy but at least works
         expect(mockPromise.then.mock.calls.length === 1).toBe(true);
         expect(mockPromise.then.mock.calls[0].length === 1).toBe(true);
-        expect(mockPromise.then.mock.calls[0][0] === SIGNALS.loadSearchResults).toBe(true);
+        expect(mockPromise.then.mock.calls[0][0] === signals.loadSearchResults).toBe(true);
         expect(mockThen.catch.mock.calls.length === 1).toBe(true);
         expect(mockThen.catch.mock.calls[0].length === 1).toBe(true);
-        expect(mockThen.catch.mock.calls[0][0] === SIGNALS.loadSearchResults).toBe(true);
-    });
-});
-
-
-describe('setRenderAs()', () => {
-    beforeEach(() => { reactor.dispatch.mockClear(); });
-
-    it('works', () => {
-        const as = 'table';
-        SIGNALS.setRenderAs(as);
-        expect(reactor.dispatch).toBeCalledWith(SIGNAL_NAMES.SET_RENDER_AS, as);
+        expect(mockThen.catch.mock.calls[0][0] === signals.loadSearchResults).toBe(true);
     });
 });

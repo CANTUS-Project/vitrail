@@ -69,39 +69,35 @@ const SIGNALS = {
         });
     },
 
+    /** Set the format of search results to "table" or "ItemView". Calling this signal with other
+     *  arguments will cause an error message.
+     */
     setSearchResultFormat: function(to) {
-        // Set the format of search results to "table" or "ItemView". Other arguments won't change
-        // the result format, and will cause an error message to appear in the console.
-        //
-        if (to !== reactor.evaluate(getters.searchResultsFormat)) {
-            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORM, to);
-        }
+        reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, to);
     },
 
-    // pagination
+    /** Set the currently-displayed page of search results. */
     setPage: function(to) {
-        // Set the currently displayed page of search results to "to."
-        //
-        if (to !== reactor.evaluate(getters.searchResultsPage)) {
-            reactor.dispatch(SIGNAL_NAMES.SET_PAGE, to);
-        }
+        reactor.dispatch(SIGNAL_NAMES.SET_PAGE, to);
     },
+
+    /** Set the number of search results displayed per page.
+     *
+     * NOTE: This function resets the current page to 1.
+     */
     setPerPage: function(to) {
-        // Set the number of search results per page to "to."
-        // NOTE: resets current page to 1
-        //
-        if (to !== reactor.evaluate(getters.searchResultsPerPage)) {
-            reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
+        // To prevent inadvertently resetting the current page when per_page doesn't actually change,
+        // we'll do this slightly weird thing.
+        const initialPerPage = reactor.evaluate(getters.searchPerPage);
+        reactor.dispatch(SIGNAL_NAMES.SET_PER_PAGE, to);
+        if (initialPerPage !== reactor.evaluate(getters.searchPerPage)) {
             reactor.dispatch(SIGNAL_NAMES.SET_PAGE, 1);
         }
     },
 
+    /** Set the resource type for which to search. */
     setResourceType: function(to) {
-        // Set the resource type to search for to "to".
-        //
-        if (to !== reactor.evaluate(getters.resourceType)) {
-            reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
-        }
+        reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
     },
 
     setSearchQuery: function(params) {
