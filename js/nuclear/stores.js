@@ -52,14 +52,14 @@ function isWholeNumber(num) {
 
 
 const SETTERS = {
-    setSearchResultFormat(previous, next) {
+    setSearchResultsFormat(previous, next) {
         // Set the format of search results to "table" or "ItemView". Other arguments won't change
         // the result format, and will cause an error message to appear in the console.
         if (undefined !== next) {
             if ('table' === next || 'ItemView' === next) {
                 return next;
             } else {
-                log.warn(`Invariant violation: setSearchResultFormat() expects "table" or "ItemView"`);
+                log.warn(`Invariant violation: setSearchResultsFormat() expects "table" or "ItemView"`);
                 return previous;
             }
         }

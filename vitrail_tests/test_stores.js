@@ -70,27 +70,27 @@ describe('isWholeNumber()', function() {
 });
 
 
-describe('SETTERS.setSearchResultFormat()', () => {
+describe('SETTERS.setSearchResultsFormat()', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
     it('returns "next" when it is "table"', () => {
         let previous = 4;
         let next = 'table';
-        let actual = stores.setters.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultsFormat(previous, next);
         expect(actual).toBe(next);
     });
 
     it('returns "next" when it is "ItemView"', () => {
         let previous = 4;
         let next = 'ItemView';
-        let actual = stores.setters.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultsFormat(previous, next);
         expect(actual).toBe(next);
     });
 
     it('returns "previous" when "next" is invalid', () => {
         let previous = 4;
         let next = 'shout to to my friends';
-        let actual = stores.setters.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultsFormat(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });

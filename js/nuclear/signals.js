@@ -72,7 +72,7 @@ const SIGNALS = {
     /** Set the format of search results to "table" or "ItemView". Calling this signal with other
      *  arguments will cause an error message.
      */
-    setSearchResultFormat: function(to) {
+    setSearchResultsFormat: function(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, to);
     },
 

@@ -38,14 +38,14 @@ import {SIGNAL_NAMES as signal_names} from '../js/nuclear/signals';
 import {SIGNALS as signals} from '../js/nuclear/signals';
 
 
-describe('setSearchResultFormat()', () => {
+describe('setSearchResultsFormat()', () => {
     beforeEach(() => { reactor.reset(); });
 
     it('works', () => {
         const to = 'table';
         // make sure it's starting with the other value
         expect(reactor.evaluate(getters.searchResultsFormat)).toBe('ItemView');
-        signals.setSearchResultFormat(to);
+        signals.setSearchResultsFormat(to);
         expect(reactor.evaluate(getters.searchResultsFormat)).toBe(to);
     });
 });
