@@ -22,17 +22,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import init from '../js/nuclear/init';
 
 // mocked
 import {log} from '../js/util/log';
-import {reactor} from '../js/nuclear/reactor';
 
 // unmocked
-jest.dontMock('../js/cantusjs/cantus.src');
-jest.dontMock('nuclear-js');
-const nuclear = require('nuclear-js');
-jest.dontMock('../js/nuclear/stores');
-const stores = require('../js/nuclear/stores');
+import nuclear  from 'nuclear-js';
+const Immutable = nuclear.Immutable;
+
+import reactor from '../js/nuclear/reactor';
+import signals from '../js/nuclear/signals';
+import stores from '../js/nuclear/stores';
 
 
 describe('isWholeNumber()', function() {
@@ -75,21 +76,21 @@ describe('SETTERS.setSearchResultFormat()', () => {
     it('returns "next" when it is "table"', () => {
         let previous = 4;
         let next = 'table';
-        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultFormat(previous, next);
         expect(actual).toBe(next);
     });
 
     it('returns "next" when it is "ItemView"', () => {
         let previous = 4;
         let next = 'ItemView';
-        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultFormat(previous, next);
         expect(actual).toBe(next);
     });
 
     it('returns "previous" when "next" is invalid', () => {
         let previous = 4;
         let next = 'shout to to my friends';
-        let actual = stores.SETTERS.setSearchResultFormat(previous, next);
+        let actual = stores.setters.setSearchResultFormat(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -97,47 +98,52 @@ describe('SETTERS.setSearchResultFormat()', () => {
 
 
 describe('SETTERS.setPage()', () => {
-    beforeEach(() => { log.warn.mockClear(); });
+    beforeEach(() => { log.warn.mockClear(); reactor.reset(); });
 
     it(`returns "next" when it's a whole number less than the number of pages`, () => {
-        reactor.evaluate.mockReturnValue(10);
+        // 10 pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
         let previous = 3;
         let next = 5;
-        let actual = stores.SETTERS.setPage(previous, next);
+        let actual = stores.setters.setPage(previous, next);
         expect(actual).toBe(next);
     });
 
     it(`returns "next" when it's 1, but number of pages is 0`, () => {
-        reactor.evaluate.mockReturnValue(0);
+        // 0 pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 0, per_page: 10}}));
         let previous = 3;
         let next = 1;
-        let actual = stores.SETTERS.setPage(previous, next);
+        let actual = stores.setters.setPage(previous, next);
         expect(actual).toBe(next);
     });
 
     it(`returns "next" when it is a string with an integer in it`, () => {
-        reactor.evaluate.mockReturnValue(10);
+        // 10 pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
         let previous = 3;
         let next = '4';
         let expected = 4;
-        let actual = stores.SETTERS.setPage(previous, next);
+        let actual = stores.setters.setPage(previous, next);
         expect(actual).toBe(expected);
     });
 
     it(`returns "previous" when "next" is greater than the number of pages`, () => {
-        reactor.evaluate.mockReturnValue(10);
+        // 10 pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
         let previous = 3;
         let next = 400;
-        let actual = stores.SETTERS.setPage(previous, next);
+        let actual = stores.setters.setPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
 
     it(`returns "previous" when "next" is not a number`, () => {
-        reactor.evaluate.mockReturnValue(10);
+        // 10 pages
+        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
         let previous = 3;
         let next = 'one hundred';
-        let actual = stores.SETTERS.setPage(previous, next);
+        let actual = stores.setters.setPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -150,7 +156,7 @@ describe('SETTERS.setPerPage()', () => {
     it(`returns "next" when it's valid input`, () => {
         let previous = 3;
         let next = 5;
-        let actual = stores.SETTERS.setPerPage(previous, next);
+        let actual = stores.setters.setPerPage(previous, next);
         expect(actual).toBe(next);
     });
 
@@ -158,14 +164,14 @@ describe('SETTERS.setPerPage()', () => {
         let previous = 3;
         let next = '5';
         let expected = 5;
-        let actual = stores.SETTERS.setPerPage(previous, next);
+        let actual = stores.setters.setPerPage(previous, next);
         expect(actual).toBe(expected);
     });
 
     it(`returns "previous" when "next" is 0`, () => {
         let previous = 3;
         let next = 0;
-        let actual = stores.SETTERS.setPerPage(previous, next);
+        let actual = stores.setters.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -173,7 +179,7 @@ describe('SETTERS.setPerPage()', () => {
     it(`returns "previous" when "next" is greater than 100`, () => {
         let previous = 3;
         let next = 400;
-        let actual = stores.SETTERS.setPerPage(previous, next);
+        let actual = stores.setters.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -181,7 +187,7 @@ describe('SETTERS.setPerPage()', () => {
     it(`returns "previous" when "next" is not a number`, () => {
         let previous = 3;
         let next = 'one hundred';
-        let actual = stores.SETTERS.setPerPage(previous, next);
+        let actual = stores.setters.setPerPage(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -192,14 +198,14 @@ describe('SETTERS.setSearchQuery', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
     it('returns initial state when called with "clear"', () => {
-        let actual = stores.SETTERS.setSearchQuery('asdf', 'clear');
-        expect(actual.equals(stores.STORES.SearchQuery.getInitialState())).toBe(true);
+        let actual = stores.setters.setSearchQuery('asdf', 'clear');
+        expect(actual.equals(stores.stores.SearchQuery.getInitialState())).toBe(true);
     });
 
     it('returns "previous" when called with invalid "next"', () => {
         let previous = 42;
         let next = 600;
-        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        let actual = stores.setters.setSearchQuery(previous, next);
         expect(actual).toBe(previous);
         expect(log.warn).toBeCalled();
     });
@@ -215,7 +221,7 @@ describe('SETTERS.setSearchQuery', () => {
         let previous = nuclear.toImmutable({city: 'true', date: 'orange'});
         let next = {force: 'a', feast: 9, incipit: 'bonsoir', type: 'chant', date: ''};
         let expected = nuclear.toImmutable({city: 'true', incipit: 'bonsoir', type: 'chants'});
-        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        let actual = stores.setters.setSearchQuery(previous, next);
         expect(actual.equals(expected)).toBe(true);
         expect(log.warn).toBeCalled();  // for "feast" set to 9 instead of a string
     });
@@ -224,7 +230,7 @@ describe('SETTERS.setSearchQuery', () => {
         let previous = nuclear.toImmutable({alreadyHere: true});
         let next = {incipit: 'bonsoir', type: 'blueberry'};
         let expected = nuclear.toImmutable({alreadyHere: true, incipit: 'bonsoir'});
-        let actual = stores.SETTERS.setSearchQuery(previous, next);
+        let actual = stores.setters.setSearchQuery(previous, next);
         expect(actual.equals(expected)).toBe(true);
         expect(log.warn).toBeCalled();  // for "feast" set to 9 instead of a string
     });
@@ -238,7 +244,7 @@ describe('SETTERS.loadSearchResults()', () => {
         let previous = 'whatever';
         let next = {incipit: 'deus ex machina'};
         let expected = nuclear.toImmutable({error: null, results: next});
-        let actual = stores.SETTERS.loadSearchResults(previous, next);
+        let actual = stores.setters.loadSearchResults(previous, next);
         expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
         expect(actual.equals(expected)).toBe(true);
     });
@@ -247,7 +253,7 @@ describe('SETTERS.loadSearchResults()', () => {
         let previous = nuclear.toImmutable({results: 42});
         let next = {code: 500};
         let expected = nuclear.toImmutable({results: 42, error: next});
-        let actual = stores.SETTERS.loadSearchResults(previous, next);
+        let actual = stores.setters.loadSearchResults(previous, next);
         expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
         expect(actual.equals(expected)).toBe(true);
     });
@@ -261,20 +267,20 @@ describe('SETTERS.setRenderAs()', () => {
         const previous = 'lolz';
         const next = 'ItemView';
         const expected = next;
-        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+        expect(stores.setters.setRenderAs(previous, next)).toBe(expected);
     });
 
     it('works with "table"', () => {
         const previous = 'lolz';
         const next = 'table';
         const expected = next;
-        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+        expect(stores.setters.setRenderAs(previous, next)).toBe(expected);
     });
 
     it('does not work with "banana"', () => {
         const previous = 'lolz';
         const next = 'banana';
         const expected = previous;
-        expect(stores.SETTERS.setRenderAs(previous, next)).toBe(expected);
+        expect(stores.setters.setRenderAs(previous, next)).toBe(expected);
     });
 });

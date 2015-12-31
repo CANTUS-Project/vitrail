@@ -231,5 +231,6 @@ const STORES = {
 };
 
 
-export {STORES, SETTERS, isWholeNumber};
-export default STORES;
+const theModule = {stores: STORES, setters: SETTERS, isWholeNumber: isWholeNumber};
+export {theModule};
+export default theModule;

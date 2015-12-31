@@ -23,17 +23,17 @@
 //-------------------------------------------------------------------------------------------------
 
 import reactor from './reactor';
-import {STORES as stores} from './stores';
+import stores from './stores';
 
 
 reactor.registerStores({
-    'currentItemView': stores.CurrentItemView,
-    'searchResultsFormat': stores.SearchResultsFormat,
-    'searchPerPage': stores.SearchPerPage,
-    'searchPage': stores.SearchPage,
-    'searchQuery': stores.SearchQuery,
-    'searchResults': stores.SearchResults,
-    'searchRenderAs': stores.SearchRenderAs,
+    'currentItemView': stores.stores.CurrentItemView,
+    'searchResultsFormat': stores.stores.SearchResultsFormat,
+    'searchPerPage': stores.stores.SearchPerPage,
+    'searchPage': stores.stores.SearchPage,
+    'searchQuery': stores.stores.SearchQuery,
+    'searchResults': stores.stores.SearchResults,
+    'searchRenderAs': stores.stores.SearchRenderAs,
 });
 
 
