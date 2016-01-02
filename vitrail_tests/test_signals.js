@@ -6,7 +6,7 @@
 // Filename:               vitrail_tests/test_signals.js
 // Purpose:                NuclearJS signals for Vitrail.
 //
-// Copyright (C) 2015 Christopher Antila
+// Copyright (C) 2015, 2016 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,12 +25,13 @@
 import init from '../js/nuclear/init';
 
 // mocked
-import {cantusModule as cantusjs} from '../js/cantusjs/cantus.src';
 import {log} from '../js/util/log';
 
 // unmocked
 import nuclear from 'nuclear-js';
 const Immutable = nuclear.Immutable;
+
+import cantusjs from '../js/cantusjs/cantus.src';
 
 import getters from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
@@ -155,8 +156,8 @@ describe('setSearchQuery()', () => {
 describe('submitSearchQuery()', () => {
     beforeEach(() => {
         reactor.reset();
-        cantusjs.Cantus.mock.instances[0].search.mockClear();
-        cantusjs.Cantus.mock.instances[0].get.mockClear();
+        cantusjs.Cantus.prototype.search.mockClear();
+        cantusjs.Cantus.prototype.get.mockClear();
     });
 
     describe('loadSearchResults()', () => {
@@ -169,7 +170,7 @@ describe('submitSearchQuery()', () => {
 
     it('calls CANTUS.search() properly', () => {
         // make a mock Promise to return from search(), then set it to be returned
-        const mockSearch = cantusjs.Cantus.mock.instances[0].search;
+        const mockSearch = cantusjs.Cantus.prototype.search;
         const mockPromise = {then: jest.genMockFn()};
         const mockThen = {catch: jest.genMockFn()};
         mockPromise.then.mockReturnValue(mockThen);
@@ -195,7 +196,7 @@ describe('submitSearchQuery()', () => {
 
     it('calls CANTUS.get() properly', () => {
         // make a mock Promise to return from get(), then set it to be returned
-        const mockGet = cantusjs.Cantus.mock.instances[0].get;
+        const mockGet = cantusjs.Cantus.prototype.get;
         const mockPromise = {then: jest.genMockFn()};
         const mockThen = {catch: jest.genMockFn()};
         mockPromise.then.mockReturnValue(mockThen);
