@@ -807,14 +807,49 @@ const ItemView = React.createClass({
 });
 
 
+/** Make the URL to the "parent" of an ItemViewOverlay component.
+ *
+ * @param (array) routes - An array of objects that have a "path" member, which is a string
+ *        containing part of the URL of a resource. Note that this should be the "routes" prop
+ *        given to an ItemViewOverlay component.
+ * @returns A string that is the URL to the "parent."
+ *
+ * **Example**
+ *
+ * > let routes = [{path: '/'}, {path: 'search'}, {path: 'results'}, {path: ':type/:rid'}];
+ * > console.log(pathToParent(routes));
+ * '/search/results'
+ */
+function pathToParent(routes) {
+    const routesLength = routes.length;
+    if (routesLength > 2) {
+        let post = '';
+        for (let i = 1; i < routesLength - 1; i++) {
+            post = `${post}/${routes[i].path}`;
+        }
+        return post;
+    } else {
+        return '/';
+    }
+};
+
+
 /** Wrapper for the ItemView component that causes its content to appear in front of all other
  *  content on the page.
  *
  * When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
  *
- * Props:
+ * Props (NOTE: all provided by react-router)
  * @param (str) params.type - The type of resource to display. Provided by react-router from the URL.
  * @param (str) params.rid - The resource ID to display. Provided by react-router from the URL.
+ * @param (array) routes - An array of objects that have a "path" member, which is a string
+ *        containing part of the URL of this resource.
+ *
+ * NOTE: The "routes" prop is an undocumented feature of react-router, provided by their RouterContext
+ *       component. Of course I don't like using undocumented features, and especially not when it's
+ *       in a third-party library with which I already have trust issues, but I can't really think
+ *       of a better way at this point, and there are bigger problems to solve!
+ * https://github.com/rackt/react-router/blob/3dd0cdf517e5c4d981113fad83f95939ae50cb60/modules/RouterContext.js
  */
 const ItemViewOverlay = React.createClass({
     propTypes: {
@@ -822,29 +857,16 @@ const ItemViewOverlay = React.createClass({
             type: React.PropTypes.string.isRequired,
             rid: React.PropTypes.string.isRequired,
         }).isRequired,
+        routes: React.PropTypes.arrayOf(React.PropTypes.shape({
+            path: React.PropTypes.string.isRequired,
+        })).isRequired,
     },
-    getDefaultProps: function() {
-        return {params: {type: '', rid: ''}};
-    },
-    render: function() {
-        // Find the URL path to the parent component.
-        // Only the last element in this.props.routes will refer to this ItemView, so we'll "go up"
-        // a level in components if we take the "path" member of everything but that last one.
-        let pathToParent = this.props.routes.reduce(function(prev, cur, i, array) {
-            if (i === array.length - 1) {
-                return prev;
-            } else {
-                return prev + cur.path;
-            }
-        }, '');
-
-        let itemview = <ItemView type={this.props.params.type} rid={this.props.params.rid} size="full"/>;
-
+    render() {
         return (
             <div className="itemview">
                 <div className="itemview-button-container">
-                    <Link className="btn btn-primary " to={pathToParent}>Close</Link>
-                    {itemview}
+                    <Link className="btn btn-primary" to={pathToParent(this.props.routes)}>Close</Link>
+                    <ItemView type={this.props.params.type} rid={this.props.params.rid} size="full"/>
                 </div>
             </div>
         );
@@ -941,4 +963,4 @@ const ItemViewDevelWrapper = React.createClass({
 });
 
 
-export {ItemViewDevelWrapper, ItemView, ItemViewOverlay};
+export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, pathToParent};
