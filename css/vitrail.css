@@ -56,3 +56,7 @@
     background-color: #fff;
     max-width: 50rem;
 }
+
+.td-align-right {
+    text-align: right;
+}

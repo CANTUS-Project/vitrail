@@ -6,7 +6,7 @@
 // Filename:               js/react/vitrail.js
 // Purpose:                Core React components for Vitrail.
 //
-// Copyright (C) 2015 Christopher Antila
+// Copyright (C) 2015, 2016 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -22,9 +22,74 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
 import React from 'react';
+import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
+
+
+/** Alert the user about something.
+ *
+ * This component is intended primarily for alerting users about errors, but may also be used for
+ * other purposes, like to alert them that an edit was successfully saved in the database.
+ *
+ * This component may be embedded in the user interface, or of "overlay" is set to true, displayed
+ * "in front of" all
+ *
+ * Props
+ * -----
+ * @param (str) message - The error message to display to the user. Required.
+ * @param (str) class - A Bootstrap 4 "contextual class" for the message (success, info, warning,
+ *     danger). Defaults to "info."
+ * @param (bool) overlay - Display in front of the rest of the UI. Default is false.
+ * @param (ImmutableJS.Map) fields - A Map of key/value pairs with additional information for the
+ *     user. These should help the user either solve the problem, or report it to the developers.
+ *
+ */
+const AlertView = React.createClass({
+    propTypes: {
+        message: React.PropTypes.string.isRequired,
+        class: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
+        overlay: React.PropTypes.bool,
+        fields: React.PropTypes.instanceOf(Immutable.Map),
+    },
+    getDefaultProps() {
+        return {overlay: false, class: 'info', fields: Immutable.Map()};
+    },
+    render() {
+        let fields = '';
+        if (this.props.fields.size > 0) {
+            let innerList = [];
+            this.props.fields.forEach((value, key) => {
+                innerList.push(
+                    <tr key={key.toLocaleLowerCase()}>
+                        <td className="td-align-right">{key}:</td>
+                        <td>{value}</td>
+                    </tr>
+                );
+            });
+
+            fields = (
+                <div className="card-block">
+                    <table className="table table-striped">
+                        <tbody>
+                        {innerList}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        return (
+            <div className="card">
+                <div className={`alert alert-${this.props.class}`} role="alert">
+                    {this.props.message}
+                </div>
+                {fields}
+            </div>
+        );
+    },
+});
+
 
 
 var NavbarItem = React.createClass({
@@ -104,4 +169,4 @@ var Vitrail = React.createClass({
 });
 
 
-export {Vitrail, NotImplemented};
+export {Vitrail, NotImplemented, AlertView};
