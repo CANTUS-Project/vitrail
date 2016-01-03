@@ -6,7 +6,7 @@
  * Filename:               css/vitrail.css
  * Purpose:                CSS file for Vitrail.
  *
- * Copyright (C) 2015 Christopher Antila
+ * Copyright (C) 2015, 2016 Christopher Antila
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@
     font-style: italic;
 }
 
-.itemview {
+.itemview-overlay {
     position: fixed;
     left: 0px;
     top: 0px;
@@ -52,7 +52,7 @@
     right: 0px;
 }
 
-.inner-itemview {
+.itemview {
     background-color: #fff;
     max-width: 50rem;
 }

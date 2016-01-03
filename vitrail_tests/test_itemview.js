@@ -41,13 +41,13 @@ describe('ItemViewOverlay', () => {
         const overlay = TestUtils.renderIntoDocument( <itemview.ItemViewOverlay params={params} routes={routes}/> );
         const overlayNode = ReactDOM.findDOMNode(overlay);
 
-        expect(overlayNode.className).toBe('itemview');
+        expect(overlayNode.className).toBe('itemview-overlay');
         expect(overlayNode.children[0].className).toBe('itemview-button-container');
         // just make sure it's an <a> like returned by Link; we'll trust that component did its stuff
         expect(overlayNode.children[0].children[0].tagName).toBe('A');
         // just make sure it's a <div> like returned by ItemView
         expect(overlayNode.children[0].children[1].tagName).toBe('DIV');
-        expect(overlayNode.children[0].children[1].className).toBe('card inner-itemview');
+        expect(overlayNode.children[0].children[1].className).toBe('card itemview');
     });
 });
 

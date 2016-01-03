@@ -6,7 +6,7 @@
 // Filename:               js/react/itemview.js
 // Purpose:                ItemView React component for Vitrail.
 //
-// Copyright (C) 2015 Christopher Antila
+// Copyright (C) 2015, 2016 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -171,7 +171,7 @@ const ItemViewChant = React.createClass({
         let post = '';
         if ('full' === this.props.size) {
             post = (
-                <div className="card inner-itemview">
+                <div className="card itemview">
                     <div className="card-block">
                         <h4 className="card-title">
                             {data.incipit}
@@ -197,7 +197,7 @@ const ItemViewChant = React.createClass({
             );
         } else {
             post = (
-                <div className="card inner-itemview">
+                <div className="card itemview">
                     <div className="card-block">
                         <h4 className="card-title">
                             {data.incipit}
@@ -255,7 +255,7 @@ const ItemViewFeast = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card inner-itemview">
+            <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
                         {data.name}
@@ -334,7 +334,7 @@ const ItemViewIndexer = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card inner-itemview">
+            <div className="card itemview">
                 <div className="card-block">
                     {name}
                     {institution}
@@ -385,7 +385,7 @@ const ItemViewGenre = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card inner-itemview">
+            <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
                         {data.name}
@@ -571,7 +571,7 @@ const ItemViewSource = React.createClass({
 
         if ('full' === this.props.size) {
             post = (
-                <div className="card inner-itemview">
+                <div className="card itemview">
                     {commonHeader}
                     <ul className="list-group list-group-flush">
                         {provenanceDetail}
@@ -585,7 +585,7 @@ const ItemViewSource = React.createClass({
             );
         } else {
             post = (
-                <div className="card inner-itemview">
+                <div className="card itemview">
                     {commonHeader}
                 </div>
             );
@@ -626,7 +626,7 @@ const ItemViewSimpleResource = React.createClass({
 
         // Build the final structure
         let post = (
-            <div className="card inner-itemview">
+            <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
                         {data.name}
@@ -735,7 +735,7 @@ const ItemView = React.createClass({
                 errMsg = 'No data: maybe the type or ID are wrong, or the Cantus server is broken?';
             }
             rendered = (
-                <div className="card inner-itemview">
+                <div className="card itemview">
                     <div className="card-block">
                         <div className="alert alert-warning" role="alert">
                             {errMsg}
@@ -863,7 +863,7 @@ const ItemViewOverlay = React.createClass({
     },
     render() {
         return (
-            <div className="itemview">
+            <div className="itemview-overlay">
                 <div className="itemview-button-container">
                     <Link className="btn btn-primary" to={pathToParent(this.props.routes)}>Close</Link>
                     <ItemView type={this.props.params.type} rid={this.props.params.rid} size="full"/>
