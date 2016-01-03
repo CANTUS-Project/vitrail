@@ -26,7 +26,7 @@ import init from '../js/nuclear/init';
 
 // const Immutable = require('nuclear-js').Immutable;  // TODO: will I actually use this?
 jest.dontMock('../js/react/itemview.js');  // module under test
-const itemview = require('../js/react/itemview.js');
+const itemview = require('../js/react/itemview.js').moduleForTesting;
 
 import React from 'react';
 import ReactDOM from 'react-dom';

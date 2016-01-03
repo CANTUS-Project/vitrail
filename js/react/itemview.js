@@ -963,4 +963,9 @@ const ItemViewDevelWrapper = React.createClass({
 });
 
 
-export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, pathToParent};
+const moduleForTesting = {
+    ItemView: ItemView,
+    pathToParent: pathToParent,
+    ItemViewOverlay: ItemViewOverlay,
+};
+export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, moduleForTesting};
