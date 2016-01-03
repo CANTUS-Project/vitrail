@@ -24,7 +24,7 @@
 
 import init from '../js/nuclear/init';
 
-// const Immutable = require('nuclear-js').Immutable;  // TODO: will I actually use this?
+import {Immutable} from 'nuclear-js';
 jest.dontMock('../js/react/itemview.js');  // module under test
 const itemview = require('../js/react/itemview.js').moduleForTesting;
 
@@ -33,21 +33,29 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 
-describe('ItemViewOverlay', () => {
+describe('ItemViewError', () => {
     it('works as intended', () => {
-        const params = {type: 'chant', rid: '1234'};
-        const routes = [{path: '/'}, {path: 'lolz'}, {path: ':type/:rid'}];
+        const errorMessage = 'This sucks!';
+        const type = Immutable.fromJS({prop: 'type'});
+        const rid = Immutable.fromJS({prop: 'rid'});
+        const data = Immutable.fromJS({prop: 'data'});
+        const resources = Immutable.fromJS({prop: 'resources'});
 
-        const overlay = TestUtils.renderIntoDocument( <itemview.ItemViewOverlay params={params} routes={routes}/> );
-        const overlayNode = ReactDOM.findDOMNode(overlay);
+        // shallow render---we just want to make sure it delegates properly to AlertView
+        const renderer = TestUtils.createRenderer();
+        const actualComponent = renderer.render( <itemview.ItemViewError
+            errorMessage={errorMessage} type={type} rid={rid} data={data} resources={resources}/> );
+        const actual = renderer.getRenderOutput(actualComponent);
 
-        expect(overlayNode.className).toBe('itemview-overlay');
-        expect(overlayNode.children[0].className).toBe('itemview-button-container');
-        // just make sure it's an <a> like returned by Link; we'll trust that component did its stuff
-        expect(overlayNode.children[0].children[0].tagName).toBe('A');
-        // just make sure it's a <div> like returned by ItemView
-        expect(overlayNode.children[0].children[1].tagName).toBe('DIV');
-        expect(overlayNode.children[0].children[1].className).toBe('card itemview');
+        expect(actual.type.displayName).toBe('AlertView');
+        const props = actual.props;
+        expect(props.message).toBe(errorMessage);
+        expect(props.class).toBe('warning');
+        expect(props.fields.get('Component')).toBe('ItemView');
+        expect(props.fields.get('Type')).toBe(type.toString());
+        expect(props.fields.get('ID')).toBe(rid.toString());
+        expect(props.fields.get('Data')).toBe(data.toString());
+        expect(props.fields.get('Resources')).toBe(resources.toString());
     });
 });
 

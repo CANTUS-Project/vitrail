@@ -22,7 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
+import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import {Link} from 'react-router';
@@ -30,6 +30,7 @@ import {Link} from 'react-router';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS} from '../nuclear/signals';
+import {AlertView} from './vitrail';
 
 
 /** ItemView sub-component for Chants. */
@@ -642,6 +643,48 @@ const ItemViewSimpleResource = React.createClass({
 });
 
 
+/** Used by the "ItemView" component to display information about an error.
+ *
+ * This component is not intended for use outside the "itemview" module.
+ *
+ * Props
+ * -----
+ * @param (str) errorMessage - The error message to display to the user.
+ * @param (any) type - The "type" prop given to ItemView.
+ * @param (any) rid - The "rid" prop given to ItemView.
+ * @param (any) data - A stringified version of the "data" prop given to ItemView.
+ * @param (any) resources - A stringified version of the "resources" prop given to ItemView.
+ *
+ * All the props (except "errorMessage") are stringified before being displayed.
+ */
+const ItemViewError = React.createClass({
+    propTypes: {
+        errorMessage: React.PropTypes.string.isRequired,
+        type: React.PropTypes.node,
+        rid: React.PropTypes.node,
+        data: React.PropTypes.node,
+        resources: React.PropTypes.node,
+    },
+    getDefaultProps() {
+        return {type: '', rid: '', data: '', resources: ''};
+    },
+    render() {
+        return (
+            <AlertView message={this.props.errorMessage}
+                       class="warning"
+                       fields={Immutable.Map({
+                           'Component': 'ItemView',
+                           'Type': this.props.type.toString(),
+                           'ID': this.props.rid.toString(),
+                           'Data': this.props.data.toString(),
+                           'Resources': this.props.resources.toString(),
+                       })}
+            />
+        );
+    },
+});
+
+
 /** Wrapper for the type-specific ItemView components.
  *
  * If the "type" and "rid" props are provided, this component emits the signal that causes
@@ -723,8 +766,7 @@ const ItemView = React.createClass({
             return false;
         }
     },
-    render: function() {
-
+    render() {
         let rendered;  // this holds the rendered component
 
         if (!this.canWeDisplaySomething()) {
@@ -735,19 +777,13 @@ const ItemView = React.createClass({
                 errMsg = 'No data: maybe the type or ID are wrong, or the Cantus server is broken?';
             }
             rendered = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <div className="alert alert-warning" role="alert">
-                            {errMsg}
-                        </div>
-                        <ul className="list-group">
-                            <li className="list-group-item">Component: ItemView</li>
-                            <li className="list-group-item">Type: {this.props.type}</li>
-                            <li className="list-group-item">ID: {this.props.rid}</li>
-                            <li className="list-group-item">Data: {this.props.data}</li>
-                            <li className="list-group-item">Resources: {this.props.resources}</li>
-                        </ul>
-                    </div>
+                <div className="itemview">
+                    <ItemViewError errorMessage={errMsg}
+                                                type={this.props.type}
+                                                rid={this.props.rid}
+                                                data={this.props.data}
+                                                resources={this.props.resources}
+                    />
                 </div>
             );
         } else {
@@ -964,6 +1000,7 @@ const ItemViewDevelWrapper = React.createClass({
 
 
 const moduleForTesting = {
+    ItemViewError: ItemViewError,
     ItemView: ItemView,
     pathToParent: pathToParent,
     ItemViewOverlay: ItemViewOverlay,
