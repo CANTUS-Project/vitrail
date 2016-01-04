@@ -26,12 +26,12 @@ import init from './nuclear/init';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, Route} from 'react-router';
+import {IndexRoute, Route, Router} from 'react-router';
 
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
-import {NotImplemented, Vitrail} from './react/vitrail';
+import {Colophon, NotImplemented, Vitrail} from './react/vitrail';
 import {ItemViewDevelWrapper, ItemViewOverlay} from './react/itemview';
 import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
@@ -42,6 +42,7 @@ ReactDOM.render(
     (
         <Router>
             <Route path="/" component={Vitrail}>
+                <IndexRoute component={Colophon}/>
                 <Route path="onebox" component={OneboxSearch}/>
                 <Route path="template" component={TemplateSearch}/>
                 <Route path="itemviewdevel" component={ItemViewDevelWrapper}>

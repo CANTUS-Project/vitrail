@@ -27,6 +27,39 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 
 
+// This is the list of software given to the Colophon.
+const listOfSoftware = [
+    {
+        name: 'Abbot',
+        version: 'TODO (0.4.2+)',
+        description: 'The "CANTUS Server" that provides data for Vitrail.',
+        licence: 'AGPLv3+',
+        link: 'https://github.com/CANTUS-Project/abbot',
+    },
+    {
+        name: 'CantusJS',
+        version: 'TODO (commit f2a62ac)',
+        description: 'Makes it easier for Vitrail to access Abbot.',
+        licence: 'GPLv3+',
+        link: 'https://github.com/CANTUS-Project/cantus-js',
+    },
+    {
+        name: 'pysolr-tornado',
+        version: '3.3.1a1',
+        description: 'Used by Abbot to connect to a "Solr" database.',
+        licence: 'New BSD',
+        link: 'https://github.com/CANTUS-Project/pysolr-tornado',
+    },
+    {
+        name: 'Vitrail',
+        version: 'TODO (0.2.5+)',
+        description: 'The browser-based application to access CANTUS data.',
+        licence: 'AGPLv3+',
+        link: 'https://github.com/CANTUS-Project/vitrail',
+    },
+];
+
+
 /** Alert the user about something.
  *
  * This component is intended primarily for alerting users about errors, but may also be used for
@@ -91,6 +124,118 @@ const AlertView = React.createClass({
 });
 
 
+/** A table of the software developed for CANTUS.
+ *
+ * Props:
+ * ------
+ * @param (array of object) software - An array of objects with the following members: "name",
+ *     "version", "description", "licence", and "link". All data should be strings.
+ */
+const SoftwareTable = React.createClass({
+    propTypes: {
+        software: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    },
+    getDefaultProps() { return {software: []}; },
+    render() {
+        return (
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Software</th>
+                        <th>Version</th>
+                        <th>Description</th>
+                        <th>Licence</th>
+                        <th>Source Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {this.props.software.map(software => {
+                        return (
+                            <tr key={software.name.toLocaleLowerCase()}>
+                                <td>{software.name}</td>
+                                <td>{software.version}</td>
+                                <td>{software.description}</td>
+                                <td>{software.licence}</td>
+                                <td><a href={software.link}>Link</a></td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        );
+    },
+});
+
+
+/** An "About Cantus" component for the Vitrail home page.
+ *
+ */
+const Colophon = React.createClass({
+    render() {
+        return (
+            <article className="container">
+                <section>
+                    <h1>About the CANTUS Database</h1>
+                    <p className="lead">
+                        CANTUS is a database of the Latin chants found in over 130 manuscripts and early
+                        printed books.
+                    </p>
+                    <p>
+                        This searchable digital archive holds inventories of primarily
+                        antiphoners and breviaries from medieval Europe; these are the main sources for
+                        the music sung in the liturgical Office. You are currently accessing the
+                        CANTUS Database through a secondary user interface called Vitrail. The primary
+                        user interface, called Drupal, is available at <a href="http://cantus.uwaterloo.ca/">http://cantus.uwaterloo.ca/</a>.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Differences between the User Interfaces</h2>
+                    <p>
+                        Drupal is the usual way of accessing the CANTUS Database. Drupal holds the authoritative
+                        version of the database. Registered users may edit the database.
+                    </p>
+                    <p>
+                        Vitrail is a new way to access the CANTUS Database, currently under development.
+                        Vitrail uses a replica of the Drupal database, which may occasionally be out-of-sync
+                        with what you see on Drupal. However, Vitrail automatically updates itself, so
+                        any differences are temporary.
+                    </p>
+                    <p>
+                        Vitrail is being developed to provide a mobile-friendly way to access the CANTUS
+                        Database. Drupal will continue to exist alongside Vitrail for several
+                        years&mdash;perhaps indefinitely.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>About Vitrail</h2>
+                    <p>
+                        Vitrail is currently under development. This is not &ldquo;production-ready&rdquo;
+                        software, so you can expect to encounter bugs and things that don&apos;t look right.
+                        When you find these, please do report them to the CANTUS team, whose contact
+                        information is available on <a href="http://cantus.uwaterloo.ca/">Drupal</a>.
+                    </p>
+                    <p>
+                        Vitrail is built with &ldquo;free and open source&rdquo; software, which means
+                        that users have different legal rights than most software. One such right is
+                        access to the application&apos;s &ldquo;source code&rdquo; so that you may
+                        modify, share, and study the application. Thus the following list briefly
+                        describes some of the free and open source software used in Vitrail, and
+                        where to access its source code.
+                    </p>
+                    <SoftwareTable software={listOfSoftware}/>
+                    <p>
+                        This list only includes software built by the CANTUS team. You may learn about
+                        additional software we use by visiting the source code repository of the project
+                        you wish to learn about.
+                    </p>
+                </section>
+            </article>
+        );
+    },
+});
+
 
 var NavbarItem = React.createClass({
     propTypes: {
@@ -125,7 +270,7 @@ var VitrailNavbar = React.createClass({
     render: function() {
         return (
             <nav className="navbar navbar-light bg-faded">
-                <div className="navbar-brand">CANTUS Database</div>
+                <a className="navbar-brand" href="/">CANTUS Database</a>
                 <ul className="nav navbar-nav">
                     {this.props.navbarItems.map((item, index) =>
                         <NavbarItem key={index} name={item.name} link={item.link}/>
@@ -169,4 +314,4 @@ var Vitrail = React.createClass({
 });
 
 
-export {Vitrail, NotImplemented, AlertView};
+export {AlertView, Colophon, NotImplemented, Vitrail};
