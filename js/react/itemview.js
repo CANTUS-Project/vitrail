@@ -967,12 +967,17 @@ const ItemViewOverlay = React.createClass({
             path: React.PropTypes.string.isRequired,
         })).isRequired,
     },
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {size: getters.itemViewOverlaySize};
+    },
     render() {
         return (
             <div className="itemview-overlay">
                 <div className="itemview-button-container">
                     <Link className="btn btn-primary" to={pathToParent(this.props.routes)}>Close</Link>
-                    <ItemView type={this.props.params.type} rid={this.props.params.rid} size="full"/>
+                    <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
                 </div>
             </div>
         );
