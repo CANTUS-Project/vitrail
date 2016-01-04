@@ -220,3 +220,17 @@ describe('submitSearchQuery()', () => {
         expect(mockThen.catch.mock.calls[0][0] === signals.loadSearchResults).toBe(true);
     });
 });
+
+
+describe('setItemViewOverlaySize()', () => {
+    beforeEach(() => { reactor.reset(); });
+
+    it('works', () => {
+        const to = 'compact';
+        expect(reactor.evaluate(getters.itemViewOverlaySize)).not.toBe(to);
+
+        signals.setItemViewOverlaySize(to);
+
+        expect(reactor.evaluate(getters.itemViewOverlaySize)).toBe(to);
+    });
+});

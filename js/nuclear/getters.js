@@ -64,6 +64,7 @@ const formatters = {
 
 const getters = {
     currentItemView: ['currentItemView'],
+    itemViewOverlaySize: ['itemViewOverlaySize'],
     // related to the query already completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],

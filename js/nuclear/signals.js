@@ -41,6 +41,7 @@ const SIGNAL_NAMES = {
     SET_SEARCH_QUERY: 6,
     LOAD_SEARCH_RESULTS: 7,
     SET_RENDER_AS: 8,
+    SET_ITEMVIEW_OVERLAY_SIZE: 9,
 };
 
 
@@ -67,6 +68,14 @@ const SIGNALS = {
                 log.error(response)
             }
         });
+    },
+
+    /** Set the "size" prop of the ItemViewOverlay component.
+     *
+     * @param (str) to - Either "full" or "compact".
+     */
+    setItemViewOverlaySize(to) {
+        reactor.dispatch(SIGNAL_NAMES.SET_ITEMVIEW_OVERLAY_SIZE, to);
     },
 
     /** Set the format of search results to "table" or "ItemView". Calling this signal with other

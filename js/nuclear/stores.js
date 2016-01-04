@@ -169,6 +169,20 @@ const SETTERS = {
             return previous;
         }
     },
+
+    /** Set the "size" prop for the ItemViewOverlay componnet.
+     *
+     * @param (str) next - Either "full" or "compact".
+     */
+    itemViewOverlaySize(previous, next) {
+        if ('full' === next || 'compact' === next) {
+            return next;
+        }
+        else {
+            log.warn('Invariant violation: itemViewOverlaySize() requires "ItemView" or "table"');
+            return previous;
+        }
+    },
 };
 
 
@@ -182,6 +196,16 @@ const STORES = {
         },
         initialize() {
             this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, justReturnThePayload);
+        },
+    }),
+
+    ItemViewOverlaySize: Store({
+        // The "size" prop for the current ItemViewOverlay component.
+        //
+
+        getInitialState() { return 'full'; },
+        initialize() {
+            this.on(SIGNAL_NAMES.SET_ITEMVIEW_OVERLAY_SIZE, SETTERS.itemViewOverlaySize);
         },
     }),
 

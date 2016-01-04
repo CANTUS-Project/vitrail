@@ -284,3 +284,29 @@ describe('SETTERS.setRenderAs()', () => {
         expect(stores.setters.setRenderAs(previous, next)).toBe(expected);
     });
 });
+
+
+describe('itemViewOverlaySize()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it('works with "full"', () => {
+        const previous = 'lolz';
+        const next = 'full';
+        const expected = next;
+        expect(stores.setters.itemViewOverlaySize(previous, next)).toBe(expected);
+    });
+
+    it('works with "compact"', () => {
+        const previous = 'lolz';
+        const next = 'compact';
+        const expected = next;
+        expect(stores.setters.itemViewOverlaySize(previous, next)).toBe(expected);
+    });
+
+    it('does not work with "banana"', () => {
+        const previous = 'lolz';
+        const next = 'banana';
+        const expected = previous;
+        expect(stores.setters.itemViewOverlaySize(previous, next)).toBe(expected);
+    });
+});

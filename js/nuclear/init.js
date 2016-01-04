@@ -28,6 +28,7 @@ import stores from './stores';
 
 reactor.registerStores({
     'currentItemView': stores.stores.CurrentItemView,
+    'itemViewOverlaySize': stores.stores.ItemViewOverlaySize,
     'searchResultsFormat': stores.stores.SearchResultsFormat,
     'searchPerPage': stores.stores.SearchPerPage,
     'searchPage': stores.stores.SearchPage,
