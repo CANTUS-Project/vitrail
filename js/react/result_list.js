@@ -32,20 +32,25 @@ import {getters} from '../nuclear/getters';
 import {ItemView} from './itemview';
 
 
-var ResultColumn = React.createClass({
+/** A cell in the ResultListTable.
+ *
+ * Props:
+ * ------
+ * @param (string) data - The cell's textual contents.
+ * @param (boolean) header - Whether to render this cell as <th> (otherwise as <td>).
+ * @param (string) link - A URL for the table contents.
+ */
+const ResultCell = React.createClass({
     propTypes: {
-        // URL corresponding to "data," which will be used as the @href of an <a>. Optional.
+        data: React.PropTypes.string.isRequired,
+        header: React.PropTypes.bool,
         link: React.PropTypes.string,
-        // Data to show in the column.
-        data: React.PropTypes.string,
-        // Whether this is a column in the table header (default is false).
-        header: React.PropTypes.bool
     },
-    getDefaultProps: function() {
-        return {link: "", data: "", header: false};
+    getDefaultProps() {
+        return {data: '', header: false, link: ''};
     },
-    render: function() {
-        var post;
+    render() {
+        let post;
         if (this.props.link) {
             post = <a href={this.props.link}>{this.props.data}</a>;
         } else {
@@ -60,37 +65,53 @@ var ResultColumn = React.createClass({
     }
 });
 
-var Result = React.createClass({
+
+/** A row in the ResultListTable.
+ *
+ * The "columns" prop determines which table cells to render, and the order. Cells are rendered from
+ * left to right, in the order specified by "columns." Column names for which there is no data in
+ * "data" will be rendered with an empty cell. Fields in "data" that do not appear in "columns" will
+ * be ignored.
+ *
+ * If a column name appears in both "data" and "resources," the rendered table cell will have a
+ * hyperlink to the URL given in "resources."
+ *
+ * @param (array of string) columns - Names of the fields in "data" that should be rendered in this
+ *     row. They will be rendered from left to right, in the order of this prop.
+ * @param (ImmutableJS.Map) data - Map with data for a resource.
+ * @param (ImmutableJS.Map) resources - Map with URLs for a resource.
+ */
+const ResultRow = React.createClass({
     propTypes: {
         // the column names to render, or the fields in "data" to render as columns
         columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
         // the object to render into columns
-        data: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         // members here are the URL for the same-name member in "data"
-        resources: React.PropTypes.object
+        resources: React.PropTypes.instanceOf(Immutable.Map),
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {resources: {}};
     },
-    render: function() {
-        var renderedColumns = [];
-        this.props.columns.forEach(function (columnName) {
-            var columnData = this.props.data[columnName];
-            if (columnData !== undefined) {
+    render() {
+        let renderedColumns = [];
+        this.props.columns.forEach(columnName => {
+            let columnData = this.props.data.get(columnName);
+            if (columnData) {
                 columnData = columnData.toString();
             }
 
-            var columnLink = '';
-            if ("name" === columnName)
+            let columnLink = '';
+            if (columnName === 'name')
                 columnLink = this.props.resources['self'];
             else {
                 columnLink = this.props.resources[columnName];
             }
 
-            renderedColumns.push(<ResultColumn key={columnName} data={columnData} link={columnLink} />);
+            renderedColumns.push(<ResultCell key={columnName} data={columnData} link={columnLink}/>);
         }, this);
-        if (this.props.data["drupal_path"] !== undefined) {
-            renderedColumns.push(<ResultColumn key="drupal_path" data="Show" link={this.props.data["drupal_path"]} />);
+        if (this.props.data.get('drupal_path')) {
+            renderedColumns.push(<ResultCell key="drupal_path" data="Show" link={this.props.data.get('drupal_path')}/>);
         }
         return (
             <tr className="resultComponent">
@@ -122,14 +143,15 @@ const ResultListItemView = React.createClass({
 
         return (
             <div className="card-columns">
-                {sortOrder.map(function(rid) {
+                {sortOrder.map(rid => {
                     return <ItemView
                         key={rid}
                         size="compact"
                         data={this.props.data.get(rid)}
                         resources={this.props.data.get('resources').get(rid)}
-                        />;
-                    }.bind(this)
+                    />;
+                    },
+                    this
                 )}
             </div>
         );
@@ -137,28 +159,29 @@ const ResultListItemView = React.createClass({
 });
 
 
-/** ResultList sub-component that produces a table.
+/** ResultList subcomponent that produces a table.
  *
  * Props:
- * - headers
- * - data
- * - dontRender
- * - sortOrder
+ * ------
+ * @param (ImmutableJS.Map) headers - ???
+ * @param (ImmutableJS.Map) data - ???
+ * - dontRender : TODO: replace this with the proper "doRender" thing, in the proper order
+ * @param (ImmutableJS.List) sortOrder - ???
  */
 const ResultListTable = React.createClass({
     propTypes: {
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-        data: React.PropTypes.object,
-        headers: React.PropTypes.object,
-        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
+        data: React.PropTypes.instanceOf(Immutable.Map),
+        headers: React.PropTypes.instanceOf(Immutable.Map),
+        sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
     getDefaultProps: function() {
         return {dontRender: [], data: null, headers: null, sortOrder: []};
     },
     render() {
         let tableHeader = [];
-        let columns = this.props.headers.fields.split(',');
-        let extraFields = this.props.headers.extra_fields;
+        let columns = this.props.headers.get('fields').split(',');
+        let extraFields = this.props.headers.get('extra_fields');
         if (null !== extraFields) {
             extraFields = extraFields.split(',');
             columns = columns.concat(extraFields);
@@ -185,17 +208,8 @@ const ResultListTable = React.createClass({
             polishedName = polishedName.slice(0, polishedName.length);
 
             // now we can make the <th> cell itself
-            tableHeader.push(<ResultColumn key={columnName} data={polishedName} header={true} />);
+            tableHeader.push(<ResultCell key={columnName} data={polishedName} header={true} />);
         });
-
-        let results = [];
-        this.props.sortOrder.forEach(function (id) {
-            results.push(<Result
-                key={id}
-                columns={columns}
-                data={this.props.data[id]}
-                resources={this.props.data.resources[id]} />);
-        }, this);
 
         return (
             <table className="table table-hover">
@@ -205,7 +219,17 @@ const ResultListTable = React.createClass({
                     </tr>
                 </thead>
                 <tbody>
-                    {results}
+                    {this.props.sortOrder.map(id => {
+                        return (
+                            <ResultRow key={id}
+                                       columns={columns}
+                                       data={this.props.data.get(id)}
+                                       resources={this.props.data.get('resources').get(id)}
+                            />
+                        );
+                        },
+                        this)
+                    }
                 </tbody>
             </table>
         );
@@ -216,8 +240,6 @@ const ResultListTable = React.createClass({
 /** TODO
  *
  */
-// TODO: move the NuclearJS stuff from ResultListFrame to ResultList
-// TODO: make ResultList and children use ImmutableJS objects directly
 const ResultList = React.createClass({
     //
     // Props:
@@ -232,31 +254,31 @@ const ResultList = React.createClass({
 
     propTypes: {
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-        data: React.PropTypes.instanceOf(Immutable.Map),
-        headers: React.PropTypes.instanceOf(Immutable.Map),
-        // the order in which to display results
-        sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
     getDefaultProps() {
-        return {dontRender: [], data: Immutable.Map(), headers: Immutable.Map(), sortOrder: Immutable.List()};
+        return {dontRender: []};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {searchResultsFormat: getters.searchResultsFormat};
+        return {
+            searchResultsFormat: getters.searchResultsFormat,
+            results: getters.searchResults
+        };
     },
     render() {
-        let results;
+        let results = <p className="card-block">(No results to display).</p>;
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
-        if (this.props.data.size > 0 && this.props.headers.size > 0) {
+        if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
                 results = <ResultListTable dontRender={this.props.dontRender}
-                                           data={this.props.data}
-                                           headers={this.props.headers}
-                                           sortOrder={this.props.sortOrder}/>;
-            } else {
-                results = <ResultListItemView data={this.props.data} sortOrder={this.props.sortOrder}/>;
+                                           data={this.state.results}
+                                           headers={this.state.results.get('headers')}
+                                           sortOrder={this.state.results.get('sort_order')}/>;
+            }
+            else {
+                results = <ResultListItemView data={this.state.results} sortOrder={this.state.results.get('sort_order')}/>;
             }
         }
 
@@ -460,20 +482,21 @@ var ErrorMessage = React.createClass({
 
 /** TODO: rename this to "ResultList" and the other component to something else
  *
+ * TODO: this.props.dontRender (where does it come from? How to specify it? Should be NuclearJS.
  */
 const ResultListFrame = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return {
-            results: getters.searchResults,
-            error: getters.searchError,
-        };
+        return { error: getters.searchError };
     },
     render() {
 
         let errorMessage = '';
         if (null !== this.state.error) {
+            // TODO: this causes a 24px high empty space in the output
+            // TODO: use AlertView for this *sometimes* (depending on what the error is)
+            // TODO: maybe I should move the "404" responsibility to ResultList, and everything else happens here with AlertView?
             errorMessage = <ErrorMessage code={this.state.error.get('code')}
                                          reason={this.state.error.get('reason')}
                                          response={this.state.error.get('response')}
@@ -482,10 +505,7 @@ const ResultListFrame = React.createClass({
 
         let results = '';
         if (null !== this.state.results) {
-            results = <ResultList data={this.state.results}
-                                  headers={this.state.results.get('headers')}
-                                  dontRender={this.props.dontRender}
-                                  sortOrder={this.state.results.get('sort_order')}/>
+            results = <ResultList dontRender={this.props.dontRender}/> ;
         }
 
         return (
