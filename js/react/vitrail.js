@@ -307,7 +307,7 @@ var Vitrail = React.createClass({
         return (
             <div>
                 <VitrailNavbar navbarItems={navbarItems}/>
-                <div className="container-fluid">{this.props.children}</div>
+                {this.props.children}
             </div>
         );
     }

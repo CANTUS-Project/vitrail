@@ -346,7 +346,7 @@ var TemplateSearch = React.createClass({
 
         // TODO: refactor "ResultListFrame" so it doesn't show anything if the "searchQuery" is null or sthg
         return (
-            <div className="col-sm-12">
+            <div className="container">
                 <div className="card">
                     <div className="card-block">
                         <h2 className="card-title">Template Search</h2>

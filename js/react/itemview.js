@@ -1019,7 +1019,7 @@ const ItemViewDevelWrapper = React.createClass({
         let linkUrl = `/itemviewdevel/${this.state.type}/${this.state.id}`;
 
         return (
-            <div>
+            <div className="container">
                 <div className="alert alert-info">
                     <p><strong>Note:</strong> This is a development wrapper around the proper ItemView.</p>
                     <p>Once &ldquo;Vitrail&rdquo; is deployed, the resource type and ID will be set

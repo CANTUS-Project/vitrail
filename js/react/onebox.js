@@ -91,7 +91,7 @@ const OneboxSearch = React.createClass({
     },
     render() {
         return (
-            <div className="searchForm col-sm-12">
+            <div className="searchForm container">
                 <div className="searchSettings card">
                     <div className="card-block">
                         <h2 className="card-title">Onebox Search</h2>
