@@ -22,9 +22,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
-import React from 'react';
+import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
+import React from 'react';
 
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
@@ -101,29 +101,33 @@ var Result = React.createClass({
 });
 
 
-/** ResultList sub-component that produces some ItemView elements.
+/** ResultList subcomponent that produces ItemView components.
  *
  * Props:
- * - data
- * - sortOrder
+ * ------
+ * @param (ImmutableJS.Map) data - The resource data provided by CantusJS.
+ * @param (ImmutableJS.List of string) sortOrder - The order in which to display resources.
+ *
  */
 const ResultListItemView = React.createClass({
     propTypes: {
-        data: React.PropTypes.object,
-        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
+        data: React.PropTypes.instanceOf(Immutable.Map),
+        sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
     getDefaultProps() {
-        return {data: null, sortOrder: []};
+        return {data: Immutable.Map, sortOrder: Immutable.List()};
     },
     render() {
+        const sortOrder = this.props.sortOrder.toJS();
+
         return (
             <div className="card-columns">
-                {this.props.sortOrder.map(function(rid) {
+                {sortOrder.map(function(rid) {
                     return <ItemView
                         key={rid}
                         size="compact"
-                        data={this.props.data[rid]}
-                        resources={this.props.data.resources[rid]}
+                        data={this.props.data.get(rid)}
+                        resources={this.props.data.get('resources').get(rid)}
                         />;
                     }.bind(this)
                 )}
@@ -209,9 +213,12 @@ const ResultListTable = React.createClass({
 });
 
 
+/** TODO
+ *
+ */
 // TODO: move the NuclearJS stuff from ResultListFrame to ResultList
 // TODO: make ResultList and children use ImmutableJS objects directly
-var ResultList = React.createClass({
+const ResultList = React.createClass({
     //
     // Props:
     // - dontRender
@@ -225,24 +232,24 @@ var ResultList = React.createClass({
 
     propTypes: {
         dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-        data: React.PropTypes.object,
-        headers: React.PropTypes.object,
+        data: React.PropTypes.instanceOf(Immutable.Map),
+        headers: React.PropTypes.instanceOf(Immutable.Map),
         // the order in which to display results
-        sortOrder: React.PropTypes.arrayOf(React.PropTypes.string),
+        sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
-    getDefaultProps: function() {
-        return {dontRender: [], data: null, headers: null, sortOrder: []};
+    getDefaultProps() {
+        return {dontRender: [], data: Immutable.Map(), headers: Immutable.Map(), sortOrder: Immutable.List()};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
         return {searchResultsFormat: getters.searchResultsFormat};
     },
-    render: function() {
+    render() {
         let results;
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
-        if (null !== this.props.data && null !== this.props.headers) {
+        if (this.props.data.size > 0 && this.props.headers.size > 0) {
             if ('table' === this.state.searchResultsFormat) {
                 results = <ResultListTable dontRender={this.props.dontRender}
                                            data={this.props.data}
@@ -451,9 +458,10 @@ var ErrorMessage = React.createClass({
 });
 
 
-var ResultListFrame = React.createClass({
-    //
-
+/** TODO: rename this to "ResultList" and the other component to something else
+ *
+ */
+const ResultListFrame = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -462,7 +470,7 @@ var ResultListFrame = React.createClass({
             error: getters.searchError,
         };
     },
-    render: function() {
+    render() {
 
         let errorMessage = '';
         if (null !== this.state.error) {
@@ -474,10 +482,10 @@ var ResultListFrame = React.createClass({
 
         let results = '';
         if (null !== this.state.results) {
-            results = <ResultList data={this.state.results.toJS()}
-                                  headers={this.state.results.get('headers').toJS()}
+            results = <ResultList data={this.state.results}
+                                  headers={this.state.results.get('headers')}
                                   dontRender={this.props.dontRender}
-                                  sortOrder={this.state.results.get('sort_order').toJS()}/>
+                                  sortOrder={this.state.results.get('sort_order')}/>
         }
 
         return (
