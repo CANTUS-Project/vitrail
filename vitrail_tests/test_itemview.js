@@ -33,6 +33,61 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 
+describe('ItemViewMultiplexer', () => {
+    /** Resource type of data; component type of resulting React component. */
+    function multiplexerTester(resourceType, componentType) {
+        const data = Immutable.Map({type: resourceType});
+        const resources = Immutable.Map();
+        const size = 'compact';
+
+        // shallow render---we just want to make sure it delegates properly to a subcomponent
+        const renderer = TestUtils.createRenderer();
+        const actualComponent = renderer.render( <itemview.ItemViewMultiplexer
+            data={data} resources={resources} size={size}/> );
+        const actual = renderer.getRenderOutput(actualComponent);
+
+        expect(actual.type.displayName).toBe(componentType);
+        if (componentType !== 'ItemViewError') {
+            const props = actual.props;
+            expect(props.data).toBe(data);
+            expect(props.resources).toBe(resources);
+        }
+    }
+
+    it('works for chants', () => {
+        multiplexerTester('chant', 'ItemViewChant');
+    });
+
+    it('works for feasts', () => {
+        multiplexerTester('feast', 'ItemViewFeast');
+    });
+
+    it('works for indexers', () => {
+        multiplexerTester('indexer', 'ItemViewIndexer');
+    });
+
+    it('works for genres', () => {
+        multiplexerTester('genre', 'ItemViewGenre');
+    });
+
+    it('works for sources', () => {
+        multiplexerTester('source', 'ItemViewSource');
+    });
+
+    it('works for simple resources', () => {
+        const types = ['century', 'notation', 'office', 'portfolio', 'provenance', 'siglum',
+            'segment', 'source_status'];
+        for (let type of types) {
+            multiplexerTester(type, 'ItemViewSimpleResource');
+        }
+    });
+
+    it('works for errors', () => {
+        multiplexerTester('vegetable', 'ItemViewError');
+    });
+});
+
+
 describe('ItemViewError', () => {
     it('works as intended', () => {
         const errorMessage = 'This sucks!';

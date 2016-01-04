@@ -643,6 +643,72 @@ const ItemViewSimpleResource = React.createClass({
 });
 
 
+/** Chooses the proper, type-specific ItemView component.
+ *
+ * This component is intended for use only by ItemView.
+ *
+ * Props
+ * -----
+ * @param (ImmutableJS.Map) data - The resource's data fields.
+ * @param (ImmutableJS.Map) resources - The resource's URL links.
+ * @param (string) size - Whether to display the "full" or "compact" view.
+ *
+ */
+const ItemViewMultiplexer = React.createClass({
+    propTypes: {
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map),
+        size: React.PropTypes.oneOf(['full', 'compact']),
+    },
+    getDefaultProps() {
+        return ({resource: Immutable.Map(), size: 'full'});
+    },
+    render() {
+        let rendered;
+        switch (this.props.data.get('type')) {
+            case 'chant':
+                rendered = <ItemViewChant data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            case 'feast':
+                rendered = <ItemViewFeast data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            case 'indexer':
+                rendered = <ItemViewIndexer data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            case 'genre':
+                rendered = <ItemViewGenre data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            case 'source':
+                rendered = <ItemViewSource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            case 'century':
+            case 'notation':
+            case 'office':
+            case 'portfolio':
+            case 'provenance':
+            case 'siglum':
+            case 'segment':
+            case 'source_status':
+                rendered = <ItemViewSimpleResource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+                break;
+
+            default:
+                rendered = <ItemViewError errorMessage="Resource type not implemented."
+                                          type={this.props.data.get('type')}
+                           />;
+                break;
+        }
+
+        return rendered;
+    },
+});
+
+
 /** Used by the "ItemView" component to display information about an error.
  *
  * This component is not intended for use outside the "itemview" module.
@@ -1004,5 +1070,6 @@ const moduleForTesting = {
     ItemView: ItemView,
     pathToParent: pathToParent,
     ItemViewOverlay: ItemViewOverlay,
+    ItemViewMultiplexer: ItemViewMultiplexer,
 };
 export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, moduleForTesting};
