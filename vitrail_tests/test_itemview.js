@@ -25,12 +25,186 @@
 import init from '../js/nuclear/init';
 
 import {Immutable} from 'nuclear-js';
-jest.dontMock('../js/react/itemview.js');  // module under test
-const itemview = require('../js/react/itemview.js').moduleForTesting;
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
+
+import reactor from '../js/nuclear/reactor';
+import {SIGNAL_NAMES} from '../js/nuclear/signals';
+
+jest.dontMock('../js/react/itemview.js');  // module under test
+const itemview = require('../js/react/itemview.js').moduleForTesting;
+
+
+describe('ItemView', () => {
+    beforeEach(() => { reactor.reset(); });
+
+    describe('ItemView.whatShouldWeDisplay()', () => {
+        it('detects NuclearJS as the data source', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = undefined;
+            const resources = undefined;
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.whatShouldWeDisplay()).toBe('nuclearjs');
+        });
+
+        it('detects props as the data source', () => {
+            const type = undefined;
+            const rid = undefined;
+            const data = Immutable.Map({type: 'source', id: '123723'});
+            const resources = Immutable.Map();
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.whatShouldWeDisplay()).toBe('props');
+        });
+
+        it('detects a mis-specified data source', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = Immutable.Map({left: 'right'});
+            const resources = Immutable.Map({right: 'left'});
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.whatShouldWeDisplay()).toBe('error');
+        });
+    });
+
+    describe('ItemView.canWeDisplaySomething()', () => {
+        it('works with NuclearJS but without results yet', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = undefined;
+            const resources = undefined;
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.canWeDisplaySomething()).toBe(false);
+        });
+
+        it('works with NuclearJS and it has results', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = undefined;
+            const resources = undefined;
+            const result = Immutable.Map({
+                sort_order: Immutable.List(['123723']),
+                resources: Immutable.Map({'123723': Immutable.Map({link: 'http'})}),
+                123723: Immutable.Map({type: 'source', id: '123723'}),
+            });
+            // send results to render!
+            reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, result);
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.canWeDisplaySomething()).toBe(true);
+        });
+
+        it('works with props', () => {
+            const type = undefined;
+            const rid = undefined;
+            const data = Immutable.Map({left: 'right'});
+            const resources = Immutable.Map({right: 'left'});
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.canWeDisplaySomething()).toBe(true);
+        });
+
+        it('works with neither props nor NuclearJS', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = Immutable.Map({left: 'right'});
+            const resources = Immutable.Map({right: 'left'});
+
+            const actual = TestUtils.renderIntoDocument(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+
+            expect(actual.canWeDisplaySomething()).toBe(false);
+        });
+    });
+
+    describe('ItemView.render()', () => {
+        it('gives an ItemViewError when there is nothing to display', () => {
+            const type = undefined;
+            const rid = undefined;
+            const data = undefined;
+            const resources = undefined;
+
+            const renderer = TestUtils.createRenderer();
+            const actualComponent = renderer.render(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources}/>
+            );
+            const actual = renderer.getRenderOutput(actualComponent);
+
+            expect(actual.type).toBe('div');
+            expect(actual.props.className).toBe('itemview');
+        });
+
+        it('gives an ItemViewMultiplexer when there are props to display', () => {
+            const type = undefined;
+            const rid = undefined;
+            const data = Immutable.Map({type: 'source', id: '123723'});
+            const resources = Immutable.Map({link: 'http'});
+            const size = 'compact';
+
+            const renderer = TestUtils.createRenderer();
+            const actualComponent = renderer.render(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources} size={size}/>
+            );
+            const actual = renderer.getRenderOutput(actualComponent);
+
+            expect(actual.type.displayName).toBe('ItemViewMultiplexer');
+            expect(actual.props.data).toBe(data);
+            expect(actual.props.resources).toBe(resources);
+            expect(actual.props.size).toBe(size);
+        });
+
+        it('gives an ItemViewMultiplexer when there is NuclearJS stuff to display', () => {
+            const type = 'source';
+            const rid = '123723';
+            const data = undefined;
+            const resources = undefined;
+            const size = 'compact';
+            const result = Immutable.Map({
+                sort_order: Immutable.List(['123723']),
+                resources: Immutable.Map({'123723': Immutable.Map({link: 'http'})}),
+                123723: Immutable.Map({type: 'source', id: '123723'}),
+            });
+            // Send results to render! I tried doing this after, but the test goes too fast and there
+            // isn't time to re-render before the assertions. Not really worth waiting, methinks.
+            reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, result);
+
+            const renderer = TestUtils.createRenderer();
+            const actualComponent = renderer.render(
+                <itemview.ItemView type={type} rid={rid} data={data} resources={resources} size={size}/>
+            );
+            const actual = renderer.getRenderOutput(actualComponent);
+
+            expect(actual.type.displayName).toBe('ItemViewMultiplexer');
+            expect(actual.props.data).toBe(result.get('123723'));
+            expect(actual.props.resources).toBe(result.get('resources').get('123723'));
+            expect(actual.props.size).toBe(size);
+        });
+    });
+});
 
 
 describe('ItemViewMultiplexer', () => {
