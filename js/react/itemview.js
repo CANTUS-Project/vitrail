@@ -982,8 +982,13 @@ const ItemViewOverlay = React.createClass({
 
 /** This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT. */
 const ItemViewDevelWrapper = React.createClass({
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {size: getters.itemViewOverlaySize};
+    },
     getInitialState: function() {
-        return {size: 'full', type: 'source', id: '123723'};
+        return {type: 'source', id: '123723'};
     },
     doNothing: function(event) {
         // Call this when the "Submit" button is clicked for this wrapper thing. It just cancels the
@@ -991,7 +996,7 @@ const ItemViewDevelWrapper = React.createClass({
         event.preventDefault();  // stop the default GET form submission
     },
     onChangeSizeRadioButton: function(event) {
-        this.setState({size: event.target.value});
+        SIGNALS.setItemViewOverlaySize(event.target.value);
     },
     onChangeType: function(event) {
         this.setState({type: event.target.value});
@@ -1002,11 +1007,13 @@ const ItemViewDevelWrapper = React.createClass({
     render: function() {
 
         // Set @checked for the "size" radio buttons. The first is with default "state."
-        let fullSizeChecked = true;
+        let fullSizeChecked = false;
         let compactSizeChecked = false;
         if ('compact' === this.state.size) {
-            fullSizeChecked = false;
             compactSizeChecked = true;
+        }
+        else {
+            fullSizeChecked = true;
         }
 
         // Set the URL for the Link
