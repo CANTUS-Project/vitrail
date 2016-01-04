@@ -40,62 +40,62 @@ const ItemViewChant = React.createClass({
         resources: React.PropTypes.object.isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
+    render() {
         let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+        const data = this.props.data;
+        const resources = this.props.resources;
 
         // Genre and Cantus ID
         let genreAndCantusid = '';
-        if (data.genre && data.cantus_id) {
-            genreAndCantusid = `${data.genre}\u2014Cantus\u00A0ID\u00A0${data.cantus_id}`;
-        } else if (data.genre) {
-            genreAndCantusid = data.genre;
-        } else if (data.cantus_id) {
-            genreAndCantusid = data.cantus_id;
+        if (data.get('genre') && data.get('cantus_id')) {
+            genreAndCantusid = `${data.get('genre')}\u2014Cantus\u00A0ID\u00A0${data.get('cantus_id')}`;
+        } else if (data.get('genre')) {
+            genreAndCantusid = data.get('genre');
+        } else if (data.get('cantus_id')) {
+            genreAndCantusid = data.get('cantus_id');
         }
 
         // Feast and Office
         let feastAndOffice = '';
         if ('full' === this.props.size) {
-            if (undefined !== data.feast && undefined !== data.feast_desc && undefined !== data.office) {
-                feastAndOffice = `Chant for ${data.feast} (${data.feast_desc}) office ${data.office}`;
-            } else if (undefined !== data.feast && undefined !== data.office) {
-                feastAndOffice = `Chant for ${data.feast} office ${data.office}`;
-            } else if (undefined !== data.feast) {
-                feastAndOffice = `Chant for ${data.feast}`;
-            } else if (undefined !== data.office) {
-                feastAndOffice = `Chant for ${data.office} office`;
+            if (data.get('feast') && data.get('feast_desc') && data.get('office')) {
+                feastAndOffice = `Chant for ${data.get('feast')} (${data.get('feast_desc')}) office ${data.get('office')}`;
+            } else if (data.get('feast') && data.get('office')) {
+                feastAndOffice = `Chant for ${data.get('feast')} office ${data.get('office')}`;
+            } else if (data.get('feast')) {
+                feastAndOffice = `Chant for ${data.get('feast')}`;
+            } else if (data.get('office')) {
+                feastAndOffice = `Chant for ${data.get('office')} office`;
             }
             if (feastAndOffice.length > 0) {
                 feastAndOffice = <li className={liClassName}>{feastAndOffice}</li>;
             }
         } else {
-            if (undefined !== data.feast && undefined !== data.office) {
-                feastAndOffice = `${data.feast} (${data.office})`;
-            } else if (undefined !== data.feast) {
-                feastAndOffice = data.feast;
-            } else if (undefined !== data.office) {
-                feastAndOffice = `(${data.office})`;
+            if (data.get('feast') && data.get('office')) {
+                feastAndOffice = `${data.get('feast')} (${data.get('office')})`;
+            } else if (data.get('feast')) {
+                feastAndOffice = data.get('feast');
+            } else if (data.get('office')) {
+                feastAndOffice = `(${data.get('office')})`;
             }
         }
 
         // Source, Folio, and Sequence
         let sourceFolioSequence = '';
         if ('full' === this.props.size) {
-            if (undefined !== data.source && undefined !== data.folio && undefined !== data.sequence) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i> on folio {data.folio}, item {data.sequence}.</li>;
-            } else if (undefined !== data.source && undefined !== data.folio) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i> on folio {data.folio}.</li>;
-            } else if (undefined !== data.source) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.source}</i>.</li>;
+            if (data.get('source') && data.get('folio') && data.get('sequence')) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}, item {data.get('sequence')}.</li>;
+            } else if (data.get('source') && data.get('folio')) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}.</li>;
+            } else if (data.get('source')) {
+                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i>.</li>;
             }
         } else {
-            if (undefined !== data.source) {
-                sourceFolioSequence = data.source;
+            if (data.get('source')) {
+                sourceFolioSequence = data.get('source');
                 if (sourceFolioSequence.length > 30) {
                     sourceFolioSequence = sourceFolioSequence.slice(0, 30);
                 }
@@ -116,55 +116,55 @@ const ItemViewChant = React.createClass({
 
         if ('full' === this.props.size) {
             // Mode
-            if (undefined !== data.mode) {
-                mode = <li className={liClassName}>Mode {data.mode}</li>;
+            if (data.get('mode')) {
+                mode = <li className={liClassName}>Mode {data.get('mode')}</li>;
             }
 
             // CAO Concordances
-            if (undefined !== data.cao_concordances) {
-                concordances = <li className={liClassName}>CAO Concordances: {data.cao_concordances}</li>;
+            if (data.get('cao_concordances')) {
+                concordances = <li className={liClassName}>CAO Concordances: {data.get('cao_concordances')}</li>;
             }
 
             // Differentia
-            if (undefined !== data.differentia) {
-                differentia = <li className={liClassName}>Differentia: {data.differentia}</li>;
+            if (data.get('differentia')) {
+                differentia = <li className={liClassName}>Differentia: {data.get('differentia')}</li>;
             }
 
             // Full Text
-            if (undefined !== data.full_text && undefined !== data.full_text_manuscript) {
+            if (data.get('full_text') && data.get('full_text_manuscript')) {
                 // TODO: this
-            } else if (undefined !== data.full_text) {
-                fullText = <li className={liClassName}>{data.full_text}</li>;
+            } else if (data.get('full_text')) {
+                fullText = <li className={liClassName}>{data.get('full_text')}</li>;
             }
 
             // Volpiano
-            if (undefined !== data.volpiano) {
-                volpiano = <li className={liClassName}>{data.volpiano}</li>;
+            if (data.get('volpiano')) {
+                volpiano = <li className={liClassName}>{data.get('volpiano')}</li>;
             }
 
             // Notes
-            if (undefined !== data.notes) {
-                notes = <li className={liClassName}>Notes: {data.notes}</li>;
+            if (data.get('notes')) {
+                notes = <li className={liClassName}>Notes: {data.get('notes')}</li>;
             }
 
             // Marginalia
-            if (undefined !== data.marginalia) {
-                marginalia = <li className={liClassName}>Marginalia: {data.marginalia}</li>;
+            if (data.get('marginalia')) {
+                marginalia = <li className={liClassName}>Marginalia: {data.get('marginalia')}</li>;
             }
 
             // Siglum
-            if (undefined !== data.siglum) {
-                siglum = <li className={liClassName}>Siglum: {data.siglum}</li>;
+            if (data.get('siglum')) {
+                siglum = <li className={liClassName}>Siglum: {data.get('siglum')}</li>;
             }
 
             // Proofreader
-            if (undefined !== data.proofreader) {
-                proofreader = <li className={liClassName}>Proofreader: {data.proofreader}</li>;
+            if (data.get('proofreader')) {
+                proofreader = <li className={liClassName}>Proofreader: {data.get('proofreader')}</li>;
             }
 
             // Melody ID
-            if (undefined !== data.melody_id) {
-                melodyID = <li className={liClassName}>Melody ID: {data.melody_id}</li>;
+            if (data.get('melody_id')) {
+                melodyID = <li className={liClassName}>Melody ID: {data.get('melody_id')}</li>;
             }
         }
 
@@ -175,7 +175,7 @@ const ItemViewChant = React.createClass({
                 <div className="card itemview">
                     <div className="card-block">
                         <h4 className="card-title">
-                            {data.incipit}
+                            {data.get('incipit')}
                             <span className="label label-info pull-right">Chant</span>
                         </h4>
                         <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
@@ -201,7 +201,7 @@ const ItemViewChant = React.createClass({
                 <div className="card itemview">
                     <div className="card-block">
                         <h4 className="card-title">
-                            {data.incipit}
+                            {data.get('incipit')}
                             <span className="label label-info pull-right">Chant</span>
                         </h4>
                         <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
@@ -220,17 +220,16 @@ const ItemViewChant = React.createClass({
 /** ItemView sub-component for Feasts. */
 const ItemViewFeast = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
-        let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+    render() {
+        const data = this.props.data;
+        const resources = this.props.resources;
 
         // Fields Available:
         // - name
@@ -240,26 +239,26 @@ const ItemViewFeast = React.createClass({
 
         // Name and Feast Code
         let codeAndDate = '';
-        if (undefined !== data.feast_code && undefined !== data.date) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.feast_code}&mdash;{data.date}</h6>;
-        } else if (undefined !== data.feast_code) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.feast_code}</h6>;
-        } else if (undefined !== data.date) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.date}</h6>;
+        if (data.get('feast_code') && data.get('date')) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}&mdash;{data.get('date')}</h6>;
+        } else if (data.get('feast_code')) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}</h6>;
+        } else if (data.get('date')) {
+            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('date')}</h6>;
         }
 
         // Description and Date
         let description = '';
-        if ('full' === this.props.size && undefined !== data.description) {
-            description = data.description;
+        if ('full' === this.props.size && data.get('description')) {
+            description = data.get('description');
         }
 
         // Build the final structure
-        let post = (
+        return (
             <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
-                        {data.name}
+                        {data.get('name')}
                         <span className="label label-info pull-right">Feast</span>
                     </h4>
                     {codeAndDate}
@@ -267,8 +266,6 @@ const ItemViewFeast = React.createClass({
                 </div>
             </div>
         );
-
-        return post;
     }
 });
 
@@ -276,17 +273,16 @@ const ItemViewFeast = React.createClass({
 /** ItemView sub-component for Indexers. */
 const ItemViewIndexer = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
-        let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+    render() {
+        const data = this.props.data;
+        const resources = this.props.resources;
 
         // Fields Available:
         // - display_name
@@ -298,17 +294,18 @@ const ItemViewIndexer = React.createClass({
 
         // Name
         let name = '';
-        if (undefined !== data.family_name && undefined !== data.given_name) {
+        if (data.get('family_name') && data.get('given_name')) {
             name = (
                 <h4 className="card-title">
-                    {data.given_name}&nbsp;{data.family_name}
+                    {data.get('given_name')}&nbsp;{data.get('family_name')}
                     <span className="label label-info pull-right">Indexer</span>
                 </h4>
             );
-        } else {
+        }
+        else {
             name = (
                 <h4 className="card-title">
-                    {data.display_name}
+                    {data.get('display_name')}
                     <span className="label label-info pull-right">Indexer</span>
                 </h4>
             );
@@ -319,22 +316,24 @@ const ItemViewIndexer = React.createClass({
 
         if ('full' === this.props.size) {
             // Institution
-            if (undefined !== data.institution) {
-                institution = <h6 className="card-subtitle text-muted">{data.institution}</h6>;
+            if (data.get('institution')) {
+                institution = <h6 className="card-subtitle text-muted">{data.get('institution')}</h6>;
             }
 
             // City and Country
-            if (undefined !== data.city && undefined !== data.country) {
-                cityAndCountry = `${data.city}, ${data.country}`;
-            } else if (undefined !== data.city) {
-                cityAndCountry = data.city;
-            } else if (undefined !== data.country) {
-                cityAndCountry = data.country;
+            if (data.get('city') && data.get('country')) {
+                cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
+            }
+            else if (data.get('city')) {
+                cityAndCountry = data.get('city');
+            }
+            else if (data.get('country')) {
+                cityAndCountry = data.get('country');
             }
         }
 
         // Build the final structure
-        let post = (
+        return (
             <div className="card itemview">
                 <div className="card-block">
                     {name}
@@ -343,8 +342,6 @@ const ItemViewIndexer = React.createClass({
                 </div>
             </div>
         );
-
-        return post;
     }
 });
 
@@ -352,17 +349,16 @@ const ItemViewIndexer = React.createClass({
 /** ItemView sub-component for Genres. */
 const ItemViewGenre = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
-        let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+    render() {
+        const data = this.props.data;
+        const resources = this.props.resources;
 
         // Fields Available:
         // - name
@@ -374,22 +370,22 @@ const ItemViewGenre = React.createClass({
 
         if ('full' === this.props.size) {
             // Mass or Office
-            if (undefined !== data.mass_or_office) {
-                massOrOffice = <h6 className="card-subtitle text-muted">{data.mass_or_office}</h6>;
+            if (data.get('mass_or_office')) {
+                massOrOffice = <h6 className="card-subtitle text-muted">{data.get('mass_or_office')}</h6>;
             }
 
             // Description
-            if (undefined !== data.description) {
-                description = data.description;
+            if (data.get('description')) {
+                description = data.get('description');
             }
         }
 
         // Build the final structure
-        let post = (
+        return (
             <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
-                        {data.name}
+                        {data.get('name')}
                         <span className="label label-info pull-right">Genre</span>
                     </h4>
                     {massOrOffice}
@@ -397,8 +393,6 @@ const ItemViewGenre = React.createClass({
                 </div>
             </div>
         );
-
-        return post;
     }
 });
 
@@ -406,17 +400,17 @@ const ItemViewGenre = React.createClass({
 /** ItemView sub-component for Sources. */
 const ItemViewSource = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
-        let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+    render() {
+        const liClassName = 'list-group-item';
+        const data = this.props.data;
+        const resources = this.props.resources;
 
         // Fields Available:
         // - title (string) – Full Manuscript Identification (City, Archive, Shelf-mark)
@@ -440,23 +434,28 @@ const ItemViewSource = React.createClass({
         // Siglum ("rism" field), Provenance, and Date
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
         let siglumProvenanceDate = '';
-        if (undefined !== data.rism && undefined !== data.provenance) {
-            if (undefined !== data.date) {
-                siglumProvenanceDate = `${data.rism}\u00A0(${data.provenance})\u00A0${data.date}`;
-            } else {
-                siglumProvenanceDate = `${data.rism}\u00A0(${data.provenance})`;
+        if (data.get('rism') && data.get('provenance')) {
+            if (data.get('date')) {
+                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})\u00A0${data.get('date')}`;
             }
-        } else if (undefined !== data.rism) {
-            if (undefined !== data.date) {
-                siglumProvenanceDate = `${data.rism}\u2014${data.date}`;
-            } else {
-                siglumProvenanceDate = data.rism;
+            else {
+                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})`;
             }
-        } else if (undefined !== data.provenance) {
-            if (undefined !== data.date) {
-                siglumProvenanceDate = `${data.provenance}\u2014${data.date}`;
-            } else {
-                siglumProvenanceDate = data.provenance;
+        }
+        else if (data.get('rism')) {
+            if (data.get('date')) {
+                siglumProvenanceDate = `${data.get('rism')}\u2014${data.get('date')}`;
+            }
+            else {
+                siglumProvenanceDate = data.get('rism');
+            }
+        }
+        else if (data.get('provenance')) {
+            if (data.get('date')) {
+                siglumProvenanceDate = `${data.get('provenance')}\u2014${data.get('date')}`;
+            }
+            else {
+                siglumProvenanceDate = data.get('provenance');
             }
         }
         if (siglumProvenanceDate.length > 0) {
@@ -472,24 +471,24 @@ const ItemViewSource = React.createClass({
 
         if ('full' === this.props.size) {
             // Provenance Detail
-            if (undefined !== data.provenance_detail && data.provenance_detail !== data.provenance) {
-                provenanceDetail = <li className={liClassName}>{data.provenance_detail}</li>;
+            if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
+                provenanceDetail = <li className={liClassName}>{data.get('provenance_detail')}</li>;
             }
 
             // Source Status
-            if (undefined !== data.source_status) {
-                status = `Status: ${data.source_status}`;
+            if (data.get('source_status')) {
+                status = `Status: ${data.get('source_status')}`;
                 status = <li className={liClassName}>{status}</li>;
             }
 
             // Summary
-            if (undefined !== data.summary) {
-                summary = <li className={liClassName}>{data.summary}</li>;
+            if (data.get('summary')) {
+                summary = <li className={liClassName}>{data.get('summary')}</li>;
             }
 
             // Occasions
-            if (undefined !== data.liturgical_occasions) {
-                occasions = `Liturgical Occasions: ${data.liturgical_occasions}`;
+            if (data.get('liturgical_occasions')) {
+                occasions = `Liturgical Occasions: ${data.get('liturgical_occasions')}`;
                 occasions = <li className={liClassName}>{occasions}</li>;
             }
 
@@ -501,37 +500,36 @@ const ItemViewSource = React.createClass({
             let proofreaders = '';
 
             // Indexing Date
-            if (undefined !== data.indexing_date) {
-                i_date = `Indexed ${data.indexing_date}`;
+            if (data.get('indexing_date')) {
+                i_date = `Indexed ${data.get('indexing_date')}`;
                 i_date = <p>{i_date}</p>;
             }
 
             // Notes
-            if (undefined !== data.indexing_notes) {
-                notes = `Indexing Notes: ${data.indexing_notes}`;
+            if (data.get('indexing_notes')) {
+                notes = `Indexing Notes: ${data.get('indexing_notes')}`;
                 notes = <p>{notes}</p>;
             }
 
             // Indexers
-            if (undefined !== data.indexers) {
-                indexers = `Indexers: ${data.indexers.join(', ')}`;
+            if (data.get('indexers')) {
+                indexers = `Indexers: ${data.get('indexers').join(', ')}`;
                 indexers = <p>{indexers}</p>;
             }
 
             // Editors
-            if (undefined !== data.editors) {
-                editors = `Editors: ${data.editors.join(', ')}`;
+            if (data.get('editors')) {
+                editors = `Editors: ${data.get('editors').join(', ')}`;
                 editors = <p>{editors}</p>;
             }
 
             // Proofreaders
-            if (undefined !== data.proofreaders) {
-                proofreaders = `Proofreaders: ${data.proofreaders.join(', ')}`;
+            if (data.get('proofreaders')) {
+                proofreaders = `Proofreaders: ${data.get('proofreaders').join(', ')}`;
                 proofreaders = <p>{proofreaders}</p>;
             }
 
-            if (true) {
-            // if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
+            if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
                 indexingInfo = (
                     <div className="card-block">
                         <h5 className="card-subtitle">Indexing Information</h5>
@@ -547,12 +545,12 @@ const ItemViewSource = React.createClass({
             }
 
             // Description --------------------------------
-            if (undefined !== data.description) {
+            if (data.get('description')) {
                 // TODO: format this better (e.g., convert the newline chars to <br/> ?)
                 description = (
                     <div className="card-block">
                         <h5 className="card-subtitle">Description</h5>
-                        <p className="card-block">{data.description}</p>
+                        <p className="card-block">{data.get('description')}</p>
                     </div>
                 );
             }
@@ -560,10 +558,10 @@ const ItemViewSource = React.createClass({
 
         // Build the final structure
         let post;
-        let commonHeader = (
+        const commonHeader = (
             <div className="card-block">
                 <h4 className="card-title">
-                    {data.title}
+                    {data.get('title')}
                     <span className="label label-info pull-right">Source</span>
                 </h4>
                 {siglumProvenanceDate}
@@ -600,17 +598,15 @@ const ItemViewSource = React.createClass({
 /** ItemView sub-component for Simple Resources. */
 const ItemViewSimpleResource = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         size: React.PropTypes.oneOf(['compact', 'full'])
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {size: 'full'};
     },
-    render: function() {
-        let liClassName = 'list-group-item';
-        let data = this.props.data;
-        let resources = this.props.resources;
+    render() {
+        const data = this.props.data;
 
         // Fields Available:
         // - name
@@ -620,25 +616,23 @@ const ItemViewSimpleResource = React.createClass({
 
         if ('full' === this.props.size) {
             // Description
-            if (undefined !== data.description) {
-                description = <h6 className="card-subtitle text-muted">{data.description}</h6>;
+            if (data.get('description')) {
+                description = <h6 className="card-subtitle text-muted">{data.get('description')}</h6>;
             }
         }
 
         // Build the final structure
-        let post = (
+        return (
             <div className="card itemview">
                 <div className="card-block">
                     <h4 className="card-title">
-                        {data.name}
-                        <span className="label label-info pull-right">{data.type}</span>
+                        {data.get('name')}
+                        <span className="label label-info pull-right">{data.get('type')}</span>
                     </h4>
                     {description}
                 </div>
             </div>
         );
-
-        return post;
     }
 });
 
