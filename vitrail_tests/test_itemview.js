@@ -34,6 +34,8 @@ import TestUtils from 'react-addons-test-utils';
 
 
 describe('ItemViewMultiplexer', () => {
+    beforeEach(() => { reactor.reset(); });
+
     /** Resource type of data; component type of resulting React component. */
     function multiplexerTester(resourceType, componentType) {
         const data = Immutable.Map({type: resourceType});
@@ -89,6 +91,8 @@ describe('ItemViewMultiplexer', () => {
 
 
 describe('ItemViewError', () => {
+    beforeEach(() => { reactor.reset(); });
+
     it('works as intended', () => {
         const errorMessage = 'This sucks!';
         const type = Immutable.fromJS({prop: 'type'});
@@ -116,6 +120,8 @@ describe('ItemViewError', () => {
 
 
 describe('ItemViewOverlay', () => {
+    beforeEach(() => { reactor.reset(); });
+
     it('works as intended', () => {
         const params = {type: 'chant', rid: '1234'};
         const routes = [{path: '/'}, {path: 'lolz'}, {path: ':type/:rid'}];
@@ -135,6 +141,8 @@ describe('ItemViewOverlay', () => {
 
 
 describe('pathToParent()', () => {
+    beforeEach(() => { reactor.reset(); });
+
     it('works with a zero-element array', () => {
         const routes = [];
         const expected = '/';
