@@ -111,7 +111,7 @@ const ResultRow = React.createClass({
             renderedColumns.push(<ResultCell key={columnName} data={columnData} link={columnLink}/>);
         }, this);
         if (this.props.data.get('drupal_path')) {
-            renderedColumns.push(<ResultCell key="drupal_path" data="Show" link={this.props.data.get('drupal_path')}/>);
+            renderedColumns.push(<ResultCell key="drupal_path" data="Drupal" link={this.props.data.get('drupal_path')}/>);
         }
         return (
             <tr className="resultComponent">
@@ -210,6 +210,9 @@ const ResultListTable = React.createClass({
             // now we can make the <th> cell itself
             tableHeader.push(<ResultCell key={columnName} data={polishedName} header={true} />);
         });
+
+        // add a header column for links to CANTUS Database on Drupal
+        tableHeader.push(<ResultCell key="drupal" data="Link to Drupal" header={true} />);
 
         return (
             <table className="table table-hover">
