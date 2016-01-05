@@ -293,13 +293,15 @@ const ResultList = React.createClass({
     }
 });
 
-var Paginator = React.createClass({
-    //
-    // State:
-    // - page (int) Current page in the search results.
-    // - totalPages (int) Total number of result pages.
-    //
 
+/** Pagination component for search results.
+ *
+ * State (provided by NuclearJS):
+ * ------------------------------
+ * @param (int) page - Currently displayed page in the search results.
+ * @param (int) totalPages - Total number of pages in the currently displayed search results.
+ */
+const Paginator = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -308,7 +310,7 @@ var Paginator = React.createClass({
             totalPages: getters.searchResultsPages,
         };
     },
-    changePage: function(button) {
+    changePage(button) {
         // Determine which page-change button was clicked then emit the setPage() signal.
         //
 
@@ -332,7 +334,7 @@ var Paginator = React.createClass({
         if (newPage < 1 || newPage > this.state.totalPages) { /* do nothing! */ }
         else { signals.setPage(newPage); signals.submitSearchQuery(); }
     },
-    render: function() {
+    render() {
         return (
             <div className="btn-group paginator" role="group" aria-label="paginator">
                 <button type="button" className="btn btn-secondary" name="pages"
@@ -352,10 +354,13 @@ var Paginator = React.createClass({
 });
 
 
-var PerPageSelector = React.createClass({
-    // Allows users to choose the number of search results shown on a page.
-    //
-
+/** Choose the number of search results to display on every page.
+ *
+ * State (provided by NuclearJS):
+ * ------------------------------
+ * @param (int) perPage - The number of search results to display on every page.
+ */
+const PerPageSelector = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -365,7 +370,7 @@ var PerPageSelector = React.createClass({
         signals.setPerPage(Number(event.target.value));
         signals.submitSearchQuery();
     },
-    render: function() {
+    render() {
         // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
         return (
             <fieldset className="form-group row">
