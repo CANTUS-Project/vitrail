@@ -298,55 +298,46 @@ const ItemViewIndexer = React.createClass({
         // - city
         // - country
 
-        // Name
-        let name = '';
-        if (data.get('family_name') && data.get('given_name')) {
-            name = (
-                <h4 className="card-title">
-                    {data.get('given_name')}&nbsp;{data.get('family_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
-        }
-        else {
-            name = (
-                <h4 className="card-title">
-                    {data.get('display_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
-        }
+        // TODO: be craftier about what's in the "subtitle" and whether the card should be expandable
 
+        let name = data.get('display_name');
         let institution = '';
         let cityAndCountry = '';
 
-        if ('full' === this.props.size) {
-            // Institution
-            if (data.get('institution')) {
-                institution = <h6 className="card-subtitle text-muted">{data.get('institution')}</h6>;
-            }
+        // Name
+        if (data.get('family_name') && data.get('given_name')) {
+            name = `${data.get('given_name')} ${data.get('family_name')}`;
+        }
 
-            // City and Country
-            if (data.get('city') && data.get('country')) {
-                cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
-            }
-            else if (data.get('city')) {
-                cityAndCountry = data.get('city');
-            }
-            else if (data.get('country')) {
-                cityAndCountry = data.get('country');
-            }
+        // Institution
+        if (data.get('institution')) {
+            institution = data.get('institution');
+        }
+
+        // City and Country
+        if (data.get('city') && data.get('country')) {
+            cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
+        }
+        else if (data.get('city')) {
+            cityAndCountry = data.get('city');
+        }
+        else if (data.get('country')) {
+            cityAndCountry = data.get('country');
+        }
+        if (cityAndCountry) {
+            cityAndCountry = <CardText expandable={true}>{cityAndCountry}</CardText> ;
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    {name}
-                    {institution}
-                    {cityAndCountry}
-                </div>
-            </div>
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardHeader title={`${name} (Indexer)`}
+                            subtitle={institution}
+                            actAsExpander={true}
+                            showExpandableButton={true}
+                />
+                {cityAndCountry}
+            </Card>
         );
     }
 });
