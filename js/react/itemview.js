@@ -594,7 +594,13 @@ const ItemViewSource = React.createClass({
 });
 
 
-/** ItemView sub-component for Simple Resources. */
+/** ItemView sub-component for Simple Resources.
+ *
+ * If there is a "description" field, it is shown as the Card subtitle.
+ * If the "description" is longer than 40 characters, it is abbreviated in the subtitle and shown
+ * in full when the card is expanded---this is the only time ItemViewSimpleResource has functionally
+ * different "compact" and "full" versions.
+ */
 const ItemViewSimpleResource = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
@@ -611,26 +617,31 @@ const ItemViewSimpleResource = React.createClass({
         // - name
         // - description
 
-        let description = '';
+        // NOTE: max length is 40
 
-        if ('full' === this.props.size) {
-            // Description
-            if (data.get('description')) {
-                description = <h6 className="card-subtitle text-muted">{data.get('description')}</h6>;
-            }
+        const type = data.get('type').charAt(0).toLocaleUpperCase() + data.get('type').slice(1);
+
+        let haveDescription = false;
+        if (data.get('description') && data.get('description').length > 40) {
+            haveDescription = true;
         }
 
-        // Build the final structure
+        let shortDescr = data.get('description');
+        let description = '';
+        if (haveDescription) {
+            description = <CardText expandable={true}>{data.get('description')}</CardText> ;
+            shortDescr = shortDescr.slice(0, 40) + '...';
+        }
+
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">{data.get('type')}</span>
-                    </h4>
-                    {description}
-                </div>
-            </div>
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardHeader title={`${data.get('name')} (${type})`}
+                            subtitle={shortDescr}
+                            actAsExpander={haveDescription}
+                            showExpandableButton={haveDescription}
+                />
+                {description}
+            </Card>
         );
     }
 });
