@@ -30,8 +30,11 @@ import Avatar from 'material-ui/lib/avatar';
 import Card from 'material-ui/lib/card/card';
 import CardActions from 'material-ui/lib/card/card-actions';
 import CardHeader from 'material-ui/lib/card/card-header';
-import FlatButton from 'material-ui/lib/flat-button';
 import CardText from 'material-ui/lib/card/card-text';
+import CardTitle from 'material-ui/lib/card/card-title';
+import FlatButton from 'material-ui/lib/flat-button';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -419,164 +422,131 @@ const ItemViewSource = React.createClass({
 
         // Siglum ("rism" field), Provenance, and Date
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
-        let siglumProvenanceDate = '';
-        if (data.get('rism') && data.get('provenance')) {
+        let provenanceDate = '';
+        if (data.get('provenance') && data.get('provenance_detail') && (data.get('provenance') !== data.get('provenance_detail'))) {
             if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})\u00A0${data.get('date')}`;
+                provenanceDate = <ListItem primaryText={`${data.get('provenance')}\u00A0(${data.get('date')})`}
+                                           secondaryText={data.get('provenance_detail')}/>;
             }
             else {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})`;
-            }
-        }
-        else if (data.get('rism')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u2014${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = data.get('rism');
+                provenanceDate = <ListItem primaryText={`${data.get('provenance')}`}
+                                           secondaryText={data.get('provenance_detail')}/>;
             }
         }
         else if (data.get('provenance')) {
             if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('provenance')}\u2014${data.get('date')}`;
+                provenanceDate = <ListItem primaryText={`${data.get('provenance')}\u00A0(${data.get('date')})`}/>;
             }
             else {
-                siglumProvenanceDate = data.get('provenance');
+                provenanceDate = <ListItem primaryText={data.get('provenance')}/>;
             }
         }
-        if (siglumProvenanceDate.length > 0) {
-            siglumProvenanceDate = <h6 className="card-subtitle text-muted">{siglumProvenanceDate}</h6>;
-        }
 
-        let provenanceDetail = '';
         let status = '';
         let summary = '';
         let occasions = '';
         let indexingInfo = '';
         let description = '';
+        //
+        let notes = '';
+        let i_date = '';
+        let editors = '';
+        let indexers = '';
+        let proofreaders = '';
 
         if ('full' === this.props.size) {
-            // Provenance Detail
-            if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
-                provenanceDetail = <li className={liClassName}>{data.get('provenance_detail')}</li>;
-            }
-
             // Source Status
             if (data.get('source_status')) {
-                status = `Status: ${data.get('source_status')}`;
-                status = <li className={liClassName}>{status}</li>;
+                status = <ListItem primaryText={data.get('source_status')}/>;
             }
 
             // Summary
             if (data.get('summary')) {
-                summary = <li className={liClassName}>{data.get('summary')}</li>;
+                summary = (
+                    <CardText expandable={true}>
+                        <h2>Summary</h2>
+                        {data.get('summary')}
+                    </CardText>
+                );
             }
 
             // Occasions
             if (data.get('liturgical_occasions')) {
-                occasions = `Liturgical Occasions: ${data.get('liturgical_occasions')}`;
-                occasions = <li className={liClassName}>{occasions}</li>;
+                occasions = (
+                    <CardText expandable={true}>
+                        <h2>Liturgical Occasions</h2>
+                        {data.get('liturgical_occasions')}
+                    </CardText>
+                );
             }
 
             // Indexing Information -----------------------
-            let notes = '';
-            let i_date = '';
-            let editors = '';
-            let indexers = '';
-            let proofreaders = '';
 
             // Indexing Date
             if (data.get('indexing_date')) {
-                i_date = `Indexed ${data.get('indexing_date')}`;
-                i_date = <p>{i_date}</p>;
+                i_date = <ListItem primaryText="Indexed" secondaryText={data.get('indexing_date')}/>;
             }
 
             // Notes
             if (data.get('indexing_notes')) {
-                notes = `Indexing Notes: ${data.get('indexing_notes')}`;
-                notes = <p>{notes}</p>;
+                notes = (
+                    <CardText expandable={true}>
+                        <h2>Indexing Notes</h2>
+                        {data.get('indexing_notes')}
+                    </CardText>
+                );
             }
 
             // Indexers
             if (data.get('indexers')) {
-                indexers = `Indexers: ${data.get('indexers').join(', ')}`;
-                indexers = <p>{indexers}</p>;
+                indexers = <ListItem primaryText="Indexers" secondaryText={data.get('indexers').join(', ')}/>;
             }
 
             // Editors
             if (data.get('editors')) {
-                editors = `Editors: ${data.get('editors').join(', ')}`;
-                editors = <p>{editors}</p>;
+                editors = <ListItem primaryText="Editors" secondaryText={data.get('editors').join(', ')}/>;
             }
 
             // Proofreaders
             if (data.get('proofreaders')) {
-                proofreaders = `Proofreaders: ${data.get('proofreaders').join(', ')}`;
-                proofreaders = <p>{proofreaders}</p>;
-            }
-
-            if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
-                indexingInfo = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Indexing Information</h5>
-                        <div className="card-block">
-                            {i_date}
-                            {notes}
-                            {editors}
-                            {indexers}
-                            {proofreaders}
-                        </div>
-                    </div>
-                );
+                proofreaders = <ListItem primaryText="Proofreaders" secondaryText={data.get('proofreaders').join(', ')}/>;
             }
 
             // Description --------------------------------
             if (data.get('description')) {
                 // TODO: format this better (e.g., convert the newline chars to <br/> ?)
                 description = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Description</h5>
-                        <p className="card-block">{data.get('description')}</p>
-                    </div>
+                    <CardText expandable={true}>
+                        <h2>Description</h2>
+                        {data.get('description')}
+                    </CardText>
                 );
             }
         }
 
-        // Build the final structure
-        let post;
-        const commonHeader = (
-            <div className="card-block">
-                <h4 className="card-title">
-                    {data.get('title')}
-                    <span className="label label-info pull-right">Source</span>
-                </h4>
-                {siglumProvenanceDate}
-            </div>
-        );
-
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                    <ul className="list-group list-group-flush">
-                        {provenanceDetail}
+        return (
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardTitle title={data.get('rism')}
+                           subtitle={data.get('title')}
+                           actAsExpander={true}
+                           showExpandableButton={true}
+                />
+                <CardText expandable={true}>
+                    <List>
+                        {provenanceDate}
                         {status}
-                        {summary}
-                        {occasions}
-                    </ul>
-                    {indexingInfo}
-                    {description}
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                </div>
-            );
-        }
-
-        return post;
+                        {i_date}
+                        {indexers}
+                        {editors}
+                        {proofreaders}
+                    </List>
+                </CardText>
+                {summary}
+                {occasions}
+                {notes}
+                {description}
+            </Card>
+        );
     }
 });
 
