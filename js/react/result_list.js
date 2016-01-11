@@ -98,7 +98,13 @@ const ResultRow = React.createClass({
         this.props.columns.forEach(columnName => {
             let columnData = this.props.data.get(columnName);
             if (columnData) {
-                columnData = columnData.toString();
+                if (Immutable.List.isList(columnData)) {
+                    // a few fields are given as lists
+                    columnData = columnData.join(', ');
+                }
+                else {
+                    columnData = columnData.toString();
+                }
             }
 
             let columnLink = '';
@@ -165,18 +171,16 @@ const ResultListItemView = React.createClass({
  * ------
  * @param (ImmutableJS.Map) headers - ???
  * @param (ImmutableJS.Map) data - ???
- * - dontRender : TODO: replace this with the proper "doRender" thing, in the proper order
  * @param (ImmutableJS.List) sortOrder - ???
  */
 const ResultListTable = React.createClass({
     propTypes: {
-        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
         data: React.PropTypes.instanceOf(Immutable.Map),
         headers: React.PropTypes.instanceOf(Immutable.Map),
         sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
     getDefaultProps: function() {
-        return {dontRender: [], data: null, headers: null, sortOrder: []};
+        return {data: null, headers: null, sortOrder: []};
     },
     render() {
         let tableHeader = [];
@@ -186,14 +190,6 @@ const ResultListTable = React.createClass({
             extraFields = extraFields.split(',');
             columns = columns.concat(extraFields);
         }
-
-        // remove the field names in "dontRender"
-        for (let field in this.props.dontRender) {
-            let pos = columns.indexOf(this.props.dontRender[field]);
-            if (pos >= 0) {
-                columns.splice(pos, 1);
-            }
-        };
 
         columns.forEach(function(columnName) {
             // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
@@ -245,22 +241,11 @@ const ResultListTable = React.createClass({
  */
 const ResultList = React.createClass({
     //
-    // Props:
-    // - dontRender
-    // - data
-    // - headers
-    // - sortOrder
-    //
     // NuclearJS State:
     // - searchResultsFormat (str) Whether to render the results in a "table" or with "ItemView" components.
+    // - results
     //
 
-    propTypes: {
-        dontRender: React.PropTypes.arrayOf(React.PropTypes.string),
-    },
-    getDefaultProps() {
-        return {dontRender: []};
-    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -275,8 +260,7 @@ const ResultList = React.createClass({
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                results = <ResultListTable dontRender={this.props.dontRender}
-                                           data={this.state.results}
+                results = <ResultListTable data={this.state.results}
                                            headers={this.state.results.get('headers')}
                                            sortOrder={this.state.results.get('sort_order')}/>;
             }
@@ -490,7 +474,6 @@ var ErrorMessage = React.createClass({
 
 /** TODO: rename this to "ResultList" and the other component to something else
  *
- * TODO: this.props.dontRender (where does it come from? How to specify it? Should be NuclearJS.
  */
 const ResultListFrame = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -513,7 +496,7 @@ const ResultListFrame = React.createClass({
 
         let results = '';
         if (null !== this.state.results) {
-            results = <ResultList dontRender={this.props.dontRender}/> ;
+            results = <ResultList/> ;
         }
 
         return (
