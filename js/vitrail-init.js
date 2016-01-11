@@ -28,6 +28,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {IndexRoute, Route, Router} from 'react-router';
 
+// as per http://www.material-ui.com/#/get-started/installation
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
+
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
