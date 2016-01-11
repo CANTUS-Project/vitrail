@@ -32,6 +32,7 @@ import CardActions from 'material-ui/lib/card/card-actions';
 import CardHeader from 'material-ui/lib/card/card-header';
 import CardText from 'material-ui/lib/card/card-text';
 import CardTitle from 'material-ui/lib/card/card-title';
+import Divider from 'material-ui/lib/divider';
 import FlatButton from 'material-ui/lib/flat-button';
 import List from 'material-ui/lib/lists/list';
 import ListItem from 'material-ui/lib/lists/list-item';
@@ -425,21 +426,22 @@ const ItemViewSource = React.createClass({
         let provenanceDate = '';
         if (data.get('provenance') && data.get('provenance_detail') && (data.get('provenance') !== data.get('provenance_detail'))) {
             if (data.get('date')) {
-                provenanceDate = <ListItem primaryText={`${data.get('provenance')}\u00A0(${data.get('date')})`}
-                                           secondaryText={data.get('provenance_detail')}/>;
+                provenanceDate = `${data.get('provenance')}\u00A0(${data.get('date')}):\u00A0${data.get('provenance_detail')}`;
             }
             else {
-                provenanceDate = <ListItem primaryText={`${data.get('provenance')}`}
-                                           secondaryText={data.get('provenance_detail')}/>;
+                provenanceDate = `${data.get('provenance')}:\u00A0${data.get('provenance_detail')}`;
             }
         }
         else if (data.get('provenance')) {
             if (data.get('date')) {
-                provenanceDate = <ListItem primaryText={`${data.get('provenance')}\u00A0(${data.get('date')})`}/>;
+                provenanceDate = `${data.get('provenance')}\u00A0(${data.get('date')})`;
             }
             else {
-                provenanceDate = <ListItem primaryText={data.get('provenance')}/>;
+                provenanceDate = `${data.get('provenance')}\u00A0(${data.get('date')})`;
             }
+        }
+        if (provenanceDate) {
+            provenanceDate = <CardText expandable={false}>{provenanceDate}</CardText>;
         }
 
         let status = '';
@@ -454,76 +456,78 @@ const ItemViewSource = React.createClass({
         let indexers = '';
         let proofreaders = '';
 
-        if ('full' === this.props.size) {
-            // Source Status
-            if (data.get('source_status')) {
-                status = <ListItem primaryText={data.get('source_status')}/>;
-            }
-
-            // Summary
-            if (data.get('summary')) {
-                summary = (
-                    <CardText expandable={true}>
-                        <h2>Summary</h2>
-                        {data.get('summary')}
-                    </CardText>
-                );
-            }
-
-            // Occasions
-            if (data.get('liturgical_occasions')) {
-                occasions = (
-                    <CardText expandable={true}>
-                        <h2>Liturgical Occasions</h2>
-                        {data.get('liturgical_occasions')}
-                    </CardText>
-                );
-            }
-
-            // Indexing Information -----------------------
-
-            // Indexing Date
-            if (data.get('indexing_date')) {
-                i_date = <ListItem primaryText="Indexed" secondaryText={data.get('indexing_date')}/>;
-            }
-
-            // Notes
-            if (data.get('indexing_notes')) {
-                notes = (
-                    <CardText expandable={true}>
-                        <h2>Indexing Notes</h2>
-                        {data.get('indexing_notes')}
-                    </CardText>
-                );
-            }
-
-            // Indexers
-            if (data.get('indexers')) {
-                indexers = <ListItem primaryText="Indexers" secondaryText={data.get('indexers').join(', ')}/>;
-            }
-
-            // Editors
-            if (data.get('editors')) {
-                editors = <ListItem primaryText="Editors" secondaryText={data.get('editors').join(', ')}/>;
-            }
-
-            // Proofreaders
-            if (data.get('proofreaders')) {
-                proofreaders = <ListItem primaryText="Proofreaders" secondaryText={data.get('proofreaders').join(', ')}/>;
-            }
-
-            // Description --------------------------------
-            if (data.get('description')) {
-                // TODO: format this better (e.g., convert the newline chars to <br/> ?)
-                description = (
-                    <CardText expandable={true}>
-                        <h2>Description</h2>
-                        {data.get('description')}
-                    </CardText>
-                );
-            }
+        // Source Status
+        if (data.get('source_status')) {
+            status = <ListItem primaryText={data.get('source_status')}/>;
         }
 
+        // Summary
+        if (data.get('summary')) {
+            summary = (
+                <CardText expandable={true}>
+                    {`Summary: ${data.get('summary')}`}
+                </CardText>
+            );
+        }
+
+        // Occasions
+        if (data.get('liturgical_occasions')) {
+            occasions = (
+                <CardText expandable={true}>
+                    <h2>Liturgical Occasions</h2>
+                    {data.get('liturgical_occasions')}
+                </CardText>
+            );
+        }
+
+        // Indexing Information -----------------------
+
+        // Indexing Date
+        if (data.get('indexing_date')) {
+            // i_date = <ListItem primaryText="Indexed" secondaryText={data.get('indexing_date')}/>;
+            i_date = `Indexed: ${data.get('indexing_date')}`;
+        }
+
+        // Notes
+        if (data.get('indexing_notes')) {
+            notes = (
+                <CardText expandable={true}>
+                    <h2>Indexing Notes</h2>
+                    {data.get('indexing_notes')}
+                </CardText>
+            );
+        }
+
+        // Indexers
+        if (data.get('indexers')) {
+            // indexers = <ListItem primaryText="Indexers" secondaryText={data.get('indexers').join(', ')}/>;
+            indexers = `Indexers: {data.get('indexers').join(', ')}`;
+        }
+
+        // Editors
+        if (data.get('editors')) {
+            editors = <ListItem primaryText="Editors" secondaryText={data.get('editors').join(', ')}/>;
+        }
+
+        // Proofreaders
+        if (data.get('proofreaders')) {
+            // proofreaders = <ListItem primaryText="Proofreaders" secondaryText={data.get('proofreaders').join(', ')}/>;
+            proofreaders = `Proofreaders: ${data.get('proofreaders').join(', ')}`;
+        }
+
+        // Description --------------------------------
+        if (data.get('description')) {
+            // TODO: format this better (e.g., convert the newline chars to <br/> ?)
+            description = (
+                <CardText expandable={true}>
+                    <h2>Description</h2>
+                    {data.get('description')}
+                </CardText>
+            );
+        }
+
+        // TODO: use dividers
+        // TODO: figure out how to avoid <h2> (or style it)
         return (
             <Card initiallyExpanded={(this.props.size === 'full')}>
                 <CardTitle title={data.get('rism')}
@@ -531,17 +535,19 @@ const ItemViewSource = React.createClass({
                            actAsExpander={true}
                            showExpandableButton={true}
                 />
-                <CardText expandable={true}>
-                    <List>
-                        {provenanceDate}
-                        {status}
-                        {i_date}
-                        {indexers}
-                        {editors}
-                        {proofreaders}
-                    </List>
-                </CardText>
+                {provenanceDate}
                 {summary}
+                <CardText expandable={true}>
+                    {status}
+                    <Divider/>
+                    {i_date}
+                    <Divider/>
+                    {indexers}
+                    <Divider/>
+                    {editors}
+                    <Divider/>
+                    {proofreaders}
+                </CardText>
                 {occasions}
                 {notes}
                 {description}
