@@ -24,8 +24,14 @@
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
-
 import {Link} from 'react-router';
+
+import Avatar from 'material-ui/lib/avatar';
+import Card from 'material-ui/lib/card/card';
+import CardActions from 'material-ui/lib/card/card-actions';
+import CardHeader from 'material-ui/lib/card/card-header';
+import FlatButton from 'material-ui/lib/flat-button';
+import CardText from 'material-ui/lib/card/card-text';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -358,40 +364,33 @@ const ItemViewGenre = React.createClass({
     },
     render() {
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Fields Available:
         // - name
         // - description
         // - mass_or_office
 
-        let description = '';
-        let massOrOffice = '';
-
-        if ('full' === this.props.size) {
-            // Mass or Office
-            if (data.get('mass_or_office')) {
-                massOrOffice = <h6 className="card-subtitle text-muted">{data.get('mass_or_office')}</h6>;
-            }
-
-            // Description
-            if (data.get('description')) {
-                description = data.get('description');
-            }
+        let massOrOffice = data.get('mass_or_office');
+        if (massOrOffice.size === 1) {
+            massOrOffice = <CardText expandable={true}>{`For the ${massOrOffice.get(0)}`}</CardText> ;
+        }
+        else if (massOrOffice.size === 2) {
+            massOrOffice = <CardText expandable={true}>{'For the mass or office'}</CardText> ;
+        }
+        else {
+            massOrOffice = '';
         }
 
-        // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Genre</span>
-                    </h4>
-                    {massOrOffice}
-                    {description}
-                </div>
-            </div>
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardHeader title={data.get('description')}
+                            subtitle="Genre"
+                            avatar={<Avatar>{data.get('name')}</Avatar>}
+                            actAsExpander={true}
+                            showExpandableButton={true}
+                />
+                {massOrOffice}
+            </Card>
         );
     }
 });
