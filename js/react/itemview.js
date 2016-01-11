@@ -58,171 +58,48 @@ const ItemViewChant = React.createClass({
         const data = this.props.data;
         const resources = this.props.resources;
 
-        // Genre and Cantus ID
-        let genreAndCantusid = '';
-        if (data.get('genre') && data.get('cantus_id')) {
-            genreAndCantusid = `${data.get('genre')}\u2014Cantus\u00A0ID\u00A0${data.get('cantus_id')}`;
-        } else if (data.get('genre')) {
-            genreAndCantusid = data.get('genre');
-        } else if (data.get('cantus_id')) {
-            genreAndCantusid = data.get('cantus_id');
-        }
+        let genreOfficeFeast = '';
+        genreOfficeFeast = `${data.get('genre')} / ${data.get('office')} / ${data.get('feast')}`;
 
-        // Feast and Office
-        let feastAndOffice = '';
-        if ('full' === this.props.size) {
-            if (data.get('feast') && data.get('feast_desc') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} (${data.get('feast_desc')}) office ${data.get('office')}`;
-            } else if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} office ${data.get('office')}`;
-            } else if (data.get('feast')) {
-                feastAndOffice = `Chant for ${data.get('feast')}`;
-            } else if (data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('office')} office`;
-            }
-            if (feastAndOffice.length > 0) {
-                feastAndOffice = <li className={liClassName}>{feastAndOffice}</li>;
-            }
-        } else {
-            if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `${data.get('feast')} (${data.get('office')})`;
-            } else if (data.get('feast')) {
-                feastAndOffice = data.get('feast');
-            } else if (data.get('office')) {
-                feastAndOffice = `(${data.get('office')})`;
-            }
-        }
-
-        // Source, Folio, and Sequence
-        let sourceFolioSequence = '';
-        if ('full' === this.props.size) {
-            if (data.get('source') && data.get('folio') && data.get('sequence')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}, item {data.get('sequence')}.</li>;
-            } else if (data.get('source') && data.get('folio')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}.</li>;
-            } else if (data.get('source')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i>.</li>;
-            }
-        } else {
-            if (data.get('source')) {
-                sourceFolioSequence = data.get('source');
-                if (sourceFolioSequence.length > 30) {
-                    sourceFolioSequence = sourceFolioSequence.slice(0, 30);
-                }
-                sourceFolioSequence = <i className="vitrail-source-name">{sourceFolioSequence}&hellip;</i>;
-            }
-        }
+        let folioSequenceSiglum = '';
+        folioSequenceSiglum = `${data.get('siglum')}: ${data.get('folio')} #${data.get('sequence')}`;
 
         let mode = '';
-        let concordances = '';
+        if (data.get('mode')) {
+            mode = `Mode: ${data.get('mode')}`;
+        }
+
         let differentia = '';
-        let fullText = '';
-        let volpiano = '';
-        let notes = '';
-        let marginalia = '';
-        let siglum = '';
-        let proofreader = '';
-        let melodyID = '';
-
-        if ('full' === this.props.size) {
-            // Mode
-            if (data.get('mode')) {
-                mode = <li className={liClassName}>Mode {data.get('mode')}</li>;
-            }
-
-            // CAO Concordances
-            if (data.get('cao_concordances')) {
-                concordances = <li className={liClassName}>CAO Concordances: {data.get('cao_concordances')}</li>;
-            }
-
-            // Differentia
-            if (data.get('differentia')) {
-                differentia = <li className={liClassName}>Differentia: {data.get('differentia')}</li>;
-            }
-
-            // Full Text
-            if (data.get('full_text') && data.get('full_text_manuscript')) {
-                // TODO: this
-            } else if (data.get('full_text')) {
-                fullText = <li className={liClassName}>{data.get('full_text')}</li>;
-            }
-
-            // Volpiano
-            if (data.get('volpiano')) {
-                volpiano = <li className={liClassName}>{data.get('volpiano')}</li>;
-            }
-
-            // Notes
-            if (data.get('notes')) {
-                notes = <li className={liClassName}>Notes: {data.get('notes')}</li>;
-            }
-
-            // Marginalia
-            if (data.get('marginalia')) {
-                marginalia = <li className={liClassName}>Marginalia: {data.get('marginalia')}</li>;
-            }
-
-            // Siglum
-            if (data.get('siglum')) {
-                siglum = <li className={liClassName}>Siglum: {data.get('siglum')}</li>;
-            }
-
-            // Proofreader
-            if (data.get('proofreader')) {
-                proofreader = <li className={liClassName}>Proofreader: {data.get('proofreader')}</li>;
-            }
-
-            // Melody ID
-            if (data.get('melody_id')) {
-                melodyID = <li className={liClassName}>Melody ID: {data.get('melody_id')}</li>;
-            }
+        if (data.get('differentia')) {
+            differentia = `Diff.: ${data.get('differentia')}`;
         }
 
         // Build the final structure
-        let post = '';
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                    </div>
-                    <ul className="list-group list-group-flush">
-                        {feastAndOffice}
-                        {sourceFolioSequence}
-                        {mode}
-                        {concordances}
-                        {differentia}
-                        {fullText}
-                        {volpiano}
-                        {notes}
-                        {marginalia}
-                        {siglum}
-                        {proofreader}
-                        {melodyID}
-                    </ul>
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                        {feastAndOffice}<br/>
-                        {sourceFolioSequence}
-                    </div>
-                </div>
-            );
-        }
-
-        return post;
+        return (
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardHeader title={`${data.get('incipit')} (Chant)`}
+                            subtitle={genreOfficeFeast}
+                            actAsExpander={true}
+                            showExpandableButton={true}
+                />
+                <CardText expandable={false}>
+                    {folioSequenceSiglum}<br/>
+                    {mode}<br/>
+                    {differentia}
+                </CardText>
+                <List expandable={true}>
+                    <ListItem primaryText='marginalia' secondaryText={data.get('marginalia')}/>
+                    <ListItem primaryText='notes' secondaryText={data.get('notes')}/>
+                    <ListItem primaryText='proofreader' secondaryText={data.get('proofreader')}/>
+                    <ListItem primaryText='melody_id' secondaryText={data.get('melody_id')}/>
+                    <ListItem primaryText='volpiano' secondaryText={data.get('volpiano')}/>
+                    <ListItem primaryText='full_text' secondaryText={data.get('full_text')}/>
+                    <ListItem primaryText='full_text_manuscript' secondaryText={data.get('full_text_manuscript')}/>
+                    <ListItem primaryText='cao_concordances' secondaryText={data.get('cao_concordances')}/>
+                    <ListItem primaryText='cantus_id' secondaryText={data.get('cantus_id')}/>
+                </List>
+            </Card>
+        );
     }
 });
 
