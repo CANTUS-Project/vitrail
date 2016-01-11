@@ -243,34 +243,30 @@ const ItemViewFeast = React.createClass({
         // - date
         // - feast code
 
-        // Name and Feast Code
-        let codeAndDate = '';
-        if (data.get('feast_code') && data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}&mdash;{data.get('date')}</h6>;
-        } else if (data.get('feast_code')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}</h6>;
-        } else if (data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('date')}</h6>;
+        // Feast Code
+        let feastCode = '';
+        if (data.get('feast_code')) {
+            feastCode = <CardText expandable={true}>{data.get('feast_code')}</CardText>;
+            // TODO: do I really want this in its own CardText component? No, but it's a small detail.
         }
 
         // Description and Date
         let description = '';
-        if ('full' === this.props.size && data.get('description')) {
-            description = data.get('description');
+        if (data.get('description')) {
+            description = <CardText expandable={true}>{data.get('description')}</CardText>;
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Feast</span>
-                    </h4>
-                    {codeAndDate}
-                    {description}
-                </div>
-            </div>
+            <Card initiallyExpanded={(this.props.size === 'full')}>
+                <CardHeader title={`${data.get('name')} (Feast)`}
+                            subtitle={data.get('date')}
+                            actAsExpander={true}
+                            showExpandableButton={true}
+                />
+                {description}
+                {feastCode}
+            </Card>
         );
     }
 });
