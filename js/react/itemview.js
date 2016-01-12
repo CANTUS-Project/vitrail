@@ -24,8 +24,9 @@
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
-
 import {Link} from 'react-router';
+
+import Panel from 'react-bootstrap/lib/Panel';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -365,33 +366,16 @@ const ItemViewGenre = React.createClass({
         // - description
         // - mass_or_office
 
-        let description = '';
-        let massOrOffice = '';
-
-        if ('full' === this.props.size) {
-            // Mass or Office
-            if (data.get('mass_or_office')) {
-                massOrOffice = <h6 className="card-subtitle text-muted">{data.get('mass_or_office')}</h6>;
-            }
-
-            // Description
-            if (data.get('description')) {
-                description = data.get('description');
-            }
-        }
+        const header = [data.get('name'), <Label bsStyle="info">Genre</Label>];
+        const description = data.get('description', '');
+        const massOrOffice = <div className="text-muted">({data.get('mass_or_office')})</div>;
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Genre</span>
-                    </h4>
-                    {massOrOffice}
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+                {description}
+                {massOrOffice}
+            </Panel>
         );
     }
 });
