@@ -52,64 +52,62 @@ const ItemViewChant = React.createClass({
         const data = this.props.data;
         const resources = this.props.resources;
 
-        // Genre and Cantus ID
-        let genreAndCantusid = '';
-        if (data.get('genre') && data.get('cantus_id')) {
-            genreAndCantusid = `${data.get('genre')}\u2014Cantus\u00A0ID\u00A0${data.get('cantus_id')}`;
-        } else if (data.get('genre')) {
-            genreAndCantusid = data.get('genre');
-        } else if (data.get('cantus_id')) {
-            genreAndCantusid = data.get('cantus_id');
+        // Primary Fields:
+        // ---------------
+        // - incipit
+        // - {genre} for {office} during {feast}
+        // - position
+        // - siglum
+        // - folio and sequence number
+        // - mode
+        // - differentia
+        //
+        // Secondary Fields ("hideable"):
+        // ------------------------------
+        // - marginalia
+        // - notes
+        // - proofreader
+        // - melody_id
+        // - volpiano
+        // - full_text & full_text_manuscript
+        // - cao_concordances
+        // - cantus ID
+        // - finalis
+
+
+        // primary fields -----------------------------------------------------
+        let header = [data.get('incipit'), <Label bsStyle="info">Chant</Label>];
+
+        // genre, office, feast
+        header.push(<div>{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
+
+        // siglum, folio, sequence
+        if (data.get('folio') && data.get('sequence')) {
+            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}</div>);
+        }
+        else if (data.get('folio')) {
+            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')}`}</div>);
+        }
+        else if (data.get('sequence')) {
+            header.push(<div>{`${data.get('siglum')}: seq. ${data.get('sequence')}`}</div>);
+        }
+        else {
+            header.push(<div>{`${data.get('siglum')}`}</div>);
         }
 
-        // Feast and Office
-        let feastAndOffice = '';
-        if ('full' === this.props.size) {
-            if (data.get('feast') && data.get('feast_desc') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} (${data.get('feast_desc')}) office ${data.get('office')}`;
-            } else if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} office ${data.get('office')}`;
-            } else if (data.get('feast')) {
-                feastAndOffice = `Chant for ${data.get('feast')}`;
-            } else if (data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('office')} office`;
-            }
-            if (feastAndOffice.length > 0) {
-                feastAndOffice = <li className={liClassName}>{feastAndOffice}</li>;
-            }
-        } else {
-            if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `${data.get('feast')} (${data.get('office')})`;
-            } else if (data.get('feast')) {
-                feastAndOffice = data.get('feast');
-            } else if (data.get('office')) {
-                feastAndOffice = `(${data.get('office')})`;
-            }
+        // mode, differentia
+        if (data.get('mode') && data.get('differentia')) {
+            header.push(<div>{`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}</div>);
+        }
+        else if (data.get('mode')) {
+            header.push(<div>{`Mode: ${data.get('mode')}`}</div>);
+        }
+        else if (data.get('differentia')) {
+            header.push(<div>{`Differentia: ${data.get('differentia')}`}</div>);
         }
 
-        // Source, Folio, and Sequence
-        let sourceFolioSequence = '';
-        if ('full' === this.props.size) {
-            if (data.get('source') && data.get('folio') && data.get('sequence')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}, item {data.get('sequence')}.</li>;
-            } else if (data.get('source') && data.get('folio')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}.</li>;
-            } else if (data.get('source')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i>.</li>;
-            }
-        } else {
-            if (data.get('source')) {
-                sourceFolioSequence = data.get('source');
-                if (sourceFolioSequence.length > 30) {
-                    sourceFolioSequence = sourceFolioSequence.slice(0, 30);
-                }
-                sourceFolioSequence = <i className="vitrail-source-name">{sourceFolioSequence}&hellip;</i>;
-            }
-        }
-
-        let mode = '';
+        // secondary fields ---------------------------------------------------
         let concordances = '';
-        let differentia = '';
         let fullText = '';
         let volpiano = '';
         let notes = '';
@@ -117,106 +115,81 @@ const ItemViewChant = React.createClass({
         let siglum = '';
         let proofreader = '';
         let melodyID = '';
+        let cantusID = '';
+        let finalis = '';
 
-        if ('full' === this.props.size) {
-            // Mode
-            if (data.get('mode')) {
-                mode = <li className={liClassName}>Mode {data.get('mode')}</li>;
-            }
+        // CAO Concordances
+        if (data.get('cao_concordances')) {
+            concordances = <ListGroupItem>CAO Concordances: {data.get('cao_concordances')}</ListGroupItem>;
+        }
 
-            // CAO Concordances
-            if (data.get('cao_concordances')) {
-                concordances = <li className={liClassName}>CAO Concordances: {data.get('cao_concordances')}</li>;
-            }
+        // Full Text
+        if (data.get('full_text') && data.get('full_text_manuscript')) {
+            fullText = [
+                <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>,
+                <ListGroupItem>Full Text (manuscript spelling):{data.get('full_text_manuscript')}</ListGroupItem>
+            ];
 
-            // Differentia
-            if (data.get('differentia')) {
-                differentia = <li className={liClassName}>Differentia: {data.get('differentia')}</li>;
-            }
+        } else if (data.get('full_text')) {
+            fullText = <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>;
+        }
 
-            // Full Text
-            if (data.get('full_text') && data.get('full_text_manuscript')) {
-                // TODO: this
-            } else if (data.get('full_text')) {
-                fullText = <li className={liClassName}>{data.get('full_text')}</li>;
-            }
+        // Volpiano
+        if (data.get('volpiano')) {
+            volpiano = <ListGroupItem>Volpiano: {data.get('volpiano')}</ListGroupItem>;
+        }
 
-            // Volpiano
-            if (data.get('volpiano')) {
-                volpiano = <li className={liClassName}>{data.get('volpiano')}</li>;
-            }
+        // Notes
+        if (data.get('notes')) {
+            notes = <ListGroupItem>Notes: {data.get('notes')}</ListGroupItem>;
+        }
 
-            // Notes
-            if (data.get('notes')) {
-                notes = <li className={liClassName}>Notes: {data.get('notes')}</li>;
-            }
+        // Marginalia
+        if (data.get('marginalia')) {
+            marginalia = <ListGroupItem>Marginalia: {data.get('marginalia')}</ListGroupItem>;
+        }
 
-            // Marginalia
-            if (data.get('marginalia')) {
-                marginalia = <li className={liClassName}>Marginalia: {data.get('marginalia')}</li>;
-            }
+        // Siglum
+        if (data.get('siglum')) {
+            siglum = <ListGroupItem>Siglum: {data.get('siglum')}</ListGroupItem>;
+        }
 
-            // Siglum
-            if (data.get('siglum')) {
-                siglum = <li className={liClassName}>Siglum: {data.get('siglum')}</li>;
-            }
+        // Proofreader
+        if (data.get('proofreader')) {
+            proofreader = <ListGroupItem>Proofreader: {data.get('proofreader')}</ListGroupItem>;
+        }
 
-            // Proofreader
-            if (data.get('proofreader')) {
-                proofreader = <li className={liClassName}>Proofreader: {data.get('proofreader')}</li>;
-            }
+        // Melody ID
+        if (data.get('melody_id')) {
+            melodyID = <ListGroupItem>Melody ID: {data.get('melody_id')}</ListGroupItem>;
+        }
 
-            // Melody ID
-            if (data.get('melody_id')) {
-                melodyID = <li className={liClassName}>Melody ID: {data.get('melody_id')}</li>;
-            }
+        // Cantus ID
+        if (data.get('cantus_id')) {
+            cantusID = <ListGroupItem>Cantus ID: {data.get('cantus_id')}</ListGroupItem>;
+        }
+
+        // Finalis
+        if (data.get('finalis')) {
+            finalis = <ListGroupItem>Finalis: {data.get('finalis')}</ListGroupItem>;
         }
 
         // Build the final structure
-        let post = '';
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                    </div>
-                    <ul className="list-group list-group-flush">
-                        {feastAndOffice}
-                        {sourceFolioSequence}
-                        {mode}
-                        {concordances}
-                        {differentia}
-                        {fullText}
-                        {volpiano}
-                        {notes}
-                        {marginalia}
-                        {siglum}
-                        {proofreader}
-                        {melodyID}
-                    </ul>
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                        {feastAndOffice}<br/>
-                        {sourceFolioSequence}
-                    </div>
-                </div>
-            );
-        }
-
-        return post;
+        return (
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+                <ListGroup>
+                    {concordances}
+                    {fullText}
+                    {volpiano}
+                    {notes}
+                    {marginalia}
+                    {proofreader}
+                    {melodyID}
+                    {cantusID}
+                    {finalis}
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
