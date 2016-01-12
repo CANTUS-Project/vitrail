@@ -382,54 +382,41 @@ const ItemViewSource = React.createClass({
         const data = this.props.data;
         const resources = this.props.resources;
 
-        // Fields Available:
-        // - title (string) – Full Manuscript Identification (City, Archive, Shelf-mark)
-        // - rism (string) – RISM number
-        // - provenance (string) – Provenance
-        // - provenance_detail (string) – More detail about the provenance
-        // - date (string) – Date
-        // IGNORED: - century (string) – Century
-        // IGNORED: - notation_style (string) – Notation used for the source
-        // - editors (string) – List of "display_name" of indexers who edited this manuscript
-        // - indexers (string) – List of "display_name" of indexers who entered this manuscript
-        // - proofreaders (string) – List of "display_name" of indexers who proofread this manuscript
-        // IGNORED: - segment (string) – Segment (i.e., source database)
-        // - source_status (string) – Status of this source
-        // - summary (string) – Summary
-        // - liturgical_occasions (string) – Liturgical occasions
-        // - description (string) – Description
-        // - indexing_notes (string) – Indexing notes
-        // - indexing_date (string) – Indexing date
-
-        // Siglum ("rism" field), Provenance, and Date
+        // Primary Fields:
+        // ---------------
+        // - "rism" (siglum)
+        // - abbr. full name
+        // - date
+        // - provenance
+        // - summary (abbreviated, if there's space) (CRA: there isn't)
+        //
+        // Secondary Fields ("hideable"):
+        // ------------------------------
+        // - full name (not abbreviated)
+        // - provenance detail
+        // - editors
+        // - indexers
+        // - proofreaders
+        // - source _status
+        // - liturgical occasions
+        // - indexing_notes
+        // - indexing_date
+        // - notation_style
+        // - century
+        // - segment
+        //
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
-        let siglumProvenanceDate = '';
-        if (data.get('rism') && data.get('provenance')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})\u00A0${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})`;
-            }
-        }
-        else if (data.get('rism')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u2014${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = data.get('rism');
-            }
+
+        let header = [data.get('rism'), <Label bsStyle="info">Source</Label>];
+        header.push(<div>{`${data.get('title').slice(0, 40)}...`}</div>);
+        if (data.get('provenance') && data.get('date')) {
+            header.push(<div>{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
         }
         else if (data.get('provenance')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('provenance')}\u2014${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = data.get('provenance');
-            }
+            header.push(<div>{data.get('provenance')}</div>);
         }
-        if (siglumProvenanceDate.length > 0) {
-            siglumProvenanceDate = <h6 className="card-subtitle text-muted">{siglumProvenanceDate}</h6>;
+        else if (data.get('date')) {
+            header.push(<div>{data.get('date')}</div>);
         }
 
         let provenanceDetail = '';
@@ -439,128 +426,91 @@ const ItemViewSource = React.createClass({
         let indexingInfo = '';
         let description = '';
 
-        if ('full' === this.props.size) {
-            // Provenance Detail
-            if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
-                provenanceDetail = <li className={liClassName}>{data.get('provenance_detail')}</li>;
-            }
+        // Provenance Detail
+        if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
+            provenanceDetail = <ListGroupItem>{data.get('provenance_detail')}</ListGroupItem>;
+        }
 
-            // Source Status
-            if (data.get('source_status')) {
-                status = `Status: ${data.get('source_status')}`;
-                status = <li className={liClassName}>{status}</li>;
-            }
+        // Source Status
+        if (data.get('source_status')) {
+            status = <ListGroupItem>{`Status: ${data.get('source_status')}`}</ListGroupItem>;
+        }
 
-            // Summary
-            if (data.get('summary')) {
-                summary = <li className={liClassName}>{data.get('summary')}</li>;
-            }
+        // Summary
+        if (data.get('summary')) {
+            summary = <ListGroupItem><Panel header="Summary">{data.get('summary')}</Panel></ListGroupItem>;
+        }
 
-            // Occasions
-            if (data.get('liturgical_occasions')) {
-                occasions = `Liturgical Occasions: ${data.get('liturgical_occasions')}`;
-                occasions = <li className={liClassName}>{occasions}</li>;
-            }
+        // Occasions
+        if (data.get('liturgical_occasions')) {
+            occasions = (
+                <ListGroupItem>
+                    <Panel header="Liturgical Occasions">
+                        {data.get('liturgical_occasions')}
+                    </Panel>
+                </ListGroupItem>
+            );
+        }
 
-            // Indexing Information -----------------------
-            let notes = '';
-            let i_date = '';
-            let editors = '';
-            let indexers = '';
-            let proofreaders = '';
+        // Indexing Information -----------------------
+        let notes = '';
+        let i_date = '';
+        let editors = '';
+        let indexers = '';
+        let proofreaders = '';
 
-            // Indexing Date
-            if (data.get('indexing_date')) {
-                i_date = `Indexed ${data.get('indexing_date')}`;
-                i_date = <p>{i_date}</p>;
-            }
+        // Indexing Date
+        if (data.get('indexing_date')) {
+            i_date = <ListGroupItem>{`Indexed ${data.get('indexing_date')}`}</ListGroupItem>;
+        }
 
-            // Notes
-            if (data.get('indexing_notes')) {
-                notes = `Indexing Notes: ${data.get('indexing_notes')}`;
-                notes = <p>{notes}</p>;
-            }
+        // Notes
+        if (data.get('indexing_notes')) {
+            notes = <ListGroupItem>{`Indexing Notes: ${data.get('indexing_notes')}`}</ListGroupItem>;
+        }
 
-            // Indexers
-            if (data.get('indexers')) {
-                indexers = `Indexers: ${data.get('indexers').join(', ')}`;
-                indexers = <p>{indexers}</p>;
-            }
+        // Indexers
+        if (data.get('indexers')) {
+            indexers = <ListGroupItem>{`Indexers: ${data.get('indexers').join(', ')}`}</ListGroupItem>;
+        }
 
-            // Editors
-            if (data.get('editors')) {
-                editors = `Editors: ${data.get('editors').join(', ')}`;
-                editors = <p>{editors}</p>;
-            }
+        // Editors
+        if (data.get('editors')) {
+            editors = <ListGroupItem>{`Editors: ${data.get('editors').join(', ')}`}</ListGroupItem>;
+        }
 
-            // Proofreaders
-            if (data.get('proofreaders')) {
-                proofreaders = `Proofreaders: ${data.get('proofreaders').join(', ')}`;
-                proofreaders = <p>{proofreaders}</p>;
-            }
+        // Proofreaders
+        if (data.get('proofreaders')) {
+            proofreaders = <ListGroupItem>{`Proofreaders: ${data.get('proofreaders').join(', ')}`}</ListGroupItem>;
+        }
 
-            if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
-                indexingInfo = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Indexing Information</h5>
-                        <div className="card-block">
-                            {i_date}
-                            {notes}
-                            {editors}
-                            {indexers}
-                            {proofreaders}
-                        </div>
-                    </div>
-                );
-            }
-
-            // Description --------------------------------
-            if (data.get('description')) {
-                // TODO: format this better (e.g., convert the newline chars to <br/> ?)
-                description = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Description</h5>
-                        <p className="card-block">{data.get('description')}</p>
-                    </div>
-                );
-            }
+        // Description --------------------------------
+        if (data.get('description')) {
+            // TODO: format this better (e.g., convert the newline chars to <br/> ?)
+            description = (
+                <ListGroupItem>
+                    <Panel header="Description">{data.get('description')}</Panel>
+                </ListGroupItem>
+            );
         }
 
         // Build the final structure
-        let post;
-        const commonHeader = (
-            <div className="card-block">
-                <h4 className="card-title">
-                    {data.get('title')}
-                    <span className="label label-info pull-right">Source</span>
-                </h4>
-                {siglumProvenanceDate}
-            </div>
-        );
-
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                    <ul className="list-group list-group-flush">
-                        {provenanceDetail}
-                        {status}
-                        {summary}
-                        {occasions}
-                    </ul>
-                    {indexingInfo}
+        return (
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header}>
+                <ListGroup>
+                    <ListGroupItem>{data.get('title')}</ListGroupItem>
+                    {status}
+                    {summary}
+                    {provenanceDetail}
+                    {indexers}
+                    {editors}
+                    {proofreaders}
+                    {notes}
+                    {occasions}
                     {description}
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                </div>
-            );
-        }
-
-        return post;
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
