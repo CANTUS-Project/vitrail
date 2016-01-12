@@ -26,6 +26,8 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Panel from 'react-bootstrap/lib/Panel';
+
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
@@ -270,12 +272,9 @@ const ResultList = React.createClass({
         }
 
         return (
-            <div className="resultList card">
-                <div className="card-block">
-                    <h2 className="card-title">Results</h2>
-                </div>
+            <Panel>
                 {results}
-            </div>
+            </Panel>
         );
     }
 });
