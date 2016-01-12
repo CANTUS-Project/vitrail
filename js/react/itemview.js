@@ -77,7 +77,7 @@ const ItemViewChant = React.createClass({
 
 
         // primary fields -----------------------------------------------------
-        let header = [data.get('incipit'), <Label bsStyle="info">Chant</Label>];
+        let header = [data.get('incipit', '?'), <Label bsStyle="info">Chant</Label>];
 
         // genre, office, feast
         header.push(<div>{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
@@ -216,7 +216,7 @@ const ItemViewFeast = React.createClass({
         // - feast code
 
         // Name and Feast Code
-        let header = [data.get('name'), <Label bsStyle="info">Feast</Label>];
+        let header = [data.get('name', ''), <Label bsStyle="info">Feast</Label>];
         if (data.get('date')) {
             header.push(<br/>);
             header.push(<span className="text-muted">{data.get('date')}</span>);
@@ -268,7 +268,7 @@ const ItemViewIndexer = React.createClass({
             name = `${data.get('given_name')} ${data.get('family_name')}`;
         }
         else {
-            name = data.get('display_name');
+            name = data.get('display_name', '');
         }
         const header = [name, <Label bsStyle="info">Indexer</Label>];
 
@@ -326,9 +326,9 @@ const ItemViewGenre = React.createClass({
         // - description
         // - mass_or_office
 
-        const header = [data.get('name'), <Label bsStyle="info">Genre</Label>];
+        const header = [data.get('name', ''), <Label bsStyle="info">Genre</Label>];
         const description = data.get('description', '');
-        const massOrOffice = <div className="text-muted">({data.get('mass_or_office')})</div>;
+        const massOrOffice = <div className="text-muted">({data.get('mass_or_office', '')})</div>;
 
         // Build the final structure
         return (
@@ -381,8 +381,8 @@ const ItemViewSource = React.createClass({
         //
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
 
-        let header = [data.get('rism'), <Label bsStyle="info">Source</Label>];
-        header.push(<div>{`${data.get('title').slice(0, 40)}...`}</div>);
+        let header = [data.get('rism', ''), <Label bsStyle="info">Source</Label>];
+        header.push(<div>{`${data.get('title', '').slice(0, 40)}...`}</div>);
         if (data.get('provenance') && data.get('date')) {
             header.push(<div>{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
         }
@@ -472,7 +472,7 @@ const ItemViewSource = React.createClass({
         return (
             <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header}>
                 <ListGroup>
-                    <ListGroupItem>{data.get('title')}</ListGroupItem>
+                    <ListGroupItem>{data.get('title', '')}</ListGroupItem>
                     {status}
                     {summary}
                     {provenanceDetail}
@@ -507,7 +507,7 @@ const ItemViewSimpleResource = React.createClass({
         // - description
 
         const type = data.get('type').slice(0, 1).toLocaleUpperCase() + data.get('type').slice(1);
-        const header = [data.get('name'), <Label bsStyle="info">{type}</Label>];
+        const header = [data.get('name', ''), <Label bsStyle="info">{type}</Label>];
         const description = data.get('description', '');
 
         // Build the final structure
