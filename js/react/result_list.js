@@ -150,7 +150,7 @@ const ResultListItemView = React.createClass({
         const sortOrder = this.props.sortOrder.toJS();
 
         return (
-            <div className="card-columns">
+            <div>
                 {sortOrder.map(rid => {
                     return <ItemView
                         key={rid}
