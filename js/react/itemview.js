@@ -26,6 +26,7 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
 
+import Label from 'react-bootstrap/lib/Label';
 import Panel from 'react-bootstrap/lib/Panel';
 
 import {getters} from '../nuclear/getters';
@@ -239,33 +240,25 @@ const ItemViewFeast = React.createClass({
         // - feast code
 
         // Name and Feast Code
-        let codeAndDate = '';
-        if (data.get('feast_code') && data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}&mdash;{data.get('date')}</h6>;
-        } else if (data.get('feast_code')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}</h6>;
-        } else if (data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('date')}</h6>;
+        let header = [data.get('name'), <Label bsStyle="info">Feast</Label>];
+        if (data.get('date')) {
+            header.push(<br/>);
+            header.push(<span className="text-muted">{data.get('date')}</span>);
         }
 
-        // Description and Date
-        let description = '';
-        if ('full' === this.props.size && data.get('description')) {
-            description = data.get('description');
+        const description = data.get('description', '');
+
+        let feastCode = data.get('feast_code', '');
+        if (feastCode) {
+            feastCode = [<br/>, feastCode];
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Feast</span>
-                    </h4>
-                    {codeAndDate}
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+                {description}
+                {feastCode}
+            </Panel>
         );
     }
 });
