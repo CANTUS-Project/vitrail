@@ -493,19 +493,16 @@ const ResultListFrame = React.createClass({
                                          />;
         }
 
-        let results = '';
-        if (null !== this.state.results) {
-            results = <ResultList/> ;
-        }
-
         return (
-            <div className="resultListFrame">
+            <Panel>
                 {errorMessage}
-                {results}
+                <Panel collapsible header="Display Settings">
+                    <PerPageSelector/>
+                    <RenderAsSelector/>
+                </Panel>
+                <ResultList/>
                 <Paginator/>
-                <PerPageSelector/>
-                <RenderAsSelector/>
-            </div>
+            </Panel>
         );
     }
 });
