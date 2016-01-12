@@ -27,6 +27,8 @@ import React from 'react';
 import {Link} from 'react-router';
 
 import Label from 'react-bootstrap/lib/Label';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
 
 import {getters} from '../nuclear/getters';
@@ -289,52 +291,43 @@ const ItemViewIndexer = React.createClass({
         // Name
         let name = '';
         if (data.get('family_name') && data.get('given_name')) {
-            name = (
-                <h4 className="card-title">
-                    {data.get('given_name')}&nbsp;{data.get('family_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
+            name = `${data.get('given_name')} ${data.get('family_name')}`;
         }
         else {
-            name = (
-                <h4 className="card-title">
-                    {data.get('display_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
+            name = data.get('display_name');
         }
+        const header = [name, <Label bsStyle="info">Indexer</Label>];
 
         let institution = '';
         let cityAndCountry = '';
 
-        if ('full' === this.props.size) {
-            // Institution
-            if (data.get('institution')) {
-                institution = <h6 className="card-subtitle text-muted">{data.get('institution')}</h6>;
-            }
+        // Institution
+        if (data.get('institution')) {
+            institution = <ListGroupItem>{data.get('institution')}</ListGroupItem>;
+        }
 
-            // City and Country
-            if (data.get('city') && data.get('country')) {
-                cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
-            }
-            else if (data.get('city')) {
-                cityAndCountry = data.get('city');
-            }
-            else if (data.get('country')) {
-                cityAndCountry = data.get('country');
-            }
+        // City and Country
+        if (data.get('city') && data.get('country')) {
+            cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
+        }
+        else if (data.get('city')) {
+            cityAndCountry = data.get('city');
+        }
+        else if (data.get('country')) {
+            cityAndCountry = data.get('country');
+        }
+        if (cityAndCountry) {
+            cityAndCountry = <ListGroupItem>{cityAndCountry}</ListGroupItem>;
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    {name}
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+                <ListGroup fill>
                     {institution}
                     {cityAndCountry}
-                </div>
-            </div>
+                </ListGroup>
+            </Panel>
         );
     }
 });
