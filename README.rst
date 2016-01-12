@@ -5,6 +5,9 @@ Vitrail
 
 .. image:: https://img.shields.io/travis/CANTUS-Project/master/vitrail.svg?style=flat-square
     :target: https://travis-ci.org/CANTUS-Project/vitrail
+.. image:: https://david-dm.org/cantus-project/vitrail.svg?style=flat-square
+    :target: https://david-dm.org/cantus-project/vitrail
+
 
 License
 -------
