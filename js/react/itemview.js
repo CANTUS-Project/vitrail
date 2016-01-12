@@ -596,26 +596,15 @@ const ItemViewSimpleResource = React.createClass({
         // - name
         // - description
 
-        let description = '';
-
-        if ('full' === this.props.size) {
-            // Description
-            if (data.get('description')) {
-                description = <h6 className="card-subtitle text-muted">{data.get('description')}</h6>;
-            }
-        }
+        const type = data.get('type').slice(0, 1).toLocaleUpperCase() + data.get('type').slice(1);
+        const header = [data.get('name'), <Label bsStyle="info">{type}</Label>];
+        const description = data.get('description', '');
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">{data.get('type')}</span>
-                    </h4>
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+                {description}
+            </Panel>
         );
     }
 });
