@@ -42,6 +42,7 @@
         "moduleFileExtensions": ["js", "json", "es6"],
         "unmockedModulePathPatterns": [
             "<rootDir>/node_modules/react",
+            "<rootDir>/node_modules/react-bootstrap",
             "<rootDir>/node_modules/react-dom",
             "<rootDir>/node_modules/react-addons-test-utils",
             "<rootDir>/node_modules/nuclear-js",
@@ -49,6 +50,7 @@
         ],
         "testDirectoryName": "vitrail_tests",
         "modulePathIgnorePatterns": [
+            "<rootDir>/bootstrap/",
             "<rootDir>/node_modules/"
         ]
     },
