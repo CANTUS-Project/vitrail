@@ -29,6 +29,7 @@ import {Link} from 'react-router';
 import Label from 'react-bootstrap/lib/Label';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Modal from 'react-bootstrap/lib/Modal';
 import Panel from 'react-bootstrap/lib/Panel';
 
 import {getters} from '../nuclear/getters';
@@ -849,13 +850,16 @@ const ItemViewOverlay = React.createClass({
         return {size: getters.itemViewOverlaySize};
     },
     render() {
+        // When the <Modal> is just set to "show" all the time, it won't close itself... so it's
+        // changing the URL that will trigger the ItemViewOverlay to go away!
+        //
         return (
-            <div className="itemview-overlay">
-                <div className="itemview-button-container">
-                    <Link className="btn btn-primary" to={pathToParent(this.props.routes)}>Close</Link>
-                    <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
-                </div>
-            </div>
+            <Modal show>
+                <Modal.Header>
+                    <Link className="btn btn-danger" to={pathToParent(this.props.routes)}>X</Link>
+                </Modal.Header>
+                <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
+            </Modal>
         );
     }
 });
