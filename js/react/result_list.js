@@ -26,6 +26,7 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Input from 'react-bootstrap/lib/Input';
 import Panel from 'react-bootstrap/lib/Panel';
 
 import {SIGNALS as signals} from '../nuclear/signals';
@@ -399,20 +400,18 @@ const RenderAsSelector = React.createClass({
 
         return (
             <form>
-                <div className="radio">
-                    <label>
-                        <input type="radio" name="renderAs" id="renderAsView" value="ItemView"
-                               checked={viewChecked} onChange={this.onChange}/>
-                        Render as Views
-                    </label>
-                </div>
-                <div className="radio">
-                    <label>
-                        <input type="radio" name="renderAs" id="renderAsTable" value="table"
-                               checked={tableChecked} onChange={this.onChange}/>
-                        Render as a Table
-                    </label>
-                </div>
+                <Input type="radio"
+                       label="Render as Views"
+                       checked={viewChecked}
+                       onChange={this.onChange}
+                       id="renderAsView"
+                />
+                <Input type="radio"
+                       label="Render as a Table"
+                       checked={tableChecked}
+                       onChange={this.onChange}
+                       id="renderAsTable"
+                />
             </form>
         );
     }
