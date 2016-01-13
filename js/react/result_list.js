@@ -29,6 +29,8 @@ import React from 'react';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Input from 'react-bootstrap/lib/Input';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
 
 import {SIGNALS as signals} from '../nuclear/signals';
@@ -489,13 +491,17 @@ const ResultListFrame = React.createClass({
 
         return (
             <Panel>
-                {errorMessage}
-                <Panel collapsible header="Display Settings">
-                    <PerPageSelector/>
-                    <RenderAsSelector/>
-                </Panel>
-                <ResultList/>
-                <Paginator/>
+                <ListGroup fill>
+                    {errorMessage}
+                    <ListGroupItem>
+                        <Panel collapsible header="Display Settings">
+                            <PerPageSelector/>
+                            <RenderAsSelector/>
+                        </Panel>
+                    </ListGroupItem>
+                    <ListGroupItem><ResultList/></ListGroupItem>
+                    <ListGroupItem><Paginator/></ListGroupItem>
+                </ListGroup>
             </Panel>
         );
     }
