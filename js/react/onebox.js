@@ -25,6 +25,9 @@
 
 import React from 'react';
 
+import Button from 'react-bootstrap/lib/Button';
+import Input from 'react-bootstrap/lib/Input';
+
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
@@ -58,20 +61,13 @@ const SearchBox = React.createClass({
     },
     render() {
         return (
-            <fieldset className="form-group row">
-                <label htmlFor="#searchQuery" className="col-sm-2">Search Query</label>
-                <div className="input-group col-sm-10">
-                    <input id="searchQuery"
-                           className="form-control form-control-search"
-                           onChange={this.onChange}
-                           type="search"
-                           value={this.state.searchQuery.get('any')}
-                    />
-                    <span className="input-group-btn">
-                        <button className="btn btn-secondary" type="submit" value="Search">Search</button>
-                    </span>
-                </div>
-            </fieldset>
+            <Input type="search"
+                   id="searchQuery"
+                   value={this.state.searchQuery.get('any')}
+                   onChange={this.onChange}
+                   label="Search Query"
+                   buttonAfter={<Button type="submit" value="Search">Search</Button>}
+            />
         );
     }
 });
