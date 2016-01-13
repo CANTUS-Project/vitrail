@@ -28,7 +28,11 @@ import React from 'react';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Input from 'react-bootstrap/lib/Input';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
+import PanelGroup from 'react-bootstrap/lib/PanelGroup';
+import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {AlertView} from './vitrail';
 import {ResultListFrame} from './result_list';
@@ -340,47 +344,22 @@ const TemplateSearchTemplate = React.createClass({
 });
 
 
-var TemplateSearch = React.createClass({
+const TemplateSearch = React.createClass({
     //
 
     componentWillMount() {
         // clear the search query
         signals.setSearchQuery('clear');
+        signals.setResourceType('chant');
     },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
-    getDataBindings() {
-        // connection to NuclearJS
-        return {
-            searchQuery: getters.searchQuery,
-        };
-    },
-    getInitialState: function() {
-        // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
-        return {currentSearch: ''};
-    },
-    render: function() {
-        // TODO: find a better way to manage the state, because this is stupid.
-
-        // fields that shouldn't be rendered for users
-        // NB: this must be done before the call to the <ResultListFrame> component
-        let dontRender = ['id', 'type'];
-
-        // TODO: refactor "ResultListFrame" so it doesn't show anything if the "searchQuery" is null or sthg
+    render() {
         return (
             <div className="container">
-                <div className="card">
-                    <div className="card-block">
-                        <h2 className="card-title">Template Search</h2>
-                        <TemplateTypeSelector/>
-                    </div>
+                <PageHeader>Template Search <small><i>{"Describe what you want, we'll fill in the blanks."}</i></small></PageHeader>
+                <PanelGroup>
                     <TemplateSearchTemplate/>
-                    <div className="card-block">
-                        <button className="btn btn-primary-outline" onClick={signals.submitSearchQuery}>Search</button>
-                    </div>
-                </div>
-                <div>
-                    <ResultListFrame dontRender={dontRender}/>
-                </div>
+                    <ResultListFrame/>
+                </PanelGroup>
             </div>
         );
     }
