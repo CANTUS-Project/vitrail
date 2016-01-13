@@ -27,6 +27,7 @@ import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import Input from 'react-bootstrap/lib/Input';
+import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -87,18 +88,12 @@ const OneboxSearch = React.createClass({
     },
     render() {
         return (
-            <div className="searchForm container">
-                <div className="searchSettings card">
-                    <div className="card-block">
-                        <h2 className="card-title">Onebox Search</h2>
-                    </div>
-                    <form onSubmit={this.submitSearch}>
-                        <SearchBox/>
-                    </form>
-                </div>
-                <div className="searchResults">
-                    <ResultListFrame/>
-                </div>
+            <div className="container">
+                <PageHeader>Onebox Search <small><i>Standard search box with advanced capabilities.</i></small></PageHeader>
+                <form onSubmit={this.submitSearch}>
+                    <SearchBox/>
+                </form>
+                <ResultListFrame/>
             </div>
         );
     }
