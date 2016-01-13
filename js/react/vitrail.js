@@ -26,6 +26,10 @@ import React from 'react';
 import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 
+import Alert from 'react-bootstrap/lib/Alert';
+import Panel from 'react-bootstrap/lib/Panel';
+import Table from 'react-bootstrap/lib/Table';
+
 
 // This is the list of software given to the Colophon.
 const listOfSoftware = [
@@ -102,23 +106,21 @@ const AlertView = React.createClass({
             });
 
             fields = (
-                <div className="card-block">
-                    <table className="table table-striped">
-                        <tbody>
-                        {innerList}
-                        </tbody>
-                    </table>
-                </div>
-            );
+                <Table fill striped>
+                    <tbody>
+                    {innerList}
+                    </tbody>
+                </Table>
+        );
         }
 
         return (
-            <div className="card">
-                <div className={`alert alert-${this.props.class}`} role="alert">
+            <Panel>
+                <Alert bsStyle={this.props.class}>
                     {this.props.message}
-                </div>
+                </Alert>
                 {fields}
-            </div>
+            </Panel>
         );
     },
 });
