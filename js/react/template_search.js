@@ -27,6 +27,7 @@ import React from 'react';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Input from 'react-bootstrap/lib/Input';
+import Panel from 'react-bootstrap/lib/Panel';
 
 import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
@@ -160,7 +161,7 @@ const TemplateSearchField = React.createClass({
 });
 
 
-var TemplateSearchFields = React.createClass({
+const TemplateSearchFields = React.createClass({
     // All the fields in a TemplateSearch template.
     //
     // Contained by TemplateSearchTemplate.
@@ -180,37 +181,30 @@ var TemplateSearchFields = React.createClass({
             contents: React.PropTypes.string
         })).isRequired,
     },
-    getInitialState: function() {
+    getInitialState() {
         return {isCollapsed: false};
     },
-    toggleCollapsion: function() {
+    toggleCollapsion(event) {
         // Toggle this.state.isCollapsed
-        this.setState({isCollapsed: !this.state.isCollapsed});
-    },
-    render: function() {
-        let buttonText = 'Collapse Fields';
-        let fieldStyle = {};
-        if (this.state.isCollapsed) {
-            fieldStyle['display'] = 'none';
-            buttonText = 'Expand Fields';
+        if (event.target.className === 'panel-title') {
+            this.setState({isCollapsed: !this.state.isCollapsed});
         }
+    },
+    render() {
+        let headerText = this.state.isCollapsed ? 'expand' : 'collapse';
+        headerText = `Click or tap this header to ${headerText} the template.`
 
         return (
-            <div className="card">
-                <div className="card-header">
-                    <button className="btn btn-primary-outline" onClick={this.toggleCollapsion}>{buttonText}</button>
-                </div>
-                <div className="card-block" style={fieldStyle}>
-                    <form>
-                        {this.props.fieldNames.map((field, index) =>
-                            <TemplateSearchField key={`template-field${index}`}
-                                                 field={field.field}
-                                                 displayName={field.displayName}
-                                                 />
-                        )}
-                    </form>
-                </div>
-            </div>
+            <Panel header={headerText} collapsible expanded={!this.state.isCollapsed} onClick={this.toggleCollapsion}>
+                <form className="form-horizontal">
+                    {this.props.fieldNames.map((field, index) =>
+                        <TemplateSearchField key={`template-field${index}`}
+                                             field={field.field}
+                                             displayName={field.displayName}
+                                             />
+                    )}
+                </form>
+            </Panel>
         );
     }
 });
