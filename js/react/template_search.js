@@ -22,15 +22,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
 import React from 'react';
+
+import Button from 'react-bootstrap/lib/Button';
+import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
+import Input from 'react-bootstrap/lib/Input';
+
 import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 
 
-var TemplateTypeSelector = React.createClass({
+const TemplateTypeSelector = React.createClass({
     // Type selection component for the TemplateSearch.
 
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -40,7 +44,7 @@ var TemplateTypeSelector = React.createClass({
             resourceType: getters.resourceType,
         };
     },
-    chooseNewType: function(event) {
+    chooseNewType(event) {
         let newType = 'chants';
 
         switch (event.target.id) {
@@ -61,20 +65,9 @@ var TemplateTypeSelector = React.createClass({
         signals.setResourceType(newType);
     },
     supportedTypes: ['chants', 'feasts', 'indexers', 'sources'],
-    componentWillMount: function() {
-        // If the TemplateSearch initializes and the "resourceType" isn't one of the types for which
-        // we have a template, we'll set it to "chants." If we set it with the signal, NuclearJS
-        // will tell all the other components about it, but our initial rendering will still use the
-        // state from before this function was called, and will ignore the updated state NuclearJS
-        // offered... so we have to *both* call the signal *and* set our own state.
-        if (!this.supportedTypes.includes(this.state.resourceType)) {
-            signals.setResourceType('chants');
-        }
-        this.setState({resourceType: 'chants'});
-    },
-    render: function() {
-        let className = 'btn btn-secondary-outline';
-        let classNameActive = 'btn btn-secondary-outline active';
+    render() {
+        const className = '';
+        const classNameActive = 'active';
 
         let buttonProps = {
             'chants': {'className': className, 'aria-pressed': 'false'},
@@ -89,22 +82,20 @@ var TemplateTypeSelector = React.createClass({
         }
 
         return (
-            <div>
-                <div className="btn-group" htmlRole="group" aria-label="resource type selector">
-                    <button id="chantsTypeButton" type="button" className={buttonProps.chants.className}
-                            aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
-                            Chants</button>
-                    <button id="feastsTypeButton" type="button" className={buttonProps.feasts.className}
-                            aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
-                            Feasts</button>
-                    <button id="indexersTypeButton" type="button" className={buttonProps.indexers.className}
-                            aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
-                            Indexers</button>
-                    <button id="sourcesTypeButton" type="button" className={buttonProps.sources.className}
-                            aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
-                            Sources</button>
-                </div>
-            </div>
+            <ButtonGroup role="group" aria-label="resource type selector">
+                <Button id="chantsTypeButton" className={buttonProps.chants.className}
+                        aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
+                        Chants</Button>
+                <Button id="feastsTypeButton" className={buttonProps.feasts.className}
+                        aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
+                        Feasts</Button>
+                <Button id="indexersTypeButton" className={buttonProps.indexers.className}
+                        aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
+                        Indexers</Button>
+                <Button id="sourcesTypeButton" className={buttonProps.sources.className}
+                        aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
+                        Sources</Button>
+            </ButtonGroup>
         );
     }
 });
