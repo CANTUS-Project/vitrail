@@ -101,7 +101,7 @@ const TemplateTypeSelector = React.createClass({
 });
 
 
-var TemplateSearchField = React.createClass({
+const TemplateSearchField = React.createClass({
     // A single field in the TemplateSearch template.
     //
 
@@ -111,7 +111,7 @@ var TemplateSearchField = React.createClass({
         // The field name displayed in the GUI. If omitted, the "field" is displayed.
         displayName: React.PropTypes.string,
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {displayName: null, contents: ''};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -121,7 +121,7 @@ var TemplateSearchField = React.createClass({
             searchQuery: getters.searchQuery,
         };
     },
-    onChange: function(event) {
+    onChange(event) {
         let post = {};
         post[this.props.field] = event.target.value;
         signals.setSearchQuery(post);
@@ -137,27 +137,24 @@ var TemplateSearchField = React.createClass({
             return false;
         }
     },
-    render: function() {
-        let displayName = this.props.displayName || this.props.field;
-        let fieldID = `template-field-${this.props.field}`;
+    render() {
+        const displayName = this.props.displayName || this.props.field;
+        const fieldID = `template-field-${this.props.field}`;
         let contents = '';
 
-        if (this.state.searchQuery.has(this.props.field)) {
+        if (this.state.searchQuery.get(this.props.field)) {
             contents = this.state.searchQuery.get(this.props.field);
         }
 
         return (
-            <fieldset className="form-group row">
-                <label className="col-sm-2 text-right">{displayName}</label>
-                <div className="col-sm-10">
-                    <input id={fieldID}
-                           type="text"
-                           className="form-control"
-                           value={contents}
-                           onChange={this.onChange}
-                           />
-                </div>
-            </fieldset>
+            <Input id={fieldID}
+                   type="text"
+                   value={contents}
+                   onChange={this.onChange}
+                   label={displayName}
+                   labelClassName="col-xs-2"
+                   wrapperClassName="col-xs-10"
+            />
         );
     }
 });
