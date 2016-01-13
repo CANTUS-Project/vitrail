@@ -467,6 +467,36 @@ var ErrorMessage = React.createClass({
 });
 
 
+/** Settings for the ResultList (per-page, render-as, etc.)
+ *
+ * State
+ * -----
+ * @param (bool) isExpanded - Whether the settings are all shown (if "true") or only the title is
+ *     shown (if "false," the default).
+ */
+const ResultListSettings = React.createClass({
+    getInitialState() {
+        return {isExpanded: false};
+    },
+    toggleCollapsion(event) {
+        // Toggle this.state.isExpanded
+        if (event.target.className === 'panel-title') {
+            this.setState({isExpanded: !this.state.isExpanded});
+        }
+    },
+    render() {
+        return (
+            <ListGroupItem>
+                <Panel collapsible expanded={this.state.isExpanded} onClick={this.toggleCollapsion} header="Display Settings">
+                    <PerPageSelector/>
+                    <RenderAsSelector/>
+                </Panel>
+            </ListGroupItem>
+        );
+    },
+});
+
+
 /** TODO: rename this to "ResultList" and the other component to something else
  *
  */
@@ -493,12 +523,7 @@ const ResultListFrame = React.createClass({
             <Panel>
                 <ListGroup fill>
                     {errorMessage}
-                    <ListGroupItem>
-                        <Panel collapsible header="Display Settings">
-                            <PerPageSelector/>
-                            <RenderAsSelector/>
-                        </Panel>
-                    </ListGroupItem>
+                    <ResultListSettings/>
                     <ListGroupItem><ResultList/></ListGroupItem>
                     <ListGroupItem><Paginator/></ListGroupItem>
                 </ListGroup>
