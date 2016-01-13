@@ -175,9 +175,15 @@ const ItemViewChant = React.createClass({
             finalis = <ListGroupItem>Finalis: {data.get('finalis')}</ListGroupItem>;
         }
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-5';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 <ListGroup>
                     {concordances}
                     {fullText}
@@ -229,9 +235,15 @@ const ItemViewFeast = React.createClass({
             feastCode = [<br/>, feastCode];
         }
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-4';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {feastCode}
             </Panel>
@@ -294,9 +306,15 @@ const ItemViewIndexer = React.createClass({
             cityAndCountry = <ListGroupItem>{cityAndCountry}</ListGroupItem>;
         }
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-4';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 <ListGroup fill>
                     {institution}
                     {cityAndCountry}
@@ -330,9 +348,15 @@ const ItemViewGenre = React.createClass({
         const description = data.get('description', '');
         const massOrOffice = <div className="text-muted">({data.get('mass_or_office', '')})</div>;
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-3';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {massOrOffice}
             </Panel>
@@ -468,9 +492,15 @@ const ItemViewSource = React.createClass({
             );
         }
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-5';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 <ListGroup>
                     <ListGroupItem>{data.get('title', '')}</ListGroupItem>
                     {status}
@@ -510,9 +540,15 @@ const ItemViewSimpleResource = React.createClass({
         const header = [data.get('name', ''), <Label bsStyle="info">{type}</Label>];
         const description = data.get('description', '');
 
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-3';
+        }
+
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
             </Panel>
         );
