@@ -140,7 +140,7 @@ const SoftwareTable = React.createClass({
     getDefaultProps() { return {software: []}; },
     render() {
         return (
-            <table className="table">
+            <Table>
                 <thead>
                     <tr>
                         <th>Software</th>
@@ -163,7 +163,7 @@ const SoftwareTable = React.createClass({
                         );
                     })}
                 </tbody>
-            </table>
+            </Table>
         );
     },
 });
