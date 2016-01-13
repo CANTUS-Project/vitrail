@@ -22,6 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
@@ -29,6 +30,7 @@ import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Input from 'react-bootstrap/lib/Input';
 import Panel from 'react-bootstrap/lib/Panel';
 
+import {AlertView} from './vitrail';
 import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -210,7 +212,7 @@ const TemplateSearchFields = React.createClass({
 });
 
 
-var TemplateSearchTemplate = React.createClass({
+const TemplateSearchTemplate = React.createClass({
     // For TemplateSearch, this is the template. This just selects the proper sub-component, but it
     // leaves TemplateSearch much cleaner.
     //
@@ -222,7 +224,7 @@ var TemplateSearchTemplate = React.createClass({
             resourceType: getters.resourceType,
         };
     },
-    render: function() {
+    render() {
         let fieldNames = [];
 
         switch (this.state.resourceType) {
@@ -294,9 +296,46 @@ var TemplateSearchTemplate = React.createClass({
                     {'field': 'indexing_date', 'displayName': 'Indexing Date'},
                 ];
                 break;
+
+            default:
+                fieldNames = 'error';
+
         }
 
-        return <TemplateSearchFields fieldNames={fieldNames}/> ;
+        if (fieldNames === 'error') {
+            const message = [
+                <h2><strong>Error</strong></h2>,
+                'TemplateSearchTemplate received an invalid resource type.',
+                <br/>,
+                'Please report this to the developers, then choose a resource type above.'
+            ];
+
+            fieldNames = (
+                <ListGroupItem>
+                    <AlertView class="danger"
+                               message={message}
+                               fields={Immutable.Map({'getters.resourceType': this.state.resourceType})}
+                    />
+                </ListGroupItem>
+            );
+        }
+        else {
+            fieldNames = (
+                <ListGroupItem>
+                    <TemplateSearchFields fieldNames={fieldNames}/>
+                </ListGroupItem>
+            );
+        }
+
+        return (
+            <Panel>
+                <ListGroup fill>
+                    <ListGroupItem><TemplateTypeSelector/></ListGroupItem>
+                    {fieldNames}
+                    <ListGroupItem><Button bsStyle="primary" onClick={signals.submitSearchQuery}>Search</Button></ListGroupItem>
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
