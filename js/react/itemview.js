@@ -795,14 +795,12 @@ const ItemView = React.createClass({
                 errMsg = 'No data: maybe waiting on the Cantus server?';
             }
             rendered = (
-                <div className="itemview">
-                    <ItemViewError errorMessage={errMsg}
-                                                type={this.props.type}
-                                                rid={this.props.rid}
-                                                data={this.props.data}
-                                                resources={this.props.resources}
-                    />
-                </div>
+                <ItemViewError errorMessage={errMsg}
+                               type={this.props.type}
+                               rid={this.props.rid}
+                               data={this.props.data}
+                               resources={this.props.resources}
+                />
             );
         } else {
             // "item" will contain only fields for this item
