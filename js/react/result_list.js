@@ -26,6 +26,8 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Button from 'react-bootstrap/lib/Button';
+import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Input from 'react-bootstrap/lib/Input';
 import Panel from 'react-bootstrap/lib/Panel';
 
@@ -323,19 +325,15 @@ const Paginator = React.createClass({
     },
     render() {
         return (
-            <div className="btn-group paginator" role="group" aria-label="paginator">
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="first" onClick={this.changePage}>&lt;&lt;</button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="previous" onClick={this.changePage}>&lt;</button>
-                <button type="button" className="blankOfBlank btn btn-secondary">
+            <ButtonGroup role="group" aria-label="paginator">
+                <Button name="pages" value="first" onClick={this.changePage}>&lt;&lt;</Button>
+                <Button name="pages" value="previous" onClick={this.changePage}>&lt;</Button>
+                <Button>
                     {this.state.page} of {this.state.totalPages}
-                </button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="next" onClick={this.changePage}>&gt;</button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="last" onClick={this.changePage}>&gt;&gt;</button>
-            </div>
+                </Button>
+                <Button name="pages" value="next" onClick={this.changePage}>&gt;</Button>
+                <Button name="pages" value="last" onClick={this.changePage}>&gt;&gt;</Button>
+            </ButtonGroup>
         );
     }
 });
