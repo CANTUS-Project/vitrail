@@ -52,7 +52,8 @@
         "modulePathIgnorePatterns": [
             "<rootDir>/bootstrap/",
             "<rootDir>/node_modules/"
-        ]
+        ],
+        "testRunner": "<rootDir>/node_modules/jest-cli/src/testRunners/jasmine/jasmine2.js"
     },
     "babel": {
         "presets": ["es2015", "react"],
