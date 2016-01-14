@@ -402,12 +402,14 @@ const RenderAsSelector = React.createClass({
                        checked={viewChecked}
                        onChange={this.onChange}
                        id="renderAsView"
+                       value="ItemView"
                 />
                 <Input type="radio"
                        label="Render as a Table"
                        checked={tableChecked}
                        onChange={this.onChange}
                        id="renderAsTable"
+                       value="table"
                 />
             </form>
         );
