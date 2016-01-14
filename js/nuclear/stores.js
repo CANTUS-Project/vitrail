@@ -33,7 +33,7 @@ import {SIGNAL_NAMES} from './signals';
 
 // Sometimes this is all we need. NOTE that Stores using this function should do validity checking
 // in the signal function.
-function justReturnThePayload(previousState, payload) { return toImmutable(payload); };
+function justReturnThePayload(previousState, payload) { console.warn('WARNING: one of the Stores is still using justReturnThePayload()'); return toImmutable(payload); };
 
 
 function isWholeNumber(num) {
@@ -212,7 +212,7 @@ const STORES = {
     SearchResultsFormat: Store({
         // Should search results be displayed as "table" or collection of "ItemView?"
         getInitialState() { return 'ItemView'; },
-        initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, justReturnThePayload); },
+        initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, SETTERS.setSearchResultsFormat); },
     }),
 
     SearchPerPage: Store({
