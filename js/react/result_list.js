@@ -32,6 +32,7 @@ import Input from 'react-bootstrap/lib/Input';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
+import Table from 'react-bootstrap/lib/Table';
 
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
@@ -198,6 +199,33 @@ const ResultListTable = React.createClass({
             columns = columns.concat(extraFields);
         }
 
+        // Remove the "id" field and, if the resource types are all the same, remove "type" too.
+        // First find out whether all the "types" are the same.
+        let dontInclude = ['id'];
+        const firstResType = this.props.data.get(this.props.sortOrder.get(0)).get('type');
+        let foundDifferent = false;
+        for (let id of this.props.sortOrder.values()) {
+            if (this.props.data.get(id).get('type') !== firstResType) {
+                foundDifferent = true;
+                break;
+            }
+        }
+        if (!foundDifferent) {
+            dontInclude.push('type');
+        }
+
+        // Second remove the unncessary fields.
+        columns = columns.reduce((prev, curr) => {
+            if (dontInclude.indexOf(curr) >= 0) {
+                return prev;
+            }
+            else {
+                prev.push(curr);
+                return prev;
+            }
+        }, []);
+
+        // Prepare the table header.
         columns.forEach(function(columnName) {
             // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
             let working = columnName.split("_");
@@ -218,7 +246,7 @@ const ResultListTable = React.createClass({
         tableHeader.push(<ResultCell key="drupal" data="Link to Drupal" header={true} />);
 
         return (
-            <table className="table table-hover">
+            <Table hover responsive>
                 <thead>
                     <tr className="resultTableHeader">
                         {tableHeader}
@@ -237,7 +265,7 @@ const ResultListTable = React.createClass({
                         this)
                     }
                 </tbody>
-            </table>
+            </Table>
         );
     },
 });
