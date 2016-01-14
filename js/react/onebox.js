@@ -22,17 +22,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
+import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import Input from 'react-bootstrap/lib/Input';
+import Modal from 'react-bootstrap/lib/Modal';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 import {ResultListFrame} from './result_list';
+import {AlertView} from './vitrail';
 
 
 const SearchBox = React.createClass({
@@ -86,10 +88,47 @@ const OneboxSearch = React.createClass({
         submitEvent.preventDefault();  // stop the default GET form submission
         signals.submitSearchQuery();
     },
+    getInitialState() {
+        return {showHelp: false};
+    },
+    toggleShowHelp() {
+        this.setState({showHelp: !this.state.showHelp});
+    },
     render() {
+        const examples = Immutable.OrderedMap({
+            'Phrases': <pre>{'"gloria in excelsis"'}</pre>,
+            'Look in a Field': <pre>{'genre:antiphon'}</pre>,
+            'Phrase in a Field': <pre>{'genre:"Antiphon Verse"'}</pre>,
+            'Boolean Operators (AND)': <pre>{'incipit:gloria AND genre:psalm'}</pre>,
+            '(OR)': <pre>{'incipit:gloria OR incipit:deus'}</pre>,
+            '(NOT)': <pre>{'incipit:gloria NOT genre:InR'}</pre>,
+            'Term Grouping': <pre>{'finalis:C AND (mode:6T OR differentia:A01)'}</pre>,
+            'Grouping on a Field': <pre>{'finalis:C AND mode:(5T OR 6T)'}</pre>,
+            'Wildcard *': [<pre>{'antiphon*'}</pre>, '(matches "antiphon" and "antiphoner")'],
+            'Wildcard ?': [<pre>{'antiphon?'}</pre>, '(matches "antiphone" and "antiphons" but not "antiphon" or "antiphoner")'],
+            'Combined Wildcards': [<pre>{'christ?*'}</pre>, '(matches "christe," "christus," "christmas," "christopher," etc.)'],
+            'Require a Value in a Field': <pre>{'+type:genre'}</pre>,
+            'Forbid a Value in a Field': <pre>{'-type:genre'}</pre>,
+            'Require the Field Has any Value': <pre>{'+differentia:*'}</pre>,
+        });
+
+        let help = (
+            <Modal show={this.state.showHelp} onHide={this.toggleShowHelp} >
+                <AlertView class="info" message="Examples of Search Queries" fields={examples}/>
+                <Modal.Footer><Button onClick={this.toggleShowHelp}>Close</Button></Modal.Footer>
+            </Modal>
+        );
+
         return (
             <div className="container">
-                <PageHeader>Onebox Search <small><i>Standard search box with advanced capabilities.</i></small></PageHeader>
+                {help}
+                <PageHeader>
+                    Onebox Search&emsp;
+                    <small>
+                        <i>Standard search box with advanced capabilities.</i>&emsp;
+                        <Button bsStyle="info" onClick={this.toggleShowHelp}>?</Button>
+                    </small>
+                </PageHeader>
                 <form onSubmit={this.submitSearch}>
                     <SearchBox/>
                 </form>
