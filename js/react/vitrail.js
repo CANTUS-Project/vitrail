@@ -26,6 +26,13 @@ import React from 'react';
 import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 
+import Alert from 'react-bootstrap/lib/Alert';
+import Nav from 'react-bootstrap/lib/Nav';
+import Navbar from 'react-bootstrap/lib/Navbar';
+import NavItem from 'react-bootstrap/lib/NavItem';
+import Panel from 'react-bootstrap/lib/Panel';
+import Table from 'react-bootstrap/lib/Table';
+
 
 // This is the list of software given to the Colophon.
 const listOfSoftware = [
@@ -102,23 +109,21 @@ const AlertView = React.createClass({
             });
 
             fields = (
-                <div className="card-block">
-                    <table className="table table-striped">
-                        <tbody>
-                        {innerList}
-                        </tbody>
-                    </table>
-                </div>
-            );
+                <Table fill striped>
+                    <tbody>
+                    {innerList}
+                    </tbody>
+                </Table>
+        );
         }
 
         return (
-            <div className="card">
-                <div className={`alert alert-${this.props.class}`} role="alert">
+            <Panel>
+                <Alert bsStyle={this.props.class}>
                     {this.props.message}
-                </div>
+                </Alert>
                 {fields}
-            </div>
+            </Panel>
         );
     },
 });
@@ -138,7 +143,7 @@ const SoftwareTable = React.createClass({
     getDefaultProps() { return {software: []}; },
     render() {
         return (
-            <table className="table">
+            <Table>
                 <thead>
                     <tr>
                         <th>Software</th>
@@ -161,7 +166,7 @@ const SoftwareTable = React.createClass({
                         );
                     })}
                 </tbody>
-            </table>
+            </Table>
         );
     },
 });
@@ -237,24 +242,26 @@ const Colophon = React.createClass({
 });
 
 
-var NavbarItem = React.createClass({
+const NavbarItem = React.createClass({
     propTypes: {
         // the textual name to display for this navbar entry
         name: React.PropTypes.string.isRequired,
         // the URL path (according to react-router) for this NavbarItem
         link: React.PropTypes.string.isRequired,
     },
-    render: function() {
+    render() {
         return (
-            <Link to={this.props.link} className="btn btn-primary-outline" activeClassName="active">
-                {this.props.name}
-            </Link>
+            <li>
+                <Link to={this.props.link} activeClassName="active">
+                    {this.props.name}
+                </Link>
+            </li>
         );
     }
 });
 
 
-var VitrailNavbar = React.createClass({
+const VitrailNavbar = React.createClass({
     propTypes: {
         // array of objects with the props required for the "NavbarItem" component
         navbarItems: React.PropTypes.arrayOf(
@@ -264,37 +271,37 @@ var VitrailNavbar = React.createClass({
             })
         )
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {navbarItems: []};
     },
-    render: function() {
+    render() {
         return (
-            <nav className="navbar navbar-light bg-faded">
-                <a className="navbar-brand" href="/">CANTUS Database</a>
-                <ul className="nav navbar-nav">
+            <Navbar>
+                <Navbar.Header><Navbar.Brand><a href="/">CANTUS Database</a></Navbar.Brand></Navbar.Header>
+                <Nav>
                     {this.props.navbarItems.map((item, index) =>
                         <NavbarItem key={index} name={item.name} link={item.link}/>
                     )}
-                </ul>
-            </nav>
+                </Nav>
+            </Navbar>
         );
     }
 });
 
 
-var NotImplemented = React.createClass({
-    render: function() {
+const NotImplemented = React.createClass({
+    render() {
         return (
-            <div className="alert alert-danger" htmlRole="alert">Not implemented!</div>
+            <Alert scStyle="danger">Not implemented!</Alert>
         );
     }
 });
 
 
-var Vitrail = React.createClass({
+const Vitrail = React.createClass({
     //
 
-    render: function() {
+    render() {
         let navbarItems = [
             // {name, link}
             {name: 'Onebox Search',        link: '/onebox'},

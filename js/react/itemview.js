@@ -24,8 +24,13 @@
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
-
 import {Link} from 'react-router';
+
+import Label from 'react-bootstrap/lib/Label';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Modal from 'react-bootstrap/lib/Modal';
+import Panel from 'react-bootstrap/lib/Panel';
 
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
@@ -48,64 +53,62 @@ const ItemViewChant = React.createClass({
         const data = this.props.data;
         const resources = this.props.resources;
 
-        // Genre and Cantus ID
-        let genreAndCantusid = '';
-        if (data.get('genre') && data.get('cantus_id')) {
-            genreAndCantusid = `${data.get('genre')}\u2014Cantus\u00A0ID\u00A0${data.get('cantus_id')}`;
-        } else if (data.get('genre')) {
-            genreAndCantusid = data.get('genre');
-        } else if (data.get('cantus_id')) {
-            genreAndCantusid = data.get('cantus_id');
+        // Primary Fields:
+        // ---------------
+        // - incipit
+        // - {genre} for {office} during {feast}
+        // - position
+        // - siglum
+        // - folio and sequence number
+        // - mode
+        // - differentia
+        //
+        // Secondary Fields ("hideable"):
+        // ------------------------------
+        // - marginalia
+        // - notes
+        // - proofreader
+        // - melody_id
+        // - volpiano
+        // - full_text & full_text_manuscript
+        // - cao_concordances
+        // - cantus ID
+        // - finalis
+
+
+        // primary fields -----------------------------------------------------
+        let header = [data.get('incipit', '?'), <Label bsStyle="info">Chant</Label>];
+
+        // genre, office, feast
+        header.push(<div>{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
+
+        // siglum, folio, sequence
+        if (data.get('folio') && data.get('sequence')) {
+            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}</div>);
+        }
+        else if (data.get('folio')) {
+            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')}`}</div>);
+        }
+        else if (data.get('sequence')) {
+            header.push(<div>{`${data.get('siglum')}: seq. ${data.get('sequence')}`}</div>);
+        }
+        else {
+            header.push(<div>{`${data.get('siglum')}`}</div>);
         }
 
-        // Feast and Office
-        let feastAndOffice = '';
-        if ('full' === this.props.size) {
-            if (data.get('feast') && data.get('feast_desc') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} (${data.get('feast_desc')}) office ${data.get('office')}`;
-            } else if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('feast')} office ${data.get('office')}`;
-            } else if (data.get('feast')) {
-                feastAndOffice = `Chant for ${data.get('feast')}`;
-            } else if (data.get('office')) {
-                feastAndOffice = `Chant for ${data.get('office')} office`;
-            }
-            if (feastAndOffice.length > 0) {
-                feastAndOffice = <li className={liClassName}>{feastAndOffice}</li>;
-            }
-        } else {
-            if (data.get('feast') && data.get('office')) {
-                feastAndOffice = `${data.get('feast')} (${data.get('office')})`;
-            } else if (data.get('feast')) {
-                feastAndOffice = data.get('feast');
-            } else if (data.get('office')) {
-                feastAndOffice = `(${data.get('office')})`;
-            }
+        // mode, differentia
+        if (data.get('mode') && data.get('differentia')) {
+            header.push(<div>{`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}</div>);
+        }
+        else if (data.get('mode')) {
+            header.push(<div>{`Mode: ${data.get('mode')}`}</div>);
+        }
+        else if (data.get('differentia')) {
+            header.push(<div>{`Differentia: ${data.get('differentia')}`}</div>);
         }
 
-        // Source, Folio, and Sequence
-        let sourceFolioSequence = '';
-        if ('full' === this.props.size) {
-            if (data.get('source') && data.get('folio') && data.get('sequence')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}, item {data.get('sequence')}.</li>;
-            } else if (data.get('source') && data.get('folio')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i> on folio {data.get('folio')}.</li>;
-            } else if (data.get('source')) {
-                sourceFolioSequence = <li className={liClassName}>From <i className="vitrail-source-name">{data.get('source')}</i>.</li>;
-            }
-        } else {
-            if (data.get('source')) {
-                sourceFolioSequence = data.get('source');
-                if (sourceFolioSequence.length > 30) {
-                    sourceFolioSequence = sourceFolioSequence.slice(0, 30);
-                }
-                sourceFolioSequence = <i className="vitrail-source-name">{sourceFolioSequence}&hellip;</i>;
-            }
-        }
-
-        let mode = '';
+        // secondary fields ---------------------------------------------------
         let concordances = '';
-        let differentia = '';
         let fullText = '';
         let volpiano = '';
         let notes = '';
@@ -113,106 +116,87 @@ const ItemViewChant = React.createClass({
         let siglum = '';
         let proofreader = '';
         let melodyID = '';
+        let cantusID = '';
+        let finalis = '';
 
-        if ('full' === this.props.size) {
-            // Mode
-            if (data.get('mode')) {
-                mode = <li className={liClassName}>Mode {data.get('mode')}</li>;
-            }
+        // CAO Concordances
+        if (data.get('cao_concordances')) {
+            concordances = <ListGroupItem>CAO Concordances: {data.get('cao_concordances')}</ListGroupItem>;
+        }
 
-            // CAO Concordances
-            if (data.get('cao_concordances')) {
-                concordances = <li className={liClassName}>CAO Concordances: {data.get('cao_concordances')}</li>;
-            }
+        // Full Text
+        if (data.get('full_text') && data.get('full_text_manuscript')) {
+            fullText = [
+                <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>,
+                <ListGroupItem>Full Text (manuscript spelling):{data.get('full_text_manuscript')}</ListGroupItem>
+            ];
 
-            // Differentia
-            if (data.get('differentia')) {
-                differentia = <li className={liClassName}>Differentia: {data.get('differentia')}</li>;
-            }
+        } else if (data.get('full_text')) {
+            fullText = <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>;
+        }
 
-            // Full Text
-            if (data.get('full_text') && data.get('full_text_manuscript')) {
-                // TODO: this
-            } else if (data.get('full_text')) {
-                fullText = <li className={liClassName}>{data.get('full_text')}</li>;
-            }
+        // Volpiano
+        if (data.get('volpiano')) {
+            volpiano = <ListGroupItem>Volpiano: {data.get('volpiano')}</ListGroupItem>;
+        }
 
-            // Volpiano
-            if (data.get('volpiano')) {
-                volpiano = <li className={liClassName}>{data.get('volpiano')}</li>;
-            }
+        // Notes
+        if (data.get('notes')) {
+            notes = <ListGroupItem>Notes: {data.get('notes')}</ListGroupItem>;
+        }
 
-            // Notes
-            if (data.get('notes')) {
-                notes = <li className={liClassName}>Notes: {data.get('notes')}</li>;
-            }
+        // Marginalia
+        if (data.get('marginalia')) {
+            marginalia = <ListGroupItem>Marginalia: {data.get('marginalia')}</ListGroupItem>;
+        }
 
-            // Marginalia
-            if (data.get('marginalia')) {
-                marginalia = <li className={liClassName}>Marginalia: {data.get('marginalia')}</li>;
-            }
+        // Siglum
+        if (data.get('siglum')) {
+            siglum = <ListGroupItem>Siglum: {data.get('siglum')}</ListGroupItem>;
+        }
 
-            // Siglum
-            if (data.get('siglum')) {
-                siglum = <li className={liClassName}>Siglum: {data.get('siglum')}</li>;
-            }
+        // Proofreader
+        if (data.get('proofreader')) {
+            proofreader = <ListGroupItem>Proofreader: {data.get('proofreader')}</ListGroupItem>;
+        }
 
-            // Proofreader
-            if (data.get('proofreader')) {
-                proofreader = <li className={liClassName}>Proofreader: {data.get('proofreader')}</li>;
-            }
+        // Melody ID
+        if (data.get('melody_id')) {
+            melodyID = <ListGroupItem>Melody ID: {data.get('melody_id')}</ListGroupItem>;
+        }
 
-            // Melody ID
-            if (data.get('melody_id')) {
-                melodyID = <li className={liClassName}>Melody ID: {data.get('melody_id')}</li>;
-            }
+        // Cantus ID
+        if (data.get('cantus_id')) {
+            cantusID = <ListGroupItem>Cantus ID: {data.get('cantus_id')}</ListGroupItem>;
+        }
+
+        // Finalis
+        if (data.get('finalis')) {
+            finalis = <ListGroupItem>Finalis: {data.get('finalis')}</ListGroupItem>;
+        }
+
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-5';
         }
 
         // Build the final structure
-        let post = '';
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                    </div>
-                    <ul className="list-group list-group-flush">
-                        {feastAndOffice}
-                        {sourceFolioSequence}
-                        {mode}
-                        {concordances}
-                        {differentia}
-                        {fullText}
-                        {volpiano}
-                        {notes}
-                        {marginalia}
-                        {siglum}
-                        {proofreader}
-                        {melodyID}
-                    </ul>
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    <div className="card-block">
-                        <h4 className="card-title">
-                            {data.get('incipit')}
-                            <span className="label label-info pull-right">Chant</span>
-                        </h4>
-                        <h6 className="card-subtitle text-muted">{genreAndCantusid}</h6>
-                        {feastAndOffice}<br/>
-                        {sourceFolioSequence}
-                    </div>
-                </div>
-            );
-        }
-
-        return post;
+        return (
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                <ListGroup>
+                    {concordances}
+                    {fullText}
+                    {volpiano}
+                    {notes}
+                    {marginalia}
+                    {proofreader}
+                    {melodyID}
+                    {cantusID}
+                    {finalis}
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
@@ -238,33 +222,31 @@ const ItemViewFeast = React.createClass({
         // - feast code
 
         // Name and Feast Code
-        let codeAndDate = '';
-        if (data.get('feast_code') && data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}&mdash;{data.get('date')}</h6>;
-        } else if (data.get('feast_code')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('feast_code')}</h6>;
-        } else if (data.get('date')) {
-            codeAndDate = <h6 className="card-subtitle text-muted">{data.get('date')}</h6>;
+        let header = [data.get('name', ''), <Label bsStyle="info">Feast</Label>];
+        if (data.get('date')) {
+            header.push(<br/>);
+            header.push(<span className="text-muted">{data.get('date')}</span>);
         }
 
-        // Description and Date
-        let description = '';
-        if ('full' === this.props.size && data.get('description')) {
-            description = data.get('description');
+        const description = data.get('description', '');
+
+        let feastCode = data.get('feast_code', '');
+        if (feastCode) {
+            feastCode = [<br/>, feastCode];
+        }
+
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-4';
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Feast</span>
-                    </h4>
-                    {codeAndDate}
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                {description}
+                {feastCode}
+            </Panel>
         );
     }
 });
@@ -295,52 +277,49 @@ const ItemViewIndexer = React.createClass({
         // Name
         let name = '';
         if (data.get('family_name') && data.get('given_name')) {
-            name = (
-                <h4 className="card-title">
-                    {data.get('given_name')}&nbsp;{data.get('family_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
+            name = `${data.get('given_name')} ${data.get('family_name')}`;
         }
         else {
-            name = (
-                <h4 className="card-title">
-                    {data.get('display_name')}
-                    <span className="label label-info pull-right">Indexer</span>
-                </h4>
-            );
+            name = data.get('display_name', '');
         }
+        const header = [name, <Label bsStyle="info">Indexer</Label>];
 
         let institution = '';
         let cityAndCountry = '';
 
-        if ('full' === this.props.size) {
-            // Institution
-            if (data.get('institution')) {
-                institution = <h6 className="card-subtitle text-muted">{data.get('institution')}</h6>;
-            }
+        // Institution
+        if (data.get('institution')) {
+            institution = <ListGroupItem>{data.get('institution')}</ListGroupItem>;
+        }
 
-            // City and Country
-            if (data.get('city') && data.get('country')) {
-                cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
-            }
-            else if (data.get('city')) {
-                cityAndCountry = data.get('city');
-            }
-            else if (data.get('country')) {
-                cityAndCountry = data.get('country');
-            }
+        // City and Country
+        if (data.get('city') && data.get('country')) {
+            cityAndCountry = `${data.get('city')}, ${data.get('country')}`;
+        }
+        else if (data.get('city')) {
+            cityAndCountry = data.get('city');
+        }
+        else if (data.get('country')) {
+            cityAndCountry = data.get('country');
+        }
+        if (cityAndCountry) {
+            cityAndCountry = <ListGroupItem>{cityAndCountry}</ListGroupItem>;
+        }
+
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-4';
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    {name}
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                <ListGroup fill>
                     {institution}
                     {cityAndCountry}
-                </div>
-            </div>
+                </ListGroup>
+            </Panel>
         );
     }
 });
@@ -365,33 +344,22 @@ const ItemViewGenre = React.createClass({
         // - description
         // - mass_or_office
 
-        let description = '';
-        let massOrOffice = '';
+        const header = [data.get('name', ''), <Label bsStyle="info">Genre</Label>];
+        const description = data.get('description', '');
+        const massOrOffice = <div className="text-muted">({data.get('mass_or_office', '')})</div>;
 
-        if ('full' === this.props.size) {
-            // Mass or Office
-            if (data.get('mass_or_office')) {
-                massOrOffice = <h6 className="card-subtitle text-muted">{data.get('mass_or_office')}</h6>;
-            }
-
-            // Description
-            if (data.get('description')) {
-                description = data.get('description');
-            }
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-3';
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">Genre</span>
-                    </h4>
-                    {massOrOffice}
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                {description}
+                {massOrOffice}
+            </Panel>
         );
     }
 });
@@ -412,54 +380,41 @@ const ItemViewSource = React.createClass({
         const data = this.props.data;
         const resources = this.props.resources;
 
-        // Fields Available:
-        // - title (string) – Full Manuscript Identification (City, Archive, Shelf-mark)
-        // - rism (string) – RISM number
-        // - provenance (string) – Provenance
-        // - provenance_detail (string) – More detail about the provenance
-        // - date (string) – Date
-        // IGNORED: - century (string) – Century
-        // IGNORED: - notation_style (string) – Notation used for the source
-        // - editors (string) – List of "display_name" of indexers who edited this manuscript
-        // - indexers (string) – List of "display_name" of indexers who entered this manuscript
-        // - proofreaders (string) – List of "display_name" of indexers who proofread this manuscript
-        // IGNORED: - segment (string) – Segment (i.e., source database)
-        // - source_status (string) – Status of this source
-        // - summary (string) – Summary
-        // - liturgical_occasions (string) – Liturgical occasions
-        // - description (string) – Description
-        // - indexing_notes (string) – Indexing notes
-        // - indexing_date (string) – Indexing date
-
-        // Siglum ("rism" field), Provenance, and Date
+        // Primary Fields:
+        // ---------------
+        // - "rism" (siglum)
+        // - abbr. full name
+        // - date
+        // - provenance
+        // - summary (abbreviated, if there's space) (CRA: there isn't)
+        //
+        // Secondary Fields ("hideable"):
+        // ------------------------------
+        // - full name (not abbreviated)
+        // - provenance detail
+        // - editors
+        // - indexers
+        // - proofreaders
+        // - source _status
+        // - liturgical occasions
+        // - indexing_notes
+        // - indexing_date
+        // - notation_style
+        // - century
+        // - segment
+        //
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
-        let siglumProvenanceDate = '';
-        if (data.get('rism') && data.get('provenance')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})\u00A0${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = `${data.get('rism')}\u00A0(${data.get('provenance')})`;
-            }
-        }
-        else if (data.get('rism')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('rism')}\u2014${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = data.get('rism');
-            }
+
+        let header = [data.get('rism', ''), <Label bsStyle="info">Source</Label>];
+        header.push(<div>{`${data.get('title', '').slice(0, 40)}...`}</div>);
+        if (data.get('provenance') && data.get('date')) {
+            header.push(<div>{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
         }
         else if (data.get('provenance')) {
-            if (data.get('date')) {
-                siglumProvenanceDate = `${data.get('provenance')}\u2014${data.get('date')}`;
-            }
-            else {
-                siglumProvenanceDate = data.get('provenance');
-            }
+            header.push(<div>{data.get('provenance')}</div>);
         }
-        if (siglumProvenanceDate.length > 0) {
-            siglumProvenanceDate = <h6 className="card-subtitle text-muted">{siglumProvenanceDate}</h6>;
+        else if (data.get('date')) {
+            header.push(<div>{data.get('date')}</div>);
         }
 
         let provenanceDetail = '';
@@ -469,128 +424,97 @@ const ItemViewSource = React.createClass({
         let indexingInfo = '';
         let description = '';
 
-        if ('full' === this.props.size) {
-            // Provenance Detail
-            if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
-                provenanceDetail = <li className={liClassName}>{data.get('provenance_detail')}</li>;
-            }
+        // Provenance Detail
+        if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
+            provenanceDetail = <ListGroupItem>{data.get('provenance_detail')}</ListGroupItem>;
+        }
 
-            // Source Status
-            if (data.get('source_status')) {
-                status = `Status: ${data.get('source_status')}`;
-                status = <li className={liClassName}>{status}</li>;
-            }
+        // Source Status
+        if (data.get('source_status')) {
+            status = <ListGroupItem>{`Status: ${data.get('source_status')}`}</ListGroupItem>;
+        }
 
-            // Summary
-            if (data.get('summary')) {
-                summary = <li className={liClassName}>{data.get('summary')}</li>;
-            }
+        // Summary
+        if (data.get('summary')) {
+            summary = <ListGroupItem><Panel header="Summary">{data.get('summary')}</Panel></ListGroupItem>;
+        }
 
-            // Occasions
-            if (data.get('liturgical_occasions')) {
-                occasions = `Liturgical Occasions: ${data.get('liturgical_occasions')}`;
-                occasions = <li className={liClassName}>{occasions}</li>;
-            }
+        // Occasions
+        if (data.get('liturgical_occasions')) {
+            occasions = (
+                <ListGroupItem>
+                    <Panel header="Liturgical Occasions">
+                        {data.get('liturgical_occasions')}
+                    </Panel>
+                </ListGroupItem>
+            );
+        }
 
-            // Indexing Information -----------------------
-            let notes = '';
-            let i_date = '';
-            let editors = '';
-            let indexers = '';
-            let proofreaders = '';
+        // Indexing Information -----------------------
+        let notes = '';
+        let i_date = '';
+        let editors = '';
+        let indexers = '';
+        let proofreaders = '';
 
-            // Indexing Date
-            if (data.get('indexing_date')) {
-                i_date = `Indexed ${data.get('indexing_date')}`;
-                i_date = <p>{i_date}</p>;
-            }
+        // Indexing Date
+        if (data.get('indexing_date')) {
+            i_date = <ListGroupItem>{`Indexed ${data.get('indexing_date')}`}</ListGroupItem>;
+        }
 
-            // Notes
-            if (data.get('indexing_notes')) {
-                notes = `Indexing Notes: ${data.get('indexing_notes')}`;
-                notes = <p>{notes}</p>;
-            }
+        // Notes
+        if (data.get('indexing_notes')) {
+            notes = <ListGroupItem>{`Indexing Notes: ${data.get('indexing_notes')}`}</ListGroupItem>;
+        }
 
-            // Indexers
-            if (data.get('indexers')) {
-                indexers = `Indexers: ${data.get('indexers').join(', ')}`;
-                indexers = <p>{indexers}</p>;
-            }
+        // Indexers
+        if (data.get('indexers')) {
+            indexers = <ListGroupItem>{`Indexers: ${data.get('indexers').join(', ')}`}</ListGroupItem>;
+        }
 
-            // Editors
-            if (data.get('editors')) {
-                editors = `Editors: ${data.get('editors').join(', ')}`;
-                editors = <p>{editors}</p>;
-            }
+        // Editors
+        if (data.get('editors')) {
+            editors = <ListGroupItem>{`Editors: ${data.get('editors').join(', ')}`}</ListGroupItem>;
+        }
 
-            // Proofreaders
-            if (data.get('proofreaders')) {
-                proofreaders = `Proofreaders: ${data.get('proofreaders').join(', ')}`;
-                proofreaders = <p>{proofreaders}</p>;
-            }
+        // Proofreaders
+        if (data.get('proofreaders')) {
+            proofreaders = <ListGroupItem>{`Proofreaders: ${data.get('proofreaders').join(', ')}`}</ListGroupItem>;
+        }
 
-            if (notes.length > 0 || i_date.length > 0 || editors.length > 0 || indexers.length > 0 || proofreaders.length > 0) {
-                indexingInfo = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Indexing Information</h5>
-                        <div className="card-block">
-                            {i_date}
-                            {notes}
-                            {editors}
-                            {indexers}
-                            {proofreaders}
-                        </div>
-                    </div>
-                );
-            }
+        // Description --------------------------------
+        if (data.get('description')) {
+            // TODO: format this better (e.g., convert the newline chars to <br/> ?)
+            description = (
+                <ListGroupItem>
+                    <Panel header="Description">{data.get('description')}</Panel>
+                </ListGroupItem>
+            );
+        }
 
-            // Description --------------------------------
-            if (data.get('description')) {
-                // TODO: format this better (e.g., convert the newline chars to <br/> ?)
-                description = (
-                    <div className="card-block">
-                        <h5 className="card-subtitle">Description</h5>
-                        <p className="card-block">{data.get('description')}</p>
-                    </div>
-                );
-            }
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-5';
         }
 
         // Build the final structure
-        let post;
-        const commonHeader = (
-            <div className="card-block">
-                <h4 className="card-title">
-                    {data.get('title')}
-                    <span className="label label-info pull-right">Source</span>
-                </h4>
-                {siglumProvenanceDate}
-            </div>
-        );
-
-        if ('full' === this.props.size) {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                    <ul className="list-group list-group-flush">
-                        {provenanceDetail}
-                        {status}
-                        {summary}
-                        {occasions}
-                    </ul>
-                    {indexingInfo}
+        return (
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                <ListGroup>
+                    <ListGroupItem>{data.get('title', '')}</ListGroupItem>
+                    {status}
+                    {summary}
+                    {provenanceDetail}
+                    {indexers}
+                    {editors}
+                    {proofreaders}
+                    {notes}
+                    {occasions}
                     {description}
-                </div>
-            );
-        } else {
-            post = (
-                <div className="card itemview">
-                    {commonHeader}
-                </div>
-            );
-        }
-
-        return post;
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
@@ -612,26 +536,21 @@ const ItemViewSimpleResource = React.createClass({
         // - name
         // - description
 
-        let description = '';
+        const type = data.get('type').slice(0, 1).toLocaleUpperCase() + data.get('type').slice(1);
+        const header = [data.get('name', ''), <Label bsStyle="info">{type}</Label>];
+        const description = data.get('description', '');
 
-        if ('full' === this.props.size) {
-            // Description
-            if (data.get('description')) {
-                description = <h6 className="card-subtitle text-muted">{data.get('description')}</h6>;
-            }
+        // Choose the column size
+        let className = '';
+        if (this.props.size === 'compact') {
+            className = 'col-md-3';
         }
 
         // Build the final structure
         return (
-            <div className="card itemview">
-                <div className="card-block">
-                    <h4 className="card-title">
-                        {data.get('name')}
-                        <span className="label label-info pull-right">{data.get('type')}</span>
-                    </h4>
-                    {description}
-                </div>
-            </div>
+            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+                {description}
+            </Panel>
         );
     }
 });
@@ -876,14 +795,12 @@ const ItemView = React.createClass({
                 errMsg = 'No data: maybe waiting on the Cantus server?';
             }
             rendered = (
-                <div className="itemview">
-                    <ItemViewError errorMessage={errMsg}
-                                                type={this.props.type}
-                                                rid={this.props.rid}
-                                                data={this.props.data}
-                                                resources={this.props.resources}
-                    />
-                </div>
+                <ItemViewError errorMessage={errMsg}
+                               type={this.props.type}
+                               rid={this.props.rid}
+                               data={this.props.data}
+                               resources={this.props.resources}
+                />
             );
         } else {
             // "item" will contain only fields for this item
@@ -967,13 +884,16 @@ const ItemViewOverlay = React.createClass({
         return {size: getters.itemViewOverlaySize};
     },
     render() {
+        // When the <Modal> is just set to "show" all the time, it won't close itself... so it's
+        // changing the URL that will trigger the ItemViewOverlay to go away!
+        //
         return (
-            <div className="itemview-overlay">
-                <div className="itemview-button-container">
-                    <Link className="btn btn-primary" to={pathToParent(this.props.routes)}>Close</Link>
-                    <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
-                </div>
-            </div>
+            <Modal show>
+                <Modal.Header>
+                    <Link className="btn btn-danger" to={pathToParent(this.props.routes)}>X</Link>
+                </Modal.Header>
+                <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
+            </Modal>
         );
     }
 });

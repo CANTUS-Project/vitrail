@@ -22,15 +22,26 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-
+import {Immutable} from 'nuclear-js';
 import React from 'react';
+
+import Button from 'react-bootstrap/lib/Button';
+import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
+import Input from 'react-bootstrap/lib/Input';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Panel from 'react-bootstrap/lib/Panel';
+import PanelGroup from 'react-bootstrap/lib/PanelGroup';
+import PageHeader from 'react-bootstrap/lib/PageHeader';
+
+import {AlertView} from './vitrail';
 import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 
 
-var TemplateTypeSelector = React.createClass({
+const TemplateTypeSelector = React.createClass({
     // Type selection component for the TemplateSearch.
 
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -40,7 +51,7 @@ var TemplateTypeSelector = React.createClass({
             resourceType: getters.resourceType,
         };
     },
-    chooseNewType: function(event) {
+    chooseNewType(event) {
         let newType = 'chants';
 
         switch (event.target.id) {
@@ -61,20 +72,9 @@ var TemplateTypeSelector = React.createClass({
         signals.setResourceType(newType);
     },
     supportedTypes: ['chants', 'feasts', 'indexers', 'sources'],
-    componentWillMount: function() {
-        // If the TemplateSearch initializes and the "resourceType" isn't one of the types for which
-        // we have a template, we'll set it to "chants." If we set it with the signal, NuclearJS
-        // will tell all the other components about it, but our initial rendering will still use the
-        // state from before this function was called, and will ignore the updated state NuclearJS
-        // offered... so we have to *both* call the signal *and* set our own state.
-        if (!this.supportedTypes.includes(this.state.resourceType)) {
-            signals.setResourceType('chants');
-        }
-        this.setState({resourceType: 'chants'});
-    },
-    render: function() {
-        let className = 'btn btn-secondary-outline';
-        let classNameActive = 'btn btn-secondary-outline active';
+    render() {
+        const className = '';
+        const classNameActive = 'active';
 
         let buttonProps = {
             'chants': {'className': className, 'aria-pressed': 'false'},
@@ -89,28 +89,26 @@ var TemplateTypeSelector = React.createClass({
         }
 
         return (
-            <div>
-                <div className="btn-group" htmlRole="group" aria-label="resource type selector">
-                    <button id="chantsTypeButton" type="button" className={buttonProps.chants.className}
-                            aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
-                            Chants</button>
-                    <button id="feastsTypeButton" type="button" className={buttonProps.feasts.className}
-                            aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
-                            Feasts</button>
-                    <button id="indexersTypeButton" type="button" className={buttonProps.indexers.className}
-                            aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
-                            Indexers</button>
-                    <button id="sourcesTypeButton" type="button" className={buttonProps.sources.className}
-                            aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
-                            Sources</button>
-                </div>
-            </div>
+            <ButtonGroup role="group" aria-label="resource type selector">
+                <Button id="chantsTypeButton" className={buttonProps.chants.className}
+                        aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
+                        Chants</Button>
+                <Button id="feastsTypeButton" className={buttonProps.feasts.className}
+                        aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
+                        Feasts</Button>
+                <Button id="indexersTypeButton" className={buttonProps.indexers.className}
+                        aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
+                        Indexers</Button>
+                <Button id="sourcesTypeButton" className={buttonProps.sources.className}
+                        aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
+                        Sources</Button>
+            </ButtonGroup>
         );
     }
 });
 
 
-var TemplateSearchField = React.createClass({
+const TemplateSearchField = React.createClass({
     // A single field in the TemplateSearch template.
     //
 
@@ -120,7 +118,7 @@ var TemplateSearchField = React.createClass({
         // The field name displayed in the GUI. If omitted, the "field" is displayed.
         displayName: React.PropTypes.string,
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {displayName: null, contents: ''};
     },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -130,7 +128,7 @@ var TemplateSearchField = React.createClass({
             searchQuery: getters.searchQuery,
         };
     },
-    onChange: function(event) {
+    onChange(event) {
         let post = {};
         post[this.props.field] = event.target.value;
         signals.setSearchQuery(post);
@@ -146,33 +144,30 @@ var TemplateSearchField = React.createClass({
             return false;
         }
     },
-    render: function() {
-        let displayName = this.props.displayName || this.props.field;
-        let fieldID = `template-field-${this.props.field}`;
+    render() {
+        const displayName = this.props.displayName || this.props.field;
+        const fieldID = `template-field-${this.props.field}`;
         let contents = '';
 
-        if (this.state.searchQuery.has(this.props.field)) {
+        if (this.state.searchQuery.get(this.props.field)) {
             contents = this.state.searchQuery.get(this.props.field);
         }
 
         return (
-            <fieldset className="form-group row">
-                <label className="col-sm-2 text-right">{displayName}</label>
-                <div className="col-sm-10">
-                    <input id={fieldID}
-                           type="text"
-                           className="form-control"
-                           value={contents}
-                           onChange={this.onChange}
-                           />
-                </div>
-            </fieldset>
+            <Input id={fieldID}
+                   type="text"
+                   value={contents}
+                   onChange={this.onChange}
+                   label={displayName}
+                   labelClassName="col-xs-2"
+                   wrapperClassName="col-xs-10"
+            />
         );
     }
 });
 
 
-var TemplateSearchFields = React.createClass({
+const TemplateSearchFields = React.createClass({
     // All the fields in a TemplateSearch template.
     //
     // Contained by TemplateSearchTemplate.
@@ -192,43 +187,36 @@ var TemplateSearchFields = React.createClass({
             contents: React.PropTypes.string
         })).isRequired,
     },
-    getInitialState: function() {
+    getInitialState() {
         return {isCollapsed: false};
     },
-    toggleCollapsion: function() {
+    toggleCollapsion(event) {
         // Toggle this.state.isCollapsed
-        this.setState({isCollapsed: !this.state.isCollapsed});
-    },
-    render: function() {
-        let buttonText = 'Collapse Fields';
-        let fieldStyle = {};
-        if (this.state.isCollapsed) {
-            fieldStyle['display'] = 'none';
-            buttonText = 'Expand Fields';
+        if (event.target.className === 'panel-title') {
+            this.setState({isCollapsed: !this.state.isCollapsed});
         }
+    },
+    render() {
+        let headerText = this.state.isCollapsed ? 'expand' : 'collapse';
+        headerText = `Click or tap this header to ${headerText} the template.`
 
         return (
-            <div className="card">
-                <div className="card-header">
-                    <button className="btn btn-primary-outline" onClick={this.toggleCollapsion}>{buttonText}</button>
-                </div>
-                <div className="card-block" style={fieldStyle}>
-                    <form>
-                        {this.props.fieldNames.map((field, index) =>
-                            <TemplateSearchField key={`template-field${index}`}
-                                                 field={field.field}
-                                                 displayName={field.displayName}
-                                                 />
-                        )}
-                    </form>
-                </div>
-            </div>
+            <Panel header={headerText} collapsible expanded={!this.state.isCollapsed} onClick={this.toggleCollapsion}>
+                <form className="form-horizontal">
+                    {this.props.fieldNames.map((field, index) =>
+                        <TemplateSearchField key={`template-field${index}`}
+                                             field={field.field}
+                                             displayName={field.displayName}
+                                             />
+                    )}
+                </form>
+            </Panel>
         );
     }
 });
 
 
-var TemplateSearchTemplate = React.createClass({
+const TemplateSearchTemplate = React.createClass({
     // For TemplateSearch, this is the template. This just selects the proper sub-component, but it
     // leaves TemplateSearch much cleaner.
     //
@@ -240,7 +228,7 @@ var TemplateSearchTemplate = React.createClass({
             resourceType: getters.resourceType,
         };
     },
-    render: function() {
+    render() {
         let fieldNames = [];
 
         switch (this.state.resourceType) {
@@ -312,54 +300,66 @@ var TemplateSearchTemplate = React.createClass({
                     {'field': 'indexing_date', 'displayName': 'Indexing Date'},
                 ];
                 break;
+
+            default:
+                fieldNames = 'error';
+
         }
 
-        return <TemplateSearchFields fieldNames={fieldNames}/> ;
+        if (fieldNames === 'error') {
+            const message = [
+                <h2><strong>Error</strong></h2>,
+                'TemplateSearchTemplate received an invalid resource type.',
+                <br/>,
+                'Please report this to the developers, then choose a resource type above.'
+            ];
+
+            fieldNames = (
+                <ListGroupItem>
+                    <AlertView class="danger"
+                               message={message}
+                               fields={Immutable.Map({'getters.resourceType': this.state.resourceType})}
+                    />
+                </ListGroupItem>
+            );
+        }
+        else {
+            fieldNames = (
+                <ListGroupItem>
+                    <TemplateSearchFields fieldNames={fieldNames}/>
+                </ListGroupItem>
+            );
+        }
+
+        return (
+            <Panel>
+                <ListGroup fill>
+                    <ListGroupItem><TemplateTypeSelector/></ListGroupItem>
+                    {fieldNames}
+                    <ListGroupItem><Button bsStyle="primary" onClick={signals.submitSearchQuery}>Search</Button></ListGroupItem>
+                </ListGroup>
+            </Panel>
+        );
     }
 });
 
 
-var TemplateSearch = React.createClass({
+const TemplateSearch = React.createClass({
     //
 
     componentWillMount() {
         // clear the search query
         signals.setSearchQuery('clear');
+        signals.setResourceType('chant');
     },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
-    getDataBindings() {
-        // connection to NuclearJS
-        return {
-            searchQuery: getters.searchQuery,
-        };
-    },
-    getInitialState: function() {
-        // - currentSearch: terms of the current search (i.e., what's in the boxes right now)
-        return {currentSearch: ''};
-    },
-    render: function() {
-        // TODO: find a better way to manage the state, because this is stupid.
-
-        // fields that shouldn't be rendered for users
-        // NB: this must be done before the call to the <ResultListFrame> component
-        let dontRender = ['id', 'type'];
-
-        // TODO: refactor "ResultListFrame" so it doesn't show anything if the "searchQuery" is null or sthg
+    render() {
         return (
             <div className="container">
-                <div className="card">
-                    <div className="card-block">
-                        <h2 className="card-title">Template Search</h2>
-                        <TemplateTypeSelector/>
-                    </div>
+                <PageHeader>Template Search <small><i>{"Describe what you want, we'll fill in the blanks."}</i></small></PageHeader>
+                <PanelGroup>
                     <TemplateSearchTemplate/>
-                    <div className="card-block">
-                        <button className="btn btn-primary-outline" onClick={signals.submitSearchQuery}>Search</button>
-                    </div>
-                </div>
-                <div>
-                    <ResultListFrame dontRender={dontRender}/>
-                </div>
+                    <ResultListFrame/>
+                </PanelGroup>
             </div>
         );
     }

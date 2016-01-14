@@ -26,6 +26,13 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Button from 'react-bootstrap/lib/Button';
+import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
+import Input from 'react-bootstrap/lib/Input';
+import ListGroup from 'react-bootstrap/lib/ListGroup';
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Panel from 'react-bootstrap/lib/Panel';
+
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
@@ -148,7 +155,7 @@ const ResultListItemView = React.createClass({
         const sortOrder = this.props.sortOrder.toJS();
 
         return (
-            <div className="card-columns">
+            <div className="row">
                 {sortOrder.map(rid => {
                     return <ItemView
                         key={rid}
@@ -270,12 +277,9 @@ const ResultList = React.createClass({
         }
 
         return (
-            <div className="resultList card">
-                <div className="card-block">
-                    <h2 className="card-title">Results</h2>
-                </div>
+            <Panel>
                 {results}
-            </div>
+            </Panel>
         );
     }
 });
@@ -323,19 +327,15 @@ const Paginator = React.createClass({
     },
     render() {
         return (
-            <div className="btn-group paginator" role="group" aria-label="paginator">
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="first" onClick={this.changePage}>&lt;&lt;</button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="previous" onClick={this.changePage}>&lt;</button>
-                <button type="button" className="blankOfBlank btn btn-secondary">
+            <ButtonGroup role="group" aria-label="paginator">
+                <Button name="pages" value="first" onClick={this.changePage}>&lt;&lt;</Button>
+                <Button name="pages" value="previous" onClick={this.changePage}>&lt;</Button>
+                <Button>
                     {this.state.page} of {this.state.totalPages}
-                </button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="next" onClick={this.changePage}>&gt;</button>
-                <button type="button" className="btn btn-secondary" name="pages"
-                        value="last" onClick={this.changePage}>&gt;&gt;</button>
-            </div>
+                </Button>
+                <Button name="pages" value="next" onClick={this.changePage}>&gt;</Button>
+                <Button name="pages" value="last" onClick={this.changePage}>&gt;&gt;</Button>
+            </ButtonGroup>
         );
     }
 });
@@ -360,18 +360,15 @@ const PerPageSelector = React.createClass({
     render() {
         // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
         return (
-            <fieldset className="form-group row">
-                <label htmlFor="#perPageSelector" className="col-sm-2">Results per page:</label>
-                <div className="col-sm-10">
-                    <input type="number"
-                           name="perPage"
-                           id="perPageSelector"
-                           className="form-control form-control-number"
-                           value={this.state.perPage}
-                           onChange={this.onChange}
-                           />
-                </div>
-            </fieldset>
+            <form>
+                <Input type="number"
+                       name="perPage"
+                       id="perPageSelector"
+                       value={this.state.perPage}
+                       onChange={this.onChange}
+                       label="Number of Results per Page"
+                />
+            </form>
         );
     }
 });
@@ -400,20 +397,18 @@ const RenderAsSelector = React.createClass({
 
         return (
             <form>
-                <div className="radio">
-                    <label>
-                        <input type="radio" name="renderAs" id="renderAsView" value="ItemView"
-                               checked={viewChecked} onChange={this.onChange}/>
-                        Render as Views
-                    </label>
-                </div>
-                <div className="radio">
-                    <label>
-                        <input type="radio" name="renderAs" id="renderAsTable" value="table"
-                               checked={tableChecked} onChange={this.onChange}/>
-                        Render as a Table
-                    </label>
-                </div>
+                <Input type="radio"
+                       label="Render as Views"
+                       checked={viewChecked}
+                       onChange={this.onChange}
+                       id="renderAsView"
+                />
+                <Input type="radio"
+                       label="Render as a Table"
+                       checked={tableChecked}
+                       onChange={this.onChange}
+                       id="renderAsTable"
+                />
             </form>
         );
     }
@@ -472,6 +467,36 @@ var ErrorMessage = React.createClass({
 });
 
 
+/** Settings for the ResultList (per-page, render-as, etc.)
+ *
+ * State
+ * -----
+ * @param (bool) isExpanded - Whether the settings are all shown (if "true") or only the title is
+ *     shown (if "false," the default).
+ */
+const ResultListSettings = React.createClass({
+    getInitialState() {
+        return {isExpanded: false};
+    },
+    toggleCollapsion(event) {
+        // Toggle this.state.isExpanded
+        if (event.target.className === 'panel-title') {
+            this.setState({isExpanded: !this.state.isExpanded});
+        }
+    },
+    render() {
+        return (
+            <ListGroupItem>
+                <Panel collapsible expanded={this.state.isExpanded} onClick={this.toggleCollapsion} header="Display Settings">
+                    <PerPageSelector/>
+                    <RenderAsSelector/>
+                </Panel>
+            </ListGroupItem>
+        );
+    },
+});
+
+
 /** TODO: rename this to "ResultList" and the other component to something else
  *
  */
@@ -494,19 +519,15 @@ const ResultListFrame = React.createClass({
                                          />;
         }
 
-        let results = '';
-        if (null !== this.state.results) {
-            results = <ResultList/> ;
-        }
-
         return (
-            <div className="resultListFrame">
-                {errorMessage}
-                {results}
-                <Paginator/>
-                <PerPageSelector/>
-                <RenderAsSelector/>
-            </div>
+            <Panel>
+                <ListGroup fill>
+                    {errorMessage}
+                    <ResultListSettings/>
+                    <ListGroupItem><ResultList/></ListGroupItem>
+                    <ListGroupItem><Paginator/></ListGroupItem>
+                </ListGroup>
+            </Panel>
         );
     }
 });
