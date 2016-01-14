@@ -222,16 +222,51 @@ const ResultListTable = React.createClass({
             dontInclude.push('type');
         }
 
-        // Second remove the unncessary fields.
-        columns = columns.reduce((prev, curr) => {
-            if (dontInclude.indexOf(curr) >= 0) {
-                return prev;
+        // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
+        let columnsAlreadyAdjusted = false;
+        if (!foundDifferent) {
+            // we'll show only the fields called "primary" in the ItemView
+            if ('chant' === firstResType) {
+                columnsAlreadyAdjusted = true;
+                //
+                columns = [
+                    'incipit',
+                    'genre',
+                    'office',
+                    'feast',
+                    'position',
+                    'siglum',
+                    'folio',
+                    'sequence',
+                    'mode',
+                    'differentia',
+                ];
             }
-            else {
-                prev.push(curr);
-                return prev;
+            else if ('source' === firstResType) {
+                columnsAlreadyAdjusted = true;
+                //
+                columns = [
+                    'rism',
+                    'title',
+                    'date',
+                    'provenance',
+                    'summary',
+                ];
             }
-        }, []);
+        }
+
+        // Now remove the unncessary fields.
+        if (!columnsAlreadyAdjusted) {
+            columns = columns.reduce((prev, curr) => {
+                if (dontInclude.indexOf(curr) >= 0) {
+                    return prev;
+                }
+                else {
+                    prev.push(curr);
+                    return prev;
+                }
+            }, []);
+        }
 
         // Prepare the table header.
         columns.forEach(function(columnName) {
