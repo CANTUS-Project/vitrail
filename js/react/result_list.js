@@ -59,10 +59,17 @@ const ResultCell = React.createClass({
     },
     render() {
         let post;
+
+        // if the text data for this cell is longer than 55 characters, abbreviate it at 50 chars
+        let data = this.props.data;
+        if (data.length > 55) {
+            data = `${data.slice(0, 50)} ... (abbr.)`;
+        }
+
         if (this.props.link) {
-            post = <a href={this.props.link}>{this.props.data}</a>;
+            post = <a href={this.props.link}>{data}</a>;
         } else {
-            post = this.props.data;
+            post = data;
         }
         if (this.props.header) {
             post = <th>{post}</th>;
