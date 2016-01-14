@@ -37,6 +37,7 @@ import Table from 'react-bootstrap/lib/Table';
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
+import {AlertView} from './vitrail';
 import {ItemView} from './itemview';
 
 
@@ -452,54 +453,96 @@ const RenderAsSelector = React.createClass({
 });
 
 
-var ErrorMessage = React.createClass({
-    //
-
+/** Use AlertView to show an error message.
+ *
+ * This component returns an AlertView directly (that is, without "wrapping" it in anything). The
+ * HTTP response code and reason are used to determine what message to show. The component currently
+ * uses the following categories:
+ * - 404: no results;
+ * - 500: when the reason is "Programmer Error" we know this means a bug in Abbot;
+ * - 502: this means Solr is on the fritz
+ * - 4xx: generically says "the user agent made an error"
+ * - 5xx: generically says "the server made an error"
+ *
+ * Props:
+ * ------
+ * @param (number) code - The HTTP response code.
+ * @param (string) reason - The HTTP response reason.
+ * @param (string) response - The body of the HTTP response.
+ */
+const ErrorMessage = React.createClass({
     propTypes: {
         code: React.PropTypes.number,
         reason: React.PropTypes.string,
         response: React.PropTypes.string,
     },
     render() {
-        let alertType = 'warning';
+        let alertType = 'danger';
         let message = '';
+        let technicalInfo = Immutable.Map();
 
         if (404 === this.props.code) {
+            alertType = 'warning';
             message = <p>The search returned no results.</p>;
-        } else if (502 === this.props.code) {
+        }
+        else if (502 === this.props.code) {
+            technicalInfo = technicalInfo.set('Developer Message', 'Abbot returned 502');
             message = (
                 <div>
+                    <h2>Server Error</h2>
                     <p>
-                        Part of the CANTUS server is not working. You may try the same search
-                        again in a few minutes, but it may also be a programming error.
+                        Part of the CANTUS server is not working (called "Solr").
                     </p>
                     <p>
-                        Technical information: Abbot returned 502.
+                        Sometimes this is a temporary problem, so you may try your search again in
+                        a few minutes. However, if this problem continues for several minutes, please
+                        report it to the developers, along with your search query.
                     </p>
                 </div>
             );
-        } else if (this.props.code < 500) {
-            alertType = 'danger';
+        }
+        else if (500 === this.props.code && 'Programmer Error' === this.props.reason) {
             message = (
                 <div>
-                    <strong>Client Error</strong>
+                    <h2>Server Error</h2>
+                    <p>
+                        The server indicates that it could not provide data because of an unhandled
+                        error condition.
+                    </p>
+                    <p>
+                        You may report this to the developers to help them fix the problem. Please
+                        include your search query when you report the issue.
+                    </p>
+                </div>
+            );
+        }
+        else if (this.props.code < 500) {
+            technicalInfo = technicalInfo.set('Code', this.props.code);
+            technicalInfo = technicalInfo.set('Reason', this.props.reason);
+            message = (
+                <div>
+                    <h2>Client Error</h2>
                     <p>This probably means that something in the browser made a mistake.</p>
-                    <p>Technical information: {this.props.response}</p>
                 </div>
             );
-        } else {
-            alertType = 'danger';
+        }
+        else {
+            technicalInfo = technicalInfo.set('Code', this.props.code);
+            technicalInfo = technicalInfo.set('Reason', this.props.reason);
             message = (
                 <div>
-                    <strong>Server Error</strong>
+                    <h2>Server Error</h2>
                     <p>This probably means that something in the server made a mistake.</p>
-                    <p>Technical information: {this.props.response}</p>
                 </div>
             );
         }
 
-        alertType = `alert alert-${alertType}`;
-        return <div className={alertType}>{message}</div>;
+        return (
+            <AlertView class={alertType}
+                       message={message}
+                       fields={technicalInfo}
+            />
+        );
     },
 });
 
@@ -547,9 +590,6 @@ const ResultListFrame = React.createClass({
 
         let errorMessage = '';
         if (null !== this.state.error) {
-            // TODO: this causes a 24px high empty space in the output
-            // TODO: use AlertView for this *sometimes* (depending on what the error is)
-            // TODO: maybe I should move the "404" responsibility to ResultList, and everything else happens here with AlertView?
             errorMessage = <ErrorMessage code={this.state.error.get('code')}
                                          reason={this.state.error.get('reason')}
                                          response={this.state.error.get('response')}

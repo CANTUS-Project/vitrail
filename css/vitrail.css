@@ -60,3 +60,7 @@
 .td-align-right {
     text-align: right;
 }
+
+.alert h2 {
+    margin-top: 0px;
+}
