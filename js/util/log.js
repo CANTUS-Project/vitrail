@@ -31,20 +31,25 @@ const log = {
     error(msg) {
         // Signal that an error has happened.
         //
+        msg = `ERROR: ${msg}`;
         console.error(msg);
+        alert(msg);
     },
 
     warn(msg) {
         // Signal that something isn't right, but execution will continue.
         //
-        console.log(`WARNING: ${msg}`);
+        msg = `WARNING: ${msg}`;
+        console.warn(msg);
+        alert(msg);
     },
 
     debug(msg) {
         // Debugging output.
         //
         if (DEBUG) {
-            console.log(`DEBUG: ${msg}`);
+            msg = `DEBUG: ${msg}`;
+            console.debug(msg);
         }
     },
 };
