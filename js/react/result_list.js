@@ -38,7 +38,7 @@ import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {AlertView} from './vitrail';
-import {ItemView} from './itemview';
+import {ItemView, makeLinkToItemView} from './itemview';
 
 
 /** A cell in the ResultListTable.
@@ -51,7 +51,7 @@ import {ItemView} from './itemview';
  */
 const ResultCell = React.createClass({
     propTypes: {
-        data: React.PropTypes.string.isRequired,
+        data: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
         header: React.PropTypes.bool,
         link: React.PropTypes.string,
     },
@@ -63,7 +63,7 @@ const ResultCell = React.createClass({
 
         // if the text data for this cell is longer than 55 characters, abbreviate it at 50 chars
         let data = this.props.data;
-        if (data.length > 55) {
+        if ('string' === typeof data && data.length > 55) {
             data = `${data.slice(0, 50)} ... (abbr.)`;
         }
 
@@ -134,6 +134,16 @@ const ResultRow = React.createClass({
         }, this);
         if (this.props.data.get('drupal_path')) {
             renderedColumns.push(<ResultCell key="drupal_path" data="Drupal" link={this.props.data.get('drupal_path')}/>);
+        }
+        if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
+            const to = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
+            renderedColumns.push(
+                <ResultCell key="itemview" data={(
+                    <Link to={to} className="btn btn-default">
+                        View
+                    </Link>
+                )}/>
+            );
         }
         return (
             <tr className="resultComponent">
