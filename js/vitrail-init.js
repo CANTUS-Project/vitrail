@@ -32,7 +32,7 @@ import {IndexRoute, Route, Router} from 'react-router';
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
 import {Colophon, NotImplemented, Vitrail} from './react/vitrail';
-import {ItemViewDevelWrapper, ItemViewOverlay} from './react/itemview';
+import {ItemViewOverlay} from './react/itemview';
 import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
 
@@ -56,7 +56,6 @@ ReactDOM.render(
                     <Route path=":type/:rid" component={ItemViewOverlay}/>
                 </Route>
 
-                <Route path="workspace" component={NotImplemented}/>
                 <Route path="bookview" component={NotImplemented}/>
             </Route>
         </Router>

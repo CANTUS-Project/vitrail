@@ -307,7 +307,6 @@ const Vitrail = React.createClass({
             {name: 'Onebox Search',        link: '/onebox'},
             {name: 'Template Search',      link: '/template'},
             // {name: 'My Workspace',         link: '/workspace'},
-            {name: 'ItemView (devel)',     link: '/itemviewdevel'},
             // {name: 'BookView (devel)',     link: '/bookview'},
         ];
 

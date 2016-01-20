@@ -971,102 +971,6 @@ const ItemViewOverlay = React.createClass({
 });
 
 
-/** This is a wrapper for ItemView BUT ONLY DURING INITIAL DEVELOPMENT. */
-const ItemViewDevelWrapper = React.createClass({
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
-    getDataBindings() {
-        // connection to NuclearJS
-        return {size: getters.itemViewOverlaySize};
-    },
-    getInitialState: function() {
-        return {type: 'source', id: '123723'};
-    },
-    doNothing: function(event) {
-        // Call this when the "Submit" button is clicked for this wrapper thing. It just cancels the
-        // default form submission with POST.
-        event.preventDefault();  // stop the default GET form submission
-    },
-    onChangeSizeRadioButton: function(event) {
-        SIGNALS.setItemViewOverlaySize(event.target.value);
-    },
-    onChangeType: function(event) {
-        this.setState({type: event.target.value});
-    },
-    onChangeId: function(event) {
-        this.setState({id: event.target.value});
-    },
-    render: function() {
-
-        // Set @checked for the "size" radio buttons. The first is with default "state."
-        let fullSizeChecked = false;
-        let compactSizeChecked = false;
-        if ('compact' === this.state.size) {
-            compactSizeChecked = true;
-        }
-        else {
-            fullSizeChecked = true;
-        }
-
-        // Set the URL for the Link
-        let linkUrl = `/itemviewdevel/${this.state.type}/${this.state.id}`;
-
-        return (
-            <div className="container">
-                <div className="alert alert-info">
-                    <p><strong>Note:</strong> This is a development wrapper around the proper ItemView.</p>
-                    <p>Once &ldquo;Vitrail&rdquo; is deployed, the resource type and ID will be set
-                    automatically, and the ItemView will be triggered from search results when you
-                    choose a particular resource.</p>
-                </div>
-                <div className="card">
-                    <div className="card-block">
-                        <h2 className="card-title">ItemView Development Wrapper</h2>
-                        <form onSubmit={this.doNothing}>
-                            <fieldset className="form-group">
-                                <label htmlFor="#ivdw-type">Resource Type (lowercase):</label>
-                                <input type="text" className="form-control" id="ivdw-type"
-                                       value={this.state.type} onChange={this.onChangeType}/>
-                            </fieldset>
-                            <fieldset className="form-group">
-                                <label htmlFor="#ivdw-type">Resource ID:</label>
-                                <input type="text" className="form-control" id="ivdw-type"
-                                       value={this.state.id} onChange={this.onChangeId}/>
-                            </fieldset>
-                            <fieldset className="form-group">
-                                <div className="radio">
-                                    <label>
-                                        <input type="radio"
-                                               name="itemview-size"
-                                               className="radio-inline"
-                                               value="full"
-                                               checked={fullSizeChecked}
-                                               onChange={this.onChangeSizeRadioButton}
-                                        />
-                                        Full View
-                                    </label>
-                                    <label>
-                                        <input type="radio"
-                                               name="itemview-size"
-                                               className="radio-inline"
-                                               value="compact"
-                                               checked={compactSizeChecked}
-                                               onChange={this.onChangeSizeRadioButton}
-                                        />
-                                        Compact View
-                                    </label>
-                                </div>
-                            </fieldset>
-                            <Link to={linkUrl} className="btn btn-primary">Show</Link>
-                        </form>
-                    </div>
-                    {this.props.children}
-                </div>
-            </div>
-        );
-    }
-});
-
-
 const moduleForTesting = {
     ItemViewError: ItemViewError,
     ItemView: ItemView,
@@ -1074,4 +978,4 @@ const moduleForTesting = {
     ItemViewOverlay: ItemViewOverlay,
     ItemViewMultiplexer: ItemViewMultiplexer,
 };
-export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, moduleForTesting, makeLinkToItemView};
+export {ItemView, ItemViewOverlay, moduleForTesting, makeLinkToItemView};
