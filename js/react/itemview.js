@@ -38,6 +38,26 @@ import {SIGNALS} from '../nuclear/signals';
 import {AlertView} from './vitrail';
 
 
+/** A button linking to a resource on Drupal. */
+const DrupalButton = React.createClass({
+    propTypes: {
+        drupalPath: React.PropTypes.string,
+    },
+    render() {
+        if (this.props.drupalPath) {
+            return (
+                <Button block bsStyle="primary" href={this.props.drupalPath} target="_blank">
+                    View on Drupal
+                </Button>
+            );
+        }
+        else {
+            return '';
+        }
+    },
+});
+
+
 /** ItemView sub-component for Chants. */
 const ItemViewChant = React.createClass({
     propTypes: {
