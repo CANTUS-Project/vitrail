@@ -133,6 +133,7 @@ const OneboxSearch = React.createClass({
                     <SearchBox/>
                 </form>
                 <ResultListFrame/>
+                {this.props.children}
             </div>
         );
     }

@@ -43,11 +43,19 @@ ReactDOM.render(
         <Router>
             <Route path="/" component={Vitrail}>
                 <IndexRoute component={Colophon}/>
-                <Route path="onebox" component={OneboxSearch}/>
-                <Route path="template" component={TemplateSearch}/>
+
+                <Route path="onebox" component={OneboxSearch}>
+                    <Route path=":type/:rid" component={ItemViewOverlay}/>
+                </Route>
+
+                <Route path="template" component={TemplateSearch}>
+                    <Route path=":type/:rid" component={ItemViewOverlay}/>
+                </Route>
+
                 <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
                     <Route path=":type/:rid" component={ItemViewOverlay}/>
                 </Route>
+
                 <Route path="workspace" component={NotImplemented}/>
                 <Route path="bookview" component={NotImplemented}/>
             </Route>

@@ -360,6 +360,7 @@ const TemplateSearch = React.createClass({
                     <TemplateSearchTemplate/>
                     <ResultListFrame/>
                 </PanelGroup>
+                {this.props.children}
             </div>
         );
     }
