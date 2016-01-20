@@ -6,7 +6,7 @@
 // Filename:               js/nuclear/signals.js
 // Purpose:                ActionTypes and Actions for NuclearJS in Vitrail.
 //
-// Copyright (C) 2015 Christopher Antila
+// Copyright (C) 2015, 2016 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
