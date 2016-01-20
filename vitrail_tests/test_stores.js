@@ -310,3 +310,23 @@ describe('itemViewOverlaySize()', () => {
         expect(stores.setters.itemViewOverlaySize(previous, next)).toBe(expected);
     });
 });
+
+
+describe('setCurrentItemView()', () => {
+    beforeEach(() => { log.warn.mockClear(); });
+
+    it('works when the argument is an object', () => {
+        const previous = 'fuzz';
+        const next = {'123': {id: '123', type: 'chant'}, sort_order: ['123']};
+        const actual = stores.setters.setCurrentItemView(previous, next);
+        expect(Immutable.Map.isMap(actual)).toBe(true);
+    });
+
+    it('fails when the argument is not an object', () => {
+        const previous = 'fuzz';
+        const next = 'bark!';
+        const expected = previous;
+        expect(stores.setters.setCurrentItemView(previous, next)).toBe(expected);
+        expect(log.warn).toBeCalled();
+    });
+});

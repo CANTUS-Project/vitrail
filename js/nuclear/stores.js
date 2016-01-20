@@ -31,11 +31,6 @@ import {reactor} from './reactor';
 import {SIGNAL_NAMES} from './signals';
 
 
-// Sometimes this is all we need. NOTE that Stores using this function should do validity checking
-// in the signal function.
-function justReturnThePayload(previousState, payload) { console.warn('WARNING: one of the Stores is still using justReturnThePayload()'); return toImmutable(payload); };
-
-
 function isWholeNumber(num) {
     // Verify that "num" is a whole number (an integer 0 or greater).
     let outcome = false;
@@ -183,6 +178,18 @@ const SETTERS = {
             return previous;
         }
     },
+
+    /** Set the "CurrentItemView."
+     *
+     * @param (ImmutableJS.Map) next - The resource to display in an ItemView.
+     */
+    setCurrentItemView(previous, next) {
+        if (typeof next !== 'object') {
+            log.warn('Invariant violation: setCurrentItemView() requires an Object');
+            return previous;
+        }
+        return toImmutable(next);
+    },
 };
 
 
@@ -195,7 +202,7 @@ const STORES = {
             return toImmutable({});
         },
         initialize() {
-            this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, justReturnThePayload);
+            this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, SETTERS.setCurrentItemView);
         },
     }),
 
