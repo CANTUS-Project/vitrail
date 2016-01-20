@@ -39,6 +39,31 @@ import {SIGNALS} from '../nuclear/signals';
 import {AlertView} from './vitrail';
 
 
+/** Make the URL to an ItemViewOverlay over the current component.
+ *
+ * @param (str) type - The type of the resource.
+ * @param (str) id - The ID of the resource.
+ *
+ * This function uses "window.location" to determine the current URL, in order to figure out which
+ * path to request as the "to" prop to a react-router <Link> component.
+ *
+ * This function does not check the validity of the type or id.
+ */
+function makeLinkToItemView(type, id) {
+    // TODO: this function is untested
+    // looks something like: #/onebox?_k=5hhcl3
+    const current = window.location.hash;
+    // ... so we want to put our stuff just before the ?
+    const indexOfQMark = current.indexOf('?');
+
+    if (-1 === indexOfQMark || current.length < 3) {
+        return '';
+    }
+
+    return `${current.slice(1, indexOfQMark)}/${type}/${id}`;
+}
+
+
 /** A button linking to a resource on Drupal. */
 const DrupalButton = React.createClass({
     propTypes: {
@@ -1049,4 +1074,4 @@ const moduleForTesting = {
     ItemViewOverlay: ItemViewOverlay,
     ItemViewMultiplexer: ItemViewMultiplexer,
 };
-export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, moduleForTesting};
+export {ItemViewDevelWrapper, ItemView, ItemViewOverlay, moduleForTesting, makeLinkToItemView};
