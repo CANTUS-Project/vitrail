@@ -26,6 +26,7 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
 
+import Button from 'react-bootstrap/lib/Button';
 import Label from 'react-bootstrap/lib/Label';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
@@ -138,6 +139,7 @@ const ItemViewChant = React.createClass({
         let melodyID = '';
         let cantusID = '';
         let finalis = '';
+        let drupalPath = '';
 
         // CAO Concordances
         if (data.get('cao_concordances')) {
@@ -195,6 +197,15 @@ const ItemViewChant = React.createClass({
             finalis = <ListGroupItem>Finalis: {data.get('finalis')}</ListGroupItem>;
         }
 
+        // Link to Drupal
+        if (data.get('drupal_path')) {
+            drupalPath = (
+                <Button block bsStyle="primary" href={data.get('drupal_path')} target="_blank">
+                    View on Drupal
+                </Button>
+            );
+        }
+
         // Choose the column size
         let className = '';
         if (this.props.size === 'compact') {
@@ -215,6 +226,7 @@ const ItemViewChant = React.createClass({
                     {cantusID}
                     {finalis}
                 </ListGroup>
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
@@ -255,6 +267,16 @@ const ItemViewFeast = React.createClass({
             feastCode = [<br/>, feastCode];
         }
 
+        // Link to Drupal
+        let drupalPath = '';
+        if (data.get('drupal_path')) {
+            drupalPath = (
+                <Button block bsStyle="primary" href={data.get('drupal_path')} target="_blank">
+                    View on Drupal
+                </Button>
+            );
+        }
+
         // Choose the column size
         let className = '';
         if (this.props.size === 'compact') {
@@ -266,6 +288,7 @@ const ItemViewFeast = React.createClass({
             <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {feastCode}
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
@@ -339,6 +362,7 @@ const ItemViewIndexer = React.createClass({
                     {institution}
                     {cityAndCountry}
                 </ListGroup>
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
@@ -379,6 +403,7 @@ const ItemViewGenre = React.createClass({
             <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {massOrOffice}
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
@@ -533,6 +558,7 @@ const ItemViewSource = React.createClass({
                     {occasions}
                     {description}
                 </ListGroup>
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
@@ -570,6 +596,7 @@ const ItemViewSimpleResource = React.createClass({
         return (
             <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
+                <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
     }
