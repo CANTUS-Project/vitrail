@@ -45,28 +45,28 @@ const SIGNAL_NAMES = {
 };
 
 
-// TODO: all these verification functions should be in the Stores
 const SIGNALS = {
+    /** Load a resource in the ItemView, given a type and ID.
+     *
+     * @param (str) type - The resource type to load.
+     * @param (str) id - The resource ID to load.
+     */
     loadInItemView: function(type, id) {
-        // Load a resource in the ItemView, given a type and ID.
-        //
-
         if (undefined === type || undefined === id) {
-            let msg = 'loadInItemView() requires "type" and "id" arguments';
-            log.error(msg);
-            throw new Error(msg);
+            log.warn('SIGNALS.loadInItemView() requires "type" and "id" arguments');
+            return;
+        }
+        if ((typeof type !== 'string') || (typeof id !== 'string')) {
+            log.warn('SIGNALS.loadInItemView() arguments must both be strings');
+            return;
         }
 
-        let settings = {type: type, id: id};
+        const settings = {type: type, id: id};
         CANTUS.get(settings)
-        .then(function(response) {reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response)})
-        .catch(function(response) {
-            if (404 === response.code) {
-                reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
-            } else {
-                // TODO: handle other errors better
-                log.error(response)
-            }
+        .then(response => { reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response) })
+        .catch(response => {
+            reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
+            log.warn(response);
         });
     },
 

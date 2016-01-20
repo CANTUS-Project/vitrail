@@ -234,3 +234,57 @@ describe('setItemViewOverlaySize()', () => {
         expect(reactor.evaluate(getters.itemViewOverlaySize)).toBe(to);
     });
 });
+
+
+describe('loadInItemView()', () => {
+    beforeEach(() => { reactor.reset(); log.warn.mockClear(); });
+
+    it(`"type" is undefined: file a warning message and don't change state`, () => {
+        const type = undefined;
+        const id = 'a';
+        signals.loadInItemView(type, id);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`"id" is undefined: file a warning message and don't change state`, () => {
+        const type = 'a';
+        const id = undefined;
+        signals.loadInItemView(type, id);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`"type" is not a string: file a warning message and don't change state`, () => {
+        const type = 5;
+        const id = 'a';
+        signals.loadInItemView(type, id);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`"id" is not a string: file a warning message and don't change state`, () => {
+        const type = 'a';
+        const id = 5;
+        signals.loadInItemView(type, id);
+        expect(log.warn).toBeCalled();
+    });
+
+    it(`the CANTUS.get() call is successful (the Store is set)`, () => {
+        // make a mock Promise to return from get(), then set it to be returned
+        const mockGet = cantusjs.Cantus.prototype.get;
+        const mockPromise = {then: jest.genMockFn()};
+        const mockThen = {catch: jest.genMockFn()};
+        mockPromise.then.mockReturnValue(mockThen);
+        mockGet.mockReturnValueOnce(mockPromise);
+        // expected argument to get()
+        const expAjaxSettings = {type: 'feasts', id: '2234'};
+
+        signals.loadInItemView('feasts', '2234');
+
+        expect(mockGet).toBeCalledWith(expAjaxSettings);
+
+        // NOTE: for some reason, these don't work with the usual expect().toBeCalledWith() checks,
+        //       so we'll have to go with this, which is clumsy but at least works
+        // Just... make sure it was called... idk.
+        expect(mockPromise.then.mock.calls.length === 1).toBe(true);
+        expect(mockThen.catch.mock.calls.length === 1).toBe(true);
+    });
+});
