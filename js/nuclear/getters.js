@@ -77,6 +77,8 @@ const getters = {
     searchQuery: ['searchQuery'],
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
+    // for Collections in the Workspace
+    collectionsList: ['collectionsList'],
 };
 
 export {getters, formatters};

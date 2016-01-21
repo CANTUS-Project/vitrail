@@ -34,6 +34,7 @@ reactor.registerStores({
     'searchPage': stores.stores.SearchPage,
     'searchQuery': stores.stores.SearchQuery,
     'searchResults': stores.stores.SearchResults,
+    'collectionsList': stores.stores.CollectionsList,
 });
 
 

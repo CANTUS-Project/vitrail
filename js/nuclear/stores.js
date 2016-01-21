@@ -22,7 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-import {Store, toImmutable} from 'nuclear-js';
+import {Immutable, Store, toImmutable} from 'nuclear-js';
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 
 import {getters} from './getters';
@@ -257,6 +257,38 @@ const STORES = {
         //
         getInitialState() { return toImmutable({error: null, results: null}); },
         initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
+    }),
+
+    CollectionsList: Store({
+        // A list of the user's "collections."
+        //
+        // It's an ImmutableJS.Map of ImmutableJS.Map objects. In the outer Map, each "key" is the
+        // collection ID (a UUID-like string for the collection). Each "value" Map has the following
+        // members:
+        // - colid: the "key" used to access this Map
+        // - name: a user-provided name for the collection
+        // - query: a string with the search query that returns this collection's members
+        // - members: an ImmutableJS.List of the CANTUS API "id" values of this collection's members
+        //
+        // Each collection must have a "name," plus one of "query" or "members."
+        //
+        getInitialState() {
+            return (
+                Immutable.Map({
+                    '123': Immutable.Map({
+                        colid: '123',
+                        name: 'Test query-based whatever',
+                        query: '+type:chant +genre_id:122 +mode:7 +folio:08*',
+                    }),
+                    '649': Immutable.Map({
+                        colid: '649',
+                        name: 'Test list-based whatever',
+                        members: Immutable.List(['444444', '444445', '444446', '444447']),
+                    }),
+                })
+            );
+        },
+        initialize() { /* TODO */ },
     }),
 };
 
