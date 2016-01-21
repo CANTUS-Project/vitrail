@@ -35,6 +35,7 @@ import {Colophon, NotImplemented, Vitrail} from './react/vitrail';
 import {ItemViewOverlay} from './react/itemview';
 import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
+import {DeskAndShelf, JustShelf, Workspace} from './react/workspace';
 
 
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
@@ -52,8 +53,11 @@ ReactDOM.render(
                     <Route path=":type/:rid" component={ItemViewOverlay}/>
                 </Route>
 
-                <Route path="itemviewdevel" component={ItemViewDevelWrapper}>
-                    <Route path=":type/:rid" component={ItemViewOverlay}/>
+                <Route path="workspace" component={Workspace}>
+                    <IndexRoute component={JustShelf}/>
+                    <Route path="collection/:colid" component={DeskAndShelf}>
+                        <Route path=":type/:rid" component={ItemViewOverlay}/>
+                    </Route>
                 </Route>
 
                 <Route path="bookview" component={NotImplemented}/>
