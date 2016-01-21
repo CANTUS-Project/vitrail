@@ -126,8 +126,10 @@ const SIGNALS = {
         }
     },
 
+    /** TODO: write the docs for this, including the "reset" special arg
+     *
+     */
     loadSearchResults(result) {
-        // This could be an inner function, but it's here to ease testing of submitSearchQuery().
         reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, result);
     },
     submitSearchQuery() {

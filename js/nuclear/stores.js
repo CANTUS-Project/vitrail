@@ -140,13 +140,20 @@ const SETTERS = {
         }
     },
 
+    /** Load results of a search query.
+     *
+     * TODO: describe all this
+     * TODO: test the "reset" functionality, which disregards both arguments and sets to initial state
+     */
     loadSearchResults(previous, next) {
-        // Load the search results.
-        //
-        if (undefined === next.code) {
+        if ('reset' === next) {
+            return STORES.SearchResults.getInitialState();
+        }
+        else if (undefined === next.code) {
             // request was successful
             return toImmutable({error: null, results: next});
-        } else {
+        }
+        else {
             // request was not successful
             return toImmutable({error: next, results: previous.get('results')});
         }
