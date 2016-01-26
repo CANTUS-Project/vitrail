@@ -278,12 +278,17 @@ const STORES = {
                     '123': Immutable.Map({
                         colid: '123',
                         name: 'Test query-based whatever',
-                        query: '+type:chant +genre_id:122 +mode:7 +folio:08*',
+                        query: '+type:chant +genre_id:4ca49f74e1681d59a7bab2677e667741b25deb17adddee0ca43eb36c17dd1c8f +mode:7 +folio:08*',
                     }),
                     '649': Immutable.Map({
                         colid: '649',
                         name: 'Test list-based whatever',
-                        members: Immutable.List(['444444', '444445', '444446', '444447']),
+                        members: Immutable.List([
+                            '651f8afae99a46b3d14a401cb11960953b5f8d08a0591bcae763cdf90c6648d8',
+                            '534c4bf96622eb8f242bf5b940cae413ded0d0a8221ab090097f950882c0a19c',
+                            '64c583c35e952fb033b51a8ddcb0fc6edd9555273962eeab69e63d67e81306ca',
+                            'e79090b84d59921ac164df601e668f7d01903ef5b3a2c57eea2343065bb1dd28',
+                        ]),
                     }),
                 })
             );
