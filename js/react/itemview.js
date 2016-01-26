@@ -452,7 +452,7 @@ const ItemViewSource = React.createClass({
 
         // Primary Fields:
         // ---------------
-        // - "rism" (siglum)
+        // - "rism" (siglum)  // TODO: should the siglum actually be cross-referenced with the Siglum resource?
         // - abbr. full name
         // - date
         // - provenance
