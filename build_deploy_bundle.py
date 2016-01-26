@@ -38,6 +38,11 @@ FILES_IN_ARCHIVE = [
     VITRAIL_OUT,
     'css/vitrail.css',
     'css/bootstrap.min.css',
+    'fonts/glyphicons-halflings-regular.eot',
+    'fonts/glyphicons-halflings-regular.svg',
+    'fonts/glyphicons-halflings-regular.ttf',
+    'fonts/glyphicons-halflings-regular.woff',
+    'fonts/glyphicons-halflings-regular.woff2',
     'index.html',
 ]
 
