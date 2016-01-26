@@ -26,6 +26,7 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Input from 'react-bootstrap/lib/Input';
 import Modal from 'react-bootstrap/lib/Modal';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
@@ -126,7 +127,9 @@ const OneboxSearch = React.createClass({
                     Onebox Search&emsp;
                     <small>
                         <i>Standard search box with advanced capabilities.</i>&emsp;
-                        <Button bsStyle="info" onClick={this.toggleShowHelp}>?</Button>
+                        <Button bsStyle="info" onClick={this.toggleShowHelp}>
+                            <Glyphicon glyph="question-sign"/>
+                        </Button>
                     </small>
                 </PageHeader>
                 <form onSubmit={this.submitSearch}>

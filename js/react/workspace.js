@@ -28,6 +28,7 @@ import {Link} from 'react-router';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Col from 'react-bootstrap/lib/Col';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
@@ -373,7 +374,9 @@ const Workspace = React.createClass({
                     Workspace&emsp;
                     <small>
                         <i>Manage your personal collections.</i>&emsp;
-                        <Button bsStyle="info" onClick={this.toggleShowHelp}>?</Button>
+                        <Button bsStyle="info" onClick={this.toggleShowHelp}>
+                            <Glyphicon glyph="question-sign"/>
+                        </Button>
                     </small>
                 </PageHeader>
 
