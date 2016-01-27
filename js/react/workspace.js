@@ -22,6 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
 
@@ -30,6 +31,7 @@ import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Col from 'react-bootstrap/lib/Col';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
+import Input from 'react-bootstrap/lib/Input';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Modal from 'react-bootstrap/lib/Modal';
@@ -140,18 +142,77 @@ const AddRemoveCollection = React.createClass({
 });
 
 
+/** Sub-component of Collection that allows renaming.
+ *
+ * Props:
+ * ------
+ * @param (ImmutableJS.Map) collection - The collection corresponding to this Collection.
+ * @param (function) hideMe - This function is called to hide the component.
+ * @param (function) chooseName - This function is called with the newly-chosen name.
+ *
+ * State:
+ * ------
+ * @param (string) name - The new name for the collection, as it's typed.
+ */
+const CollectionRename = React.createClass({
+    propTypes: {
+        collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        hideMe: React.PropTypes.func.isRequired,
+        chooseName: React.PropTypes.func.isRequired,
+    },
+    getInitialState() { return {name: this.props.collection.get('name')}; },
+    updateName(event) { this.setState({name: event.target.value}); },
+    submitRename() { this.props.chooseName(this.state.name); this.props.hideMe(); },
+    render() {
+        return (
+            <Modal show onHide={this.props.hideMe}>
+                <Modal.Header>
+                    {`Rename "${this.props.collection.get('name')}"`}
+                </Modal.Header>
+                <Modal.Body>
+                    <Input
+                        type="text"
+                        label="New name for the collection"
+                        ref="input"
+                        value={this.state.name}
+                        onChange={this.updateName}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button bsStyle="danger" onClick={this.props.hideMe}>Cancel</Button>
+                    <Button bsStyle="primary" onClick={this.submitRename}>Rename</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    },
+});
+
+
 /** A collection of database resources, as represented in the Shelf component.
  *
  * Props:
  * ------
  * @param (ImmutableJS.Map) collection - The collection corresponding to this Collection.
+ *
+ * State:
+ * ------
+ * @param (bool) showRenamer - Whether to show the <CollectionRename> component.
  */
 const Collection = React.createClass({
     propTypes: {
-        collection: React.PropTypes.object.isRequired,  // TODO: put a Map here
+        collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+    },
+    getInitialState() {
+        return {showRenamer: false};
     },
     delete() {
         signals.deleteCollection(this.props.collection.get('colid'));
+    },
+    toggleRenamer() {
+        this.setState({showRenamer: !this.state.showRenamer});
+    },
+    submitRename(newName) {
+        signals.renameCollection(this.props.collection.get('colid'), newName);
     },
     render() {
         const colid = this.props.collection.get('colid');
@@ -163,14 +224,24 @@ const Collection = React.createClass({
                     <Link className="btn btn-default" to={`/workspace/collection/${colid}`}>
                         Open
                     </Link>
-                    <Button>Rename</Button>
+                    <Button onClick={this.toggleRenamer}>Rename</Button>
                     <Button onClick={this.delete}>Delete</Button>
                 </ButtonGroup>
             </Popover>
         );
 
+        let renamer;
+        if (this.state.showRenamer) {
+            renamer = (
+                <CollectionRename collection={this.props.collection}
+                                  hideMe={this.toggleRenamer}
+                                  chooseName={this.submitRename}
+            />);
+        }
+
         return (
             <ListGroupItem>
+                {renamer}
                 <OverlayTrigger trigger="click" placement="left" overlay={overlay} rootClose>
                     <Button>{name}</Button>
                 </OverlayTrigger>
