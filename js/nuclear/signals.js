@@ -49,6 +49,7 @@ const SIGNAL_NAMES = {
     ASK_WHICH_COLLECTION: 13,
     DELETE_COLLECTION: 14,
     RENAME_COLLECTION: 15,
+    ADD_COLLECTION: 16,
 };
 
 
@@ -214,6 +215,14 @@ const SIGNALS = {
      */
     renameCollection(colid, name) {
         reactor.dispatch(SIGNAL_NAMES.RENAME_COLLECTION, {colid: colid, name: name});
+    },
+
+    /** Make a new collection.
+     *
+     * @param (str) name - The name of the new collection.
+     */
+    addNewCollection(name) {
+        reactor.dispatch(SIGNAL_NAMES.ADD_COLLECTION, name);
     },
 };
 

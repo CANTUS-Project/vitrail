@@ -282,21 +282,45 @@ const SETTERS = {
      * @param (str) next.colid - ID of the collection to rename.
      * @param (str) next.name - New name for the collection.
      */
-     renameCollection(previous, next) {
-         // TODO: untested
-         if (typeof next.colid !== 'string' || typeof next.name !== 'string') {
-             log.warn('Invariant violation: renameCollection() received non-string args');
-         }
-         else if (!previous.get('collections').has(next.colid)) {
-             log.warn('renameCollection() received nonexistent collection ID');
-         }
-         else {
-             previous = previous.toJS();
-             previous['collections'][next.colid]['name'] = next.name;
-             previous = toImmutable(previous);
-         }
-         return previous;
-     },
+    renameCollection(previous, next) {
+        // TODO: untested
+        if (typeof next.colid !== 'string' || typeof next.name !== 'string') {
+            log.warn('Invariant violation: renameCollection() received non-string args');
+        }
+        else if (!previous.get('collections').has(next.colid)) {
+            log.warn('renameCollection() received nonexistent collection ID');
+        }
+        else {
+            previous = previous.toJS();
+            previous['collections'][next.colid]['name'] = next.name;
+            previous = toImmutable(previous);
+        }
+        return previous;
+    },
+
+    /** Make a new collection.
+     *
+     * @param (str) next - The name for the new collection.
+     */
+    addNewCollection(previous, next) {
+        // TODO: untested
+        if (typeof next !== 'string') {
+            log.warn('Invariant violation: addNewCollection() received a non-string arg.');
+        }
+        else {
+            const id = Date.now().toString();
+            if (previous.hasIn(['collections', id])) {
+                // NOTE: this seems impossible... if Date.now() works as advertized...
+                log.error('addNewCollection(): cannot add collection because of ID collision; try again');
+            }
+            else {
+                previous = previous.toJS();
+                previous['collections'][id] = {colid: id, name: next, members: []};
+                previous = toImmutable(previous);
+            }
+        }
+        return previous;
+    },
 };
 
 
@@ -417,6 +441,7 @@ const STORES = {
             this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
             this.on(SIGNAL_NAMES.DELETE_COLLECTION, SETTERS.deleteCollection);
             this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
+            this.on(SIGNAL_NAMES.ADD_COLLECTION, SETTERS.addNewCollection);
         },
     }),
 };
