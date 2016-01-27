@@ -87,7 +87,7 @@ const listOfSoftware = [
  */
 const AlertView = React.createClass({
     propTypes: {
-        message: React.PropTypes.string.isRequired,
+        message: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
         class: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
         overlay: React.PropTypes.bool,
         fields: React.PropTypes.instanceOf(Immutable.Map),
