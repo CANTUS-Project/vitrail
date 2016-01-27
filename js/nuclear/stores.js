@@ -208,15 +208,30 @@ const SETTERS = {
         if (typeof next.colid !== 'string' || typeof next.rid !== 'string') {
             log.warn('Invariant violation: addResourceIDToCollection() received non-string args');
         }
-        else if (!previous.has(next.colid)) {
+        else if (!previous.get('collections').has(next.colid)) {
             log.warn('addResourceIDToCollection() received nonexistent collection ID');
         }
-        else {
-            let coll = previous.get(next.colid);
-            coll = coll.update('members', () => { return coll.get('members').push(next.rid) });
-            previous = previous.update(next.colid, () => { return coll });
+        else if (!previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+            // TODO: figure out how to do this elegantly with ImmutableJS
+            previous = previous.toJS();
+            previous['collections'][next.colid]['members'].push(next.rid);
+            previous = toImmutable(previous);
         }
         return previous;
+    },
+
+    /** Toggle the "add to which collection? Modal component.
+     */
+    toggleAddToCollection(previous) {
+        return previous.update('showAddToCollection', () => { return !previous.get('showAddToCollection') });
+    },
+
+    /** When you want to add a resource to a collection, but you don't know which collection.
+     *
+     * @param (str) next - The resource ID to add to ??? collection.
+     */
+    askWhichCollection(previous, next) {
+        return previous.update('candidate', () => { return next });
     },
 };
 
@@ -246,7 +261,7 @@ const STORES = {
 
     SearchResultsFormat: Store({
         // Should search results be displayed as "table" or collection of "ItemView?"
-        getInitialState() { return 'ItemView'; },
+        getInitialState() { return 'table'; },
         initialize() { this.on(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, SETTERS.setSearchResultsFormat); },
     }),
 
@@ -283,46 +298,58 @@ const STORES = {
     CollectionsList: Store({
         // A list of the user's "collections."
         //
-        // It's an ImmutableJS.Map of ImmutableJS.Map objects. In the outer Map, each "key" is the
-        // collection ID (a UUID-like string for the collection). Each "value" Map has the following
-        // members:
-        // - colid: the "key" used to access this Map
-        // - name: a user-provided name for the collection
-        // - query: a string with the search query that returns this collection's members
-        // - members: an ImmutableJS.List of the CANTUS API "id" values of this collection's members
+        // It's an ImmutableJS.Map of ImmutableJS.Map objects. It looks like this:
         //
-        // Each collection must have a "name," plus one of "query" or "members."
+        // Map({
+        //    // whether to show the "add to which collection?" Modal
+        //    'showAddToCollection': false,
+        //    // a resource ID we're currently asking about adding to a collection
+        //    'candidate': undefined,
+        //    // Map of collection ID to other Maps
+        //    'collections': Map({
+        //       '123': Map({
+        //          'colid': '123',
+        //          'name': 'Some Important Collection',
+        //          'members': List(['34', '88', '29', '48'])
+        //       })
+        // })
         //
         getInitialState() {
             return (
                 Immutable.Map({
-                    '123': Immutable.Map({
-                        colid: '123',
-                        name: 'Basically an arbitrary assemblage',
-                        members: Immutable.List([
-                            'aafde8e886d192db75c10d35421e78bb3e3baaa0561f53dffe14419979a47d06',
-                            '9ded8bb6f4cdb6df3f87efa0e0c22d2c9bde50c2c9301d36718084f8f2bd6be4',
-                            'df0cfa85fc2f92d6e306d59c38a4b8606d17d4f5173a571f7eb7425748106d1a',
-                            '94dd975be739841e87d13c7f1a4f1da627300e253e8cb78abf58e8c0c7f6685f',
-                            '5c350006d360af65ea03e636e147cd99ba0e5e15deaf6a751283df971be89199',
-                            'd89572865de4306542775cd6796142e50fc0aff7581a02ae4ebea65ddfcb74dc',
-                        ]),
-                    }),
-                    '649': Immutable.Map({
-                        colid: '649',
-                        name: 'Another Sample of Stuff',
-                        members: Immutable.List([
-                            '651f8afae99a46b3d14a401cb11960953b5f8d08a0591bcae763cdf90c6648d8',
-                            '534c4bf96622eb8f242bf5b940cae413ded0d0a8221ab090097f950882c0a19c',
-                            '64c583c35e952fb033b51a8ddcb0fc6edd9555273962eeab69e63d67e81306ca',
-                            'e79090b84d59921ac164df601e668f7d01903ef5b3a2c57eea2343065bb1dd28',
-                        ]),
+                    'showAddToCollection': false,
+                    'candidate': undefined,
+                    'collections': Immutable.Map({
+                        '123': Immutable.Map({
+                            colid: '123',
+                            name: 'Basically an arbitrary assemblage',
+                            members: Immutable.List([
+                                'aafde8e886d192db75c10d35421e78bb3e3baaa0561f53dffe14419979a47d06',
+                                '9ded8bb6f4cdb6df3f87efa0e0c22d2c9bde50c2c9301d36718084f8f2bd6be4',
+                                'df0cfa85fc2f92d6e306d59c38a4b8606d17d4f5173a571f7eb7425748106d1a',
+                                '94dd975be739841e87d13c7f1a4f1da627300e253e8cb78abf58e8c0c7f6685f',
+                                '5c350006d360af65ea03e636e147cd99ba0e5e15deaf6a751283df971be89199',
+                                'd89572865de4306542775cd6796142e50fc0aff7581a02ae4ebea65ddfcb74dc',
+                            ]),
+                        }),
+                        '649': Immutable.Map({
+                            colid: '649',
+                            name: 'Another Sample of Stuff',
+                            members: Immutable.List([
+                                '651f8afae99a46b3d14a401cb11960953b5f8d08a0591bcae763cdf90c6648d8',
+                                '534c4bf96622eb8f242bf5b940cae413ded0d0a8221ab090097f950882c0a19c',
+                                '64c583c35e952fb033b51a8ddcb0fc6edd9555273962eeab69e63d67e81306ca',
+                                'e79090b84d59921ac164df601e668f7d01903ef5b3a2c57eea2343065bb1dd28',
+                            ]),
+                        }),
                     }),
                 })
             );
         },
         initialize() {
             this.on(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, SETTERS.addResourceIDToCollection);
+            this.on(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION, SETTERS.toggleAddToCollection);
+            this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
         },
     }),
 };

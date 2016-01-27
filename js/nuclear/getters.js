@@ -78,7 +78,9 @@ const getters = {
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
     // for Collections in the Workspace
-    collectionsList: ['collectionsList'],
+    collectionsList: [['collectionsList'], (results) => { return results.get('collections') }],
+    showAddToCollection: [['collectionsList'], (results) => { return results.get('showAddToCollection') }],
+    candidateForCollection: [['collectionsList'], (results) => { return results.get('candidate') }],
 };
 
 export {getters, formatters};
