@@ -47,6 +47,7 @@ const SIGNAL_NAMES = {
     REMOVE_RID_FROM_COLLECTION: 11,
     TOGGLE_ADD_TO_COLLECTION: 12,
     ASK_WHICH_COLLECTION: 13,
+    DELETE_COLLECTION: 14,
 };
 
 
@@ -195,6 +196,14 @@ const SIGNALS = {
     askWhichCollection(rid) {
         reactor.dispatch(SIGNAL_NAMES.ASK_WHICH_COLLECTION, rid);
         reactor.dispatch(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION);
+    },
+
+    /** Delete a collection.
+     *
+     * @param (str) colid - The ID of the collection to delete.
+     */
+    deleteCollection(colid) {
+        reactor.dispatch(SIGNAL_NAMES.DELETE_COLLECTION, colid);
     },
 };
 

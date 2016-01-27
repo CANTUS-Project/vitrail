@@ -245,6 +245,7 @@ const SETTERS = {
     /** Toggle the "add to which collection? Modal component.
      */
     toggleAddToCollection(previous) {
+        // TODO: untested
         return previous.update('showAddToCollection', () => { return !previous.get('showAddToCollection') });
     },
 
@@ -253,7 +254,27 @@ const SETTERS = {
      * @param (str) next - The resource ID to add to ??? collection.
      */
     askWhichCollection(previous, next) {
+        // TODO: untested
         return previous.update('candidate', () => { return next });
+    },
+
+    /** Delete a collection.
+     *
+     * @param (str) next) - The ID of the collection to delete.
+     */
+    deleteCollection(previous, next) {
+        // TODO: untested
+        if (typeof next !== 'string') {
+            log.warn('Invariant violation: deleteCollection() received non-string arg');
+        }
+        else if (!previous.get('collections').has(next)) {
+            log.warn('deleteCollection() receive a nonexistent collection ID');
+        }
+        else {
+            return previous.update('collections', () => {
+                return previous.get('collections').delete(next);
+            });
+        }
     },
 };
 
@@ -373,6 +394,7 @@ const STORES = {
             this.on(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, SETTERS.removeResourceIDFromCollection);
             this.on(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION, SETTERS.toggleAddToCollection);
             this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
+            this.on(SIGNAL_NAMES.DELETE_COLLECTION, SETTERS.deleteCollection);
         },
     }),
 };
