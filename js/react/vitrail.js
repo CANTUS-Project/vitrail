@@ -38,7 +38,7 @@ import Table from 'react-bootstrap/lib/Table';
 const listOfSoftware = [
     {
         name: 'Abbot',
-        version: 'TODO (0.4.2+)',
+        version: 'TODO (0.5.1+)',
         description: 'The "CANTUS Server" that provides data for Vitrail.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/abbot',
@@ -52,7 +52,7 @@ const listOfSoftware = [
     },
     {
         name: 'pysolr-tornado',
-        version: '3.3.1a1',
+        version: '4.0.0a1',
         description: 'Used by Abbot to connect to a "Solr" database.',
         licence: 'New BSD',
         link: 'https://github.com/CANTUS-Project/pysolr-tornado',
