@@ -40,7 +40,7 @@ import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {AlertView} from './vitrail';
 import {ItemView, makeLinkToItemView} from './itemview';
-import {AddRemoveCollection} from './workspace';
+import {AddToCollection, AddRemoveCollection} from './workspace';
 
 
 /** A cell in the ResultListTable.
@@ -668,6 +668,7 @@ const ResultListFrame = React.createClass({
 
         return (
             <Panel>
+                <AddToCollection/>
                 <ListGroup fill>
                     {errorMessage}
                     <ResultListSettings/>

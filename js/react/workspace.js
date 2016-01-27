@@ -46,6 +46,53 @@ import ResultList from './result_list';
 import signals from '../nuclear/signals';
 
 
+/** Displays existing collections, asking the user which collection a resource should be added to.
+ *
+ * NuclearJS State
+ * ---------------
+ * @param (ImmutableJS.Map) collections - The collections that exist.
+ */
+const AddToCollection = React.createClass({
+    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    getDataBindings() {
+        // connection to NuclearJS
+        return {
+            collections: getters.collectionsList,
+            show: getters.showAddToCollection,
+            candidate: getters.candidateForCollection,
+        };
+    },
+    addToCollection(event) {
+        signals.addResourceIDToCollection(event.target.id.slice(4), this.state.candidate);
+        this.justHide();
+    },
+    justHide() {
+        signals.toggleAddToCollection();
+    },
+    render() {
+        return(
+            <Modal show={this.state.show} onHide={this.justHide}>
+                <Modal.Header>
+                    Add resource to which collection?
+                </Modal.Header>
+                <Modal.Body>
+                    {this.state.collections.map((value, key) => {
+                        return (
+                            <Button onClick={this.addToCollection} id={`col-${key}`} key={key} block>
+                                {value.get('name')}
+                            </Button>
+                        );
+                    }).toList()}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button bsStyle="danger" onClick={this.justHide}>Cancel</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    },
+});
+
+
 /** Produces a <ButtonGroup> with buttons for adding/removing a resource to a collection, as applicable.
  *
  * Props:
@@ -64,7 +111,7 @@ const AddRemoveCollection = React.createClass({
         colid: React.PropTypes.string,
     },
     addToCollection() {
-        signals.addResourceIDToCollection('123', this.props.rid);
+        signals.askWhichCollection(this.props.rid);
     },
     removeFromCollection() {
     },
@@ -390,4 +437,4 @@ const Workspace = React.createClass({
 const moduleForTesting = {
     Workspace: Workspace,
 };
-export {AddRemoveCollection, DeskAndShelf, JustShelf, Workspace};
+export {AddToCollection, AddRemoveCollection, DeskAndShelf, JustShelf, Workspace};
