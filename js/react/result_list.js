@@ -28,6 +28,7 @@ import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Input from 'react-bootstrap/lib/Input';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
@@ -39,6 +40,7 @@ import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {AlertView} from './vitrail';
 import {ItemView, makeLinkToItemView} from './itemview';
+import {AddRemoveCollection} from './workspace';
 
 
 /** A cell in the ResultListTable.
@@ -92,6 +94,7 @@ const ResultCell = React.createClass({
  * If a column name appears in both "data" and "resources," the rendered table cell will have a
  * hyperlink to the URL given in "resources."
  *
+ * @param (string) colid - The collection ID being displayed, if applicable.
  * @param (array of string) columns - Names of the fields in "data" that should be rendered in this
  *     row. They will be rendered from left to right, in the order of this prop.
  * @param (ImmutableJS.Map) data - Map with data for a resource.
@@ -110,6 +113,7 @@ const ResultRow = React.createClass({
         return {resources: {}};
     },
     render() {
+        //
         let renderedColumns = [];
         this.props.columns.forEach(columnName => {
             let columnData = this.props.data.get(columnName);
@@ -132,19 +136,29 @@ const ResultRow = React.createClass({
 
             renderedColumns.push(<ResultCell key={columnName} data={columnData} link={columnLink}/>);
         }, this);
-        if (this.props.data.get('drupal_path')) {
-            renderedColumns.push(<ResultCell key="drupal_path" data="Drupal" link={this.props.data.get('drupal_path')}/>);
-        }
+
+        //
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
             const to = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
             renderedColumns.push(
                 <ResultCell key="itemview" data={(
-                    <Link to={to} className="btn btn-default">
+                    <Link to={to} className="btn btn-default btn-sm">
                         View
                     </Link>
                 )}/>
             );
         }
+
+        // add the Collection add/remove buttons
+        if (this.props.data.get('type') === 'chant') {
+            renderedColumns.push(
+                <ResultCell key="collection-add" data={(
+                    <AddRemoveCollection rid={this.props.data.get('id')} colid={this.props.colid}/>
+                )}/>
+            );
+        }
+
+        //
         return (
             <tr className="resultComponent">
                 {renderedColumns}
@@ -195,12 +209,14 @@ const ResultListItemView = React.createClass({
  *
  * Props:
  * ------
+ * @param (string) colid - The collection ID being displayed, if applicable.
  * @param (ImmutableJS.Map) headers - ???
  * @param (ImmutableJS.Map) data - ???
  * @param (ImmutableJS.List) sortOrder - ???
  */
 const ResultListTable = React.createClass({
     propTypes: {
+        colid: React.PropTypes.string,
         data: React.PropTypes.instanceOf(Immutable.Map),
         headers: React.PropTypes.instanceOf(Immutable.Map),
         sortOrder: React.PropTypes.instanceOf(Immutable.List),
@@ -295,9 +311,6 @@ const ResultListTable = React.createClass({
             tableHeader.push(<ResultCell key={columnName} data={polishedName} header={true} />);
         });
 
-        // add a header column for links to CANTUS Database on Drupal
-        tableHeader.push(<ResultCell key="drupal" data="Link to Drupal" header={true} />);
-
         return (
             <Table hover responsive>
                 <thead>
@@ -309,6 +322,7 @@ const ResultListTable = React.createClass({
                     {this.props.sortOrder.map(id => {
                         return (
                             <ResultRow key={id}
+                                       colid={this.props.colid}
                                        columns={columns}
                                        data={this.props.data.get(id)}
                                        resources={this.props.data.get('resources').get(id)}
@@ -326,6 +340,9 @@ const ResultListTable = React.createClass({
 
 /** TODO
  *
+ * Props:
+ * ------
+ * @param (string) colid - The collection ID being displayed, if applicable.
  */
 const ResultList = React.createClass({
     //
@@ -334,6 +351,9 @@ const ResultList = React.createClass({
     // - results
     //
 
+    propTypes: {
+        colid: React.PropTypes.string,
+    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -348,7 +368,8 @@ const ResultList = React.createClass({
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                results = <ResultListTable data={this.state.results}
+                results = <ResultListTable colid={this.props.colid}
+                                           data={this.state.results}
                                            headers={this.state.results.get('headers')}
                                            sortOrder={this.state.results.get('sort_order')}/>;
             }
@@ -624,8 +645,12 @@ const ResultListSettings = React.createClass({
 
 /** TODO: rename this to "ResultList" and the other component to something else
  *
+ * @param (string) colid - The collection ID being displayed, if relevant.
  */
 const ResultListFrame = React.createClass({
+    propTypes: {
+        colid: React.PropTypes.string,
+    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -646,7 +671,7 @@ const ResultListFrame = React.createClass({
                 <ListGroup fill>
                     {errorMessage}
                     <ResultListSettings/>
-                    <ListGroupItem><ResultList/></ListGroupItem>
+                    <ListGroupItem><ResultList colid={this.props.colid}/></ListGroupItem>
                     <ListGroupItem><Paginator/></ListGroupItem>
                 </ListGroup>
             </Panel>

@@ -46,6 +46,51 @@ import ResultList from './result_list';
 import signals from '../nuclear/signals';
 
 
+/** Produces a <ButtonGroup> with buttons for adding/removing a resource to a collection, as applicable.
+ *
+ * Props:
+ * ------
+ * @param (string) rid - The resource ID to add or remove.
+ * @param (string) colid - The collection ID this resource is in, if applicable.
+ *
+ * Note that a "remove" button will only be produced if the "colid" prop is given. Otherwise, we
+ * don't know from which collection to remove the resource.
+ *
+ * The "add" button is always shown because you might want a resource to be in many collections.
+ */
+const AddRemoveCollection = React.createClass({
+    propTypes: {
+        rid: React.PropTypes.string.isRequired,
+        colid: React.PropTypes.string,
+    },
+    addToCollection() {
+    },
+    removeFromCollection() {
+    },
+    render() {
+        let removeButton;
+        if (this.props.colid) {
+            removeButton = (
+                <Button onClick={this.removeFromCollection} bsSize="small">
+                    <Glyphicon glyph="minus"/>
+                    <span className="sr-only">Remove from Collection</span>
+                </Button>
+            );
+        }
+
+        return (
+            <ButtonGroup>
+                <Button onClick={this.addToCollection} bsSize="small">
+                    <Glyphicon glyph="plus"/>
+                    <span className="sr-only">Add to a Collection</span>
+                </Button>
+                {removeButton}
+            </ButtonGroup>
+        );
+    },
+});
+
+
 /** A collection of database resources, as represented in the Shelf component.
  *
  * Props:
@@ -204,7 +249,7 @@ const Desk = React.createClass({
         return (
             <Col lg={10}>
                 <Panel header={header}>
-                    <ResultList/>
+                    <ResultList colid={this.props.colid}/>
                 </Panel>
                 {advanced}
             </Col>
@@ -392,4 +437,4 @@ const Workspace = React.createClass({
 const moduleForTesting = {
     Workspace: Workspace,
 };
-export {DeskAndShelf, JustShelf, Workspace};
+export {AddRemoveCollection, DeskAndShelf, JustShelf, Workspace};
