@@ -229,7 +229,7 @@ const Desk = React.createClass({
     },
     render() {
         let advanced;
-        let openCollectionName = '';
+        let openCollectionName;
         // only render the collection's name, and the "Advanced" panel, we've loaded the collection
         if (this.state.collections.has(this.props.colid)) {
             openCollectionName = this.state.collections.get(this.props.colid).get('name');

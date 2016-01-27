@@ -96,7 +96,7 @@ const AlertView = React.createClass({
         return {overlay: false, class: 'info', fields: Immutable.Map()};
     },
     render() {
-        let fields = '';
+        let fields;
         if (this.props.fields.size > 0) {
             let innerList = [];
             this.props.fields.forEach((value, key) => {

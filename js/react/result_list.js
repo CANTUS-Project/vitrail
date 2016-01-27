@@ -127,7 +127,7 @@ const ResultRow = React.createClass({
                 }
             }
 
-            let columnLink = '';
+            let columnLink;
             if (columnName === 'name')
                 columnLink = this.props.resources['self'];
             else {
@@ -544,7 +544,7 @@ const ErrorMessage = React.createClass({
     },
     render() {
         let alertType = 'danger';
-        let message = '';
+        let message;
         let technicalInfo = Immutable.Map();
 
         if (404 === this.props.code) {
@@ -658,7 +658,7 @@ const ResultListFrame = React.createClass({
     },
     render() {
 
-        let errorMessage = '';
+        let errorMessage;
         if (null !== this.state.error) {
             errorMessage = <ErrorMessage code={this.state.error.get('code')}
                                          reason={this.state.error.get('reason')}

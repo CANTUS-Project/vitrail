@@ -147,7 +147,7 @@ const TemplateSearchField = React.createClass({
     render() {
         const displayName = this.props.displayName || this.props.field;
         const fieldID = `template-field-${this.props.field}`;
-        let contents = '';
+        let contents;
 
         if (this.state.searchQuery.get(this.props.field)) {
             contents = this.state.searchQuery.get(this.props.field);

@@ -154,17 +154,17 @@ const ItemViewChant = React.createClass({
         }
 
         // secondary fields ---------------------------------------------------
-        let concordances = '';
-        let fullText = '';
-        let volpiano = '';
-        let notes = '';
-        let marginalia = '';
-        let siglum = '';
-        let proofreader = '';
-        let melodyID = '';
-        let cantusID = '';
-        let finalis = '';
-        let drupalPath = '';
+        let concordances;
+        let fullText;
+        let volpiano;
+        let notes;
+        let marginalia;
+        let siglum;
+        let proofreader;
+        let melodyID;
+        let cantusID;
+        let finalis;
+        let drupalPath;
 
         // CAO Concordances
         if (data.get('cao_concordances')) {
@@ -232,7 +232,7 @@ const ItemViewChant = React.createClass({
         }
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-5';
         }
@@ -293,7 +293,7 @@ const ItemViewFeast = React.createClass({
         }
 
         // Link to Drupal
-        let drupalPath = '';
+        let drupalPath;
         if (data.get('drupal_path')) {
             drupalPath = (
                 <Button block bsStyle="primary" href={data.get('drupal_path')} target="_blank">
@@ -303,7 +303,7 @@ const ItemViewFeast = React.createClass({
         }
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-4';
         }
@@ -343,7 +343,7 @@ const ItemViewIndexer = React.createClass({
         // - country
 
         // Name
-        let name = '';
+        let name;
         if (data.get('family_name') && data.get('given_name')) {
             name = `${data.get('given_name')} ${data.get('family_name')}`;
         }
@@ -352,8 +352,8 @@ const ItemViewIndexer = React.createClass({
         }
         const header = [name, <Label bsStyle="info">Indexer</Label>];
 
-        let institution = '';
-        let cityAndCountry = '';
+        let institution;
+        let cityAndCountry;
 
         // Institution
         if (data.get('institution')) {
@@ -375,7 +375,7 @@ const ItemViewIndexer = React.createClass({
         }
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-4';
         }
@@ -418,7 +418,7 @@ const ItemViewGenre = React.createClass({
         const massOrOffice = <div className="text-muted">({data.get('mass_or_office', '')})</div>;
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-3';
         }
@@ -487,12 +487,12 @@ const ItemViewSource = React.createClass({
             header.push(<div>{data.get('date')}</div>);
         }
 
-        let provenanceDetail = '';
-        let status = '';
-        let summary = '';
-        let occasions = '';
-        let indexingInfo = '';
-        let description = '';
+        let provenanceDetail;
+        let status;
+        let summary;
+        let occasions;
+        let indexingInfo;
+        let description;
 
         // Provenance Detail
         if (data.get('provenance_detail') && data.get('provenance_detail') !== data.get('provenance')) {
@@ -521,11 +521,11 @@ const ItemViewSource = React.createClass({
         }
 
         // Indexing Information -----------------------
-        let notes = '';
-        let i_date = '';
-        let editors = '';
-        let indexers = '';
-        let proofreaders = '';
+        let notes;
+        let i_date;
+        let editors;
+        let indexers;
+        let proofreaders;
 
         // Indexing Date
         if (data.get('indexing_date')) {
@@ -563,7 +563,7 @@ const ItemViewSource = React.createClass({
         }
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-5';
         }
@@ -612,7 +612,7 @@ const ItemViewSimpleResource = React.createClass({
         const description = data.get('description', '');
 
         // Choose the column size
-        let className = '';
+        let className;
         if (this.props.size === 'compact') {
             className = 'col-md-3';
         }
@@ -912,7 +912,7 @@ const ItemView = React.createClass({
 function pathToParent(routes) {
     const routesLength = routes.length;
     if (routesLength > 2) {
-        let post = '';
+        let post;
         for (let i = 1; i < routesLength - 1; i++) {
             post = `${post}/${routes[i].path}`;
         }
