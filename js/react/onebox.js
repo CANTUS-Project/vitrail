@@ -82,8 +82,9 @@ const OneboxSearch = React.createClass({
     //
 
     componentWillMount() {
-        // clear the search query
+        // clear the search query and previously-loaded results
         signals.setSearchQuery('clear');
+        signals.loadSearchResults('reset');
     },
     submitSearch(submitEvent) {
         submitEvent.preventDefault();  // stop the default GET form submission

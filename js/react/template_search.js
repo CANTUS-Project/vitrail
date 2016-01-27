@@ -350,6 +350,7 @@ const TemplateSearch = React.createClass({
     componentWillMount() {
         // clear the search query
         signals.setSearchQuery('clear');
+        signals.loadSearchResults('reset');
         signals.setResourceType('chant');
     },
     render() {
