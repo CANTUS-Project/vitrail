@@ -146,7 +146,8 @@ const AddRemoveCollection = React.createClass({
  *
  * Props:
  * ------
- * @param (ImmutableJS.Map) collection - The collection corresponding to this Collection.
+ * @param (ImmutableJS.Map) collection - Optional. The collection corresponding to this Collection.
+ *     If this is omitted, we assume this is for a new collection.
  * @param (function) hideMe - This function is called to hide the component.
  * @param (function) chooseName - This function is called with the newly-chosen name.
  *
@@ -156,18 +157,33 @@ const AddRemoveCollection = React.createClass({
  */
 const CollectionRename = React.createClass({
     propTypes: {
-        collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        collection: React.PropTypes.instanceOf(Immutable.Map),
         hideMe: React.PropTypes.func.isRequired,
         chooseName: React.PropTypes.func.isRequired,
     },
-    getInitialState() { return {name: this.props.collection.get('name')}; },
+    getInitialState() {
+        if (this.props.collection) {
+            return {name: this.props.collection.get('name')};
+        }
+        else {
+            return {name: ''};
+        }
+    },
     updateName(event) { this.setState({name: event.target.value}); },
     submitRename() { this.props.chooseName(this.state.name); this.props.hideMe(); },
     render() {
+        let header;
+        if (this.props.collection) {
+            header = `Rename "${this.props.collection.get('name')}"`
+        }
+        else {
+            header = 'New collection';
+        }
+
         return (
             <Modal show onHide={this.props.hideMe}>
                 <Modal.Header>
-                    {`Rename "${this.props.collection.get('name')}"`}
+                    {header}
                 </Modal.Header>
                 <Modal.Body>
                     <Input
@@ -180,7 +196,7 @@ const CollectionRename = React.createClass({
                 </Modal.Body>
                 <Modal.Footer>
                     <Button bsStyle="danger" onClick={this.props.hideMe}>Cancel</Button>
-                    <Button bsStyle="primary" onClick={this.submitRename}>Rename</Button>
+                    <Button bsStyle="primary" onClick={this.submitRename}>Choose Name</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -379,24 +395,43 @@ const Desk = React.createClass({
 });
 
 
+/** TODO
+ *
+ * State:
+ * ------
+ * @param (ImmutableJS.Map) collections - From NuclearJS. The collections that exist.
+ * @param (bool) addingNewCollection - Whether we are currently adding a new collection, and the
+ *     "CollectionRename" component should therefore be shown.
+ */
 const Shelf = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
         return { collections: getters.collectionsList };
     },
+    getInitialState() { return {addingNewCollection: false}; },
+    toggleAddingCollection() { this.setState({addingNewCollection: !this.state.addingNewCollection}); },
+    addCollection(newName) { signals.addNewCollection(newName); },
     render() {
         const collections = this.state.collections.map(value => {
             return <Collection key={value.get('colid')} collection={value}/>;
         }).toArray();
 
+        let renamer;
+        if (this.state.addingNewCollection) {
+            renamer = <CollectionRename hideMe={this.toggleAddingCollection} chooseName={this.addCollection}/>;
+        }
+
         return (
             <Col lg={2}>
+                {renamer}
                 <Panel header="Shelf">
                     <ListGroup fill>
                         {collections}
                     </ListGroup>
-                    <Button bsStyle="warning">Maybe another button to make a new collection?</Button>
+                    <Button bsStyle="success" onClick={this.toggleAddingCollection}>
+                        <Glyphicon glyph="plus"/>&nbsp;New Collection
+                    </Button>
                 </Panel>
                 {this.props.children}
             </Col>
@@ -505,7 +540,7 @@ const Workspace = React.createClass({
 
         return (
             <Grid id="vitrail-workspace" fluid>
-                <div className="alert alert-danger"><strong>The Workspace is a half-finished draft. It does not work.</strong></div>
+                <div className="alert alert-warning"><strong>The Workspace is a draft. It only sort of works.</strong></div>
                 {help}
                 <PageHeader>
                     Workspace&emsp;
