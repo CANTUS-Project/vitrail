@@ -114,6 +114,7 @@ const AddRemoveCollection = React.createClass({
         signals.askWhichCollection(this.props.rid);
     },
     removeFromCollection() {
+        signals.removeResourceIDFromCollection(this.props.colid, this.props.rid);
     },
     render() {
         let removeButton;
@@ -235,8 +236,15 @@ const Desk = React.createClass({
         signals.loadSearchResults('reset');
         this.loadCollection(this.props.colid);
     },
-    componentWillReceiveProps(nextProps) {
-        this.loadCollection(nextProps.colid);
+    componentWillUpdate(nextProps, nextState) {
+        // When the props.colid is changing, or *our* collection changes, we need to ask
+        // loadCollection() to help us update.
+        if (nextProps.colid !== this.props.colid) {
+            this.loadCollection(nextProps.colid);
+        }
+        else if (!nextState.collections.getIn([this.props.colid, 'members']).equals(this.state.collections.getIn([this.props.colid, 'members']))) {
+            this.loadCollection(nextProps.colid, nextState);
+        }
     },
     getInitialState() {
         return {showAdvanced: false};
@@ -244,15 +252,25 @@ const Desk = React.createClass({
     toggleShowAdvanced() {
         this.setState({showAdvanced: !this.state.showAdvanced});
     },
-    /** Load the data for the collection given by "colid." */
-    loadCollection(colid) {
-        if (!this.state.collections.has(colid)) {
+    /** Load the data for the collection given by "colid."
+     *
+     * @param (str) colid - The collection ID to load.
+     * @param (ImmutableJS.Map) nextState - If updating the collection to a value not yet in
+     *     "this.state" then this argument should be "nextState."
+     */
+    loadCollection(colid, nextState) {
+        let state = this.state;
+        if (nextState) {
+            state = nextState;
+        }
+
+        if (!state.collections.has(colid)) {
             signals.loadSearchResults('reset');
             log.error(`The collection ID (${colid}) does not exist.`);
         }
         else {
-            const coll = this.state.collections.get(colid);
-            signals.setSearchQuery({'any': `+id:(${coll.get('members').join(' OR ')})`});
+            const members = state.collections.getIn([colid, 'members']);
+            signals.setSearchQuery({'any': `+id:(${members.join(' OR ')})`});
             signals.submitSearchQuery();
         }
     },
