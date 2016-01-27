@@ -64,6 +64,7 @@ const AddRemoveCollection = React.createClass({
         colid: React.PropTypes.string,
     },
     addToCollection() {
+        signals.addResourceIDToCollection('123', this.props.rid);
     },
     removeFromCollection() {
     },
@@ -141,20 +142,7 @@ const DeskAdvanced = React.createClass({
     },
     render() {
         const title = `Advanced Settings: "${this.props.collection.get('name')}"`;
-        let basis = 'list';
-        if (this.props.collection.get('query')) {
-            basis = 'query';
-        }
-        basis = `This is a ${basis}-based collection.`;
-
-        let message;
-
-        if (this.props.collection.get('query')) {
-            message = this.props.collection.get('query');
-        }
-        else {  // list-based with "members"
-            message = `IDs in this collection: ${this.props.collection.get('members').join(', ')}.`;
-        }
+        const message = `IDs in this collection: ${this.props.collection.get('members').join(', ')}.`;
 
         return (
             <Modal show onHide={this.props.closeFunc}>
@@ -164,7 +152,6 @@ const DeskAdvanced = React.createClass({
 
                 <Modal.Body>
                     <ListGroup>
-                        <ListGroupItem>{basis}</ListGroupItem>
                         <ListGroupItem>{message}</ListGroupItem>
                     </ListGroup>
                 </Modal.Body>
@@ -218,12 +205,7 @@ const Desk = React.createClass({
         }
         else {
             const coll = this.state.collections.get(colid);
-            if (coll.get('query')) {
-                signals.setSearchQuery({'any': coll.get('query')});
-            }
-            else {  // has a List of "members"
-                signals.setSearchQuery({'any': `+id:(${coll.get('members').join(' OR ')})`});
-            }
+            signals.setSearchQuery({'any': `+id:(${coll.get('members').join(' OR ')})`});
             signals.submitSearchQuery();
         }
     },
@@ -351,44 +333,15 @@ const WorkspaceHelp = React.createClass({
                         groups of resources that you may want to view later.
                     </p>
                     <p>
+                        Soon, you will be able to save collections, and all the resources in them,
+                        in your browser across restarts. That way, you can access the CANTUS Database
+                        offline.
+                    </p>
+                    <p>
                         You can name your collections, but remember that they are always private, they
                         cannot be shared, and they are not backed up to a CANTUS server. If you lose your
                         collections, such as by resetting your browser cache, there is unfortunately no
                         way to get them back.
-                    </p>
-                    <hr/>
-                    <p>
-                        Collections may either be "Query Based" or "List Based."
-                    </p>
-                    <dl>
-                        <dt>Query-based collection</dt>
-                        <dd>
-                            If your collection is <dfn>query-based</dfn>, we save a search query.
-                            The actual items in the collection may change over time as chants are
-                            added to the CANTUS Database, and as our search software improves.
-                        </dd>
-                    </dl>
-                    <p>
-                        You might use this to remember a complicated search query. For
-                        example, after you figure out the search query that finds the third
-                        antiphon on even-numbered <i>folia</i> for Eastertide, you can make
-                        the query into a collection. As new manuscripts are added to the
-                        database, matching antiphons will automatically appear in your saved collection.
-                    </p>
-                    <dl>
-                        <dt>List-based collection</dt>
-                        <dd>
-                            If your collection is <dfn>list-based</dfn>, we save the internal ID
-                            number for every item in your collection. You will always see the most
-                            up-to-date data, but items will not be added to or removed from the
-                            collection unless you do so specifically.
-                        </dd>
-                    </dl>
-                    <p>
-                        You might use this track a group of items that will never change, or
-                        that are related only in ways the database does not understand. For
-                        example, you might keep a list-based collection of all the chants
-                        mentioned in an article. Or to keep a list of your favourite chants.
                     </p>
                 </Modal.Body>
 

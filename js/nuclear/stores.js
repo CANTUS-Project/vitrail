@@ -298,12 +298,19 @@ const STORES = {
                 Immutable.Map({
                     '123': Immutable.Map({
                         colid: '123',
-                        name: 'Test query-based whatever',
-                        query: '+type:chant +genre_id:4ca49f74e1681d59a7bab2677e667741b25deb17adddee0ca43eb36c17dd1c8f +mode:7 +folio:08*',
+                        name: 'Basically an arbitrary assemblage',
+                        members: Immutable.List([
+                            'aafde8e886d192db75c10d35421e78bb3e3baaa0561f53dffe14419979a47d06',
+                            '9ded8bb6f4cdb6df3f87efa0e0c22d2c9bde50c2c9301d36718084f8f2bd6be4',
+                            'df0cfa85fc2f92d6e306d59c38a4b8606d17d4f5173a571f7eb7425748106d1a',
+                            '94dd975be739841e87d13c7f1a4f1da627300e253e8cb78abf58e8c0c7f6685f',
+                            '5c350006d360af65ea03e636e147cd99ba0e5e15deaf6a751283df971be89199',
+                            'd89572865de4306542775cd6796142e50fc0aff7581a02ae4ebea65ddfcb74dc',
+                        ]),
                     }),
                     '649': Immutable.Map({
                         colid: '649',
-                        name: 'Test list-based whatever',
+                        name: 'Another Sample of Stuff',
                         members: Immutable.List([
                             '651f8afae99a46b3d14a401cb11960953b5f8d08a0591bcae763cdf90c6648d8',
                             '534c4bf96622eb8f242bf5b940cae413ded0d0a8221ab090097f950882c0a19c',
