@@ -42,6 +42,8 @@ const SIGNAL_NAMES = {
     LOAD_SEARCH_RESULTS: 7,
     SET_RENDER_AS: 8,
     SET_ITEMVIEW_OVERLAY_SIZE: 9,
+    // for Collections
+    ADD_RID_TO_COLLECTION: 10,
 };
 
 
@@ -153,6 +155,16 @@ const SIGNALS = {
             // browse query
             CANTUS.get(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         }
+    },
+
+    /** Add resource with ID "rid" to the collection with ID "colid."
+     *
+     * @param (str) colid - The collection ID to amend.
+     * @param (str) rid - The resource ID to append.
+     */
+    addResourceIDToCollection(colid, rid) {
+        // TODO: untested
+        reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
     },
 };
 

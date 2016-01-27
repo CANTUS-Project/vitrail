@@ -197,6 +197,27 @@ const SETTERS = {
         }
         return toImmutable(next);
     },
+
+    /** Add a resource ID to a List of the members in a Collection.
+     *
+     * @param (object) next - An object with "colid" and "rid" members, both strings, indicating the
+     *     collection ID to be amended and the resource ID to append, respectively.
+     */
+    addResourceIDToCollection(previous, next) {
+        // TODO: untested
+        if (typeof next.colid !== 'string' || typeof next.rid !== 'string') {
+            log.warn('Invariant violation: addResourceIDToCollection() received non-string args');
+        }
+        else if (!previous.has(next.colid)) {
+            log.warn('addResourceIDToCollection() received nonexistent collection ID');
+        }
+        else {
+            let coll = previous.get(next.colid);
+            coll = coll.update('members', () => { return coll.get('members').push(next.rid) });
+            previous = previous.update(next.colid, () => { return coll });
+        }
+        return previous;
+    },
 };
 
 
@@ -293,7 +314,9 @@ const STORES = {
                 })
             );
         },
-        initialize() { /* TODO */ },
+        initialize() {
+            this.on(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, SETTERS.addResourceIDToCollection);
+        },
     }),
 };
 
