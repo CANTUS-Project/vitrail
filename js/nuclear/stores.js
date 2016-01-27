@@ -220,6 +220,28 @@ const SETTERS = {
         return previous;
     },
 
+    /** Remove a resource ID from a List of the members in a Collection.
+     *
+     * @param (object) next - An object with "colid" and "rid" members, both strings, indicating the
+     *     collection ID to be amended and the resource ID to remove, respectively.
+     */
+    removeResourceIDFromCollection(previous, next) {
+        // TODO: untested
+        if (typeof next.colid !== 'string' || typeof next.rid !== 'string') {
+            log.warn('Invariant violation: removeResourceIDFromCollection() received non-string args');
+        }
+        else if (!previous.get('collections').has(next.colid)) {
+            log.warn('removeResourceIDFromCollection() received nonexistent collection ID');
+        }
+        else if (previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+            previous = previous.toJS();
+            let index = previous['collections'][next.colid]['members'].indexOf(next.rid);
+            previous['collections'][next.colid]['members'].splice(index, 1);
+            previous = toImmutable(previous);
+        }
+        return previous;
+    },
+
     /** Toggle the "add to which collection? Modal component.
      */
     toggleAddToCollection(previous) {
@@ -348,6 +370,7 @@ const STORES = {
         },
         initialize() {
             this.on(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, SETTERS.addResourceIDToCollection);
+            this.on(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, SETTERS.removeResourceIDFromCollection);
             this.on(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION, SETTERS.toggleAddToCollection);
             this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
         },

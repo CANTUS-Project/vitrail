@@ -44,8 +44,9 @@ const SIGNAL_NAMES = {
     SET_ITEMVIEW_OVERLAY_SIZE: 9,
     // for Collections
     ADD_RID_TO_COLLECTION: 10,
-    TOGGLE_ADD_TO_COLLECTION: 11,
-    ASK_WHICH_COLLECTION: 12,
+    REMOVE_RID_FROM_COLLECTION: 11,
+    TOGGLE_ADD_TO_COLLECTION: 12,
+    ASK_WHICH_COLLECTION: 13,
 };
 
 
@@ -170,6 +171,16 @@ const SIGNALS = {
         // TODO: untested
         reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
         reactor.dispatch(SIGNAL_NAMES.ASK_WHICH_COLLECTION, undefined);
+    },
+
+    /** Remove resource with ID "rid" from the collection with ID "colid."
+     *
+     * @param (str) colid - The collection ID to amend.
+     * @param (str) rid - The resource ID to remove.
+     */
+    removeResourceIDFromCollection(colid, rid) {
+        // TODO: untested
+        reactor.dispatch(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, {colid: colid, rid: rid});
     },
 
     /** Toggle the "add to which collection?" Modal component. */
