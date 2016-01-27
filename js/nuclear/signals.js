@@ -48,6 +48,7 @@ const SIGNAL_NAMES = {
     TOGGLE_ADD_TO_COLLECTION: 12,
     ASK_WHICH_COLLECTION: 13,
     DELETE_COLLECTION: 14,
+    RENAME_COLLECTION: 15,
 };
 
 
@@ -204,6 +205,15 @@ const SIGNALS = {
      */
     deleteCollection(colid) {
         reactor.dispatch(SIGNAL_NAMES.DELETE_COLLECTION, colid);
+    },
+
+    /** Rename a collection.
+     *
+     * @param (str) colid - The ID of the collection to rename.
+     * @param (str) name - The new name for this collection.
+     */
+    renameCollection(colid, name) {
+        reactor.dispatch(SIGNAL_NAMES.RENAME_COLLECTION, {colid: colid, name: name});
     },
 };
 

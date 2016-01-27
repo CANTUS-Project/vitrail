@@ -260,7 +260,7 @@ const SETTERS = {
 
     /** Delete a collection.
      *
-     * @param (str) next) - The ID of the collection to delete.
+     * @param (str) next - The ID of the collection to delete.
      */
     deleteCollection(previous, next) {
         // TODO: untested
@@ -276,6 +276,27 @@ const SETTERS = {
             });
         }
     },
+
+    /** Rename a collection.
+     *
+     * @param (str) next.colid - ID of the collection to rename.
+     * @param (str) next.name - New name for the collection.
+     */
+     renameCollection(previous, next) {
+         // TODO: untested
+         if (typeof next.colid !== 'string' || typeof next.name !== 'string') {
+             log.warn('Invariant violation: renameCollection() received non-string args');
+         }
+         else if (!previous.get('collections').has(next.colid)) {
+             log.warn('renameCollection() received nonexistent collection ID');
+         }
+         else {
+             previous = previous.toJS();
+             previous['collections'][next.colid]['name'] = next.name;
+             previous = toImmutable(previous);
+         }
+         return previous;
+     },
 };
 
 
@@ -395,6 +416,7 @@ const STORES = {
             this.on(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION, SETTERS.toggleAddToCollection);
             this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
             this.on(SIGNAL_NAMES.DELETE_COLLECTION, SETTERS.deleteCollection);
+            this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
         },
     }),
 };
