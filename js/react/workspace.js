@@ -150,6 +150,9 @@ const Collection = React.createClass({
     propTypes: {
         collection: React.PropTypes.object.isRequired,  // TODO: put a Map here
     },
+    delete() {
+        signals.deleteCollection(this.props.collection.get('colid'));
+    },
     render() {
         const colid = this.props.collection.get('colid');
         const name = this.props.collection.get('name');
@@ -161,7 +164,7 @@ const Collection = React.createClass({
                         Open
                     </Link>
                     <Button>Rename</Button>
-                    <Button>Delete</Button>
+                    <Button onClick={this.delete}>Delete</Button>
                 </ButtonGroup>
             </Popover>
         );
