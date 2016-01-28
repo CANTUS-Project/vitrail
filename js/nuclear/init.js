@@ -22,7 +22,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
-import reactor from './reactor';
+import localforage from 'localforage';
+
+import {localforageKey, reactor} from './reactor';
 import stores from './stores';
 
 
@@ -35,6 +37,13 @@ reactor.registerStores({
     'searchQuery': stores.stores.SearchQuery,
     'searchResults': stores.stores.SearchResults,
     'collectionsList': stores.stores.CollectionsList,
+});
+
+// load any saved collections; we don't want to load anything else though
+localforage.getItem(localforageKey).then(state => {
+    if (state) {
+        reactor.loadState({collectionsList: state.collectionsList});
+    }
 });
 
 

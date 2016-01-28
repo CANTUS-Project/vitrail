@@ -26,10 +26,13 @@
 import {Reactor} from 'nuclear-js';
 
 
+const localforageKey = 'vitrail-1';
+
+
 const reactor = new Reactor({
     // debug: true,
 });
 
 
-export {reactor};
+export {reactor, localforageKey};
 export default reactor;

@@ -23,10 +23,11 @@
 //-------------------------------------------------------------------------------------------------
 
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
+import localforage from 'localforage';
 
 import {getters} from './getters';
 import {log} from '../util/log';
-import {reactor} from './reactor';
+import {localforageKey, reactor} from './reactor';
 
 
 const CANTUS = new cantusjs.Cantus('http://abbot.adjectivenoun.ca:8888/');
@@ -223,6 +224,14 @@ const SIGNALS = {
      */
     addNewCollection(name) {
         reactor.dispatch(SIGNAL_NAMES.ADD_COLLECTION, name);
+    },
+
+    /** Clear all data in "localforage" and all cached chants. */
+    clearShelf() {
+        // TODO: untested
+        reactor.reset();
+        localforage.removeItem(localforageKey);
+        // TODO: clear cached chants-and-stuff, once those are cached
     },
 };
 
