@@ -22,6 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------------------------
 
+import localforage from 'localforage';
 import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
@@ -43,7 +44,7 @@ import Row from 'react-bootstrap/lib/Row';
 
 import getters from '../nuclear/getters';
 import log from '../util/log';
-import reactor from '../nuclear/reactor';
+import {localforageKey, reactor} from '../nuclear/reactor';
 import ResultList from './result_list';
 import signals from '../nuclear/signals';
 
@@ -395,6 +396,44 @@ const Desk = React.createClass({
 });
 
 
+/** Confirm with the user that they want to reset the NuclearJS reactor.
+ *
+ * @param (function) hideMe - This function is called to hide the component.
+ */
+const ReactorResetter = React.createClass({
+    propTypes: {
+        hideMe: React.PropTypes.func.isRequired,
+    },
+    doTheReset() {
+        signals.clearShelf();
+        this.props.hideMe();
+    },
+    render() {
+        return(
+            <Modal show onHide={this.props.hideMe}>
+                <Modal.Header>
+                    Really clear your shelf?
+                </Modal.Header>
+                <Modal.Body>
+                    When you clear your shelf:
+                    <ul>
+                        <li>all your collections are deleted,</li>
+                        <li>all your saved collections are deleted, and</li>
+                        <li>all your saved chants are deleted too.</li>
+                    </ul>
+                    This does not affect data on the server. Only your local data are affected.
+                    <div className="alert alert-danger"><strong>NOTE</strong>: it does not fully work, so you have to refresh the page after you clear</div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button bsStyle="danger" onClick={this.doTheReset}>Clear</Button>
+                    <Button bsStyle="success" onClick={this.props.hideMe}>Keep Shelf</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    },
+});
+
+
 /** TODO
  *
  * State:
@@ -402,6 +441,8 @@ const Desk = React.createClass({
  * @param (ImmutableJS.Map) collections - From NuclearJS. The collections that exist.
  * @param (bool) addingNewCollection - Whether we are currently adding a new collection, and the
  *     "CollectionRename" component should therefore be shown.
+ * @param (bool) showResetter - Whether we are currently asking the user whether they want to reset
+ *     the NuclearJS Reactor, and should therefore show the "ReactorResetter" component.
  */
 const Shelf = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
@@ -409,9 +450,11 @@ const Shelf = React.createClass({
         // connection to NuclearJS
         return { collections: getters.collectionsList };
     },
-    getInitialState() { return {addingNewCollection: false}; },
+    getInitialState() { return {addingNewCollection: false, showResetter: false}; },
     toggleAddingCollection() { this.setState({addingNewCollection: !this.state.addingNewCollection}); },
+    toggleShowResetter() { this.setState({showResetter: !this.state.showResetter}); },
     addCollection(newName) { signals.addNewCollection(newName); },
+    saveShelf() { localforage.setItem(localforageKey, reactor.serialize()); },
     render() {
         const collections = this.state.collections.map(value => {
             return <Collection key={value.get('colid')} collection={value}/>;
@@ -422,15 +465,27 @@ const Shelf = React.createClass({
             renamer = <CollectionRename hideMe={this.toggleAddingCollection} chooseName={this.addCollection}/>;
         }
 
+        let resetter;
+        if (this.state.showResetter) {
+            resetter = <ReactorResetter hideMe={this.toggleShowResetter}/>;
+        }
+
         return (
             <Col lg={2}>
                 {renamer}
+                {resetter}
                 <Panel header="Shelf">
                     <ListGroup fill>
                         {collections}
                     </ListGroup>
-                    <Button bsStyle="success" onClick={this.toggleAddingCollection}>
+                    <Button bsStyle="success" block onClick={this.toggleAddingCollection}>
                         <Glyphicon glyph="plus"/>&nbsp;New Collection
+                    </Button>
+                    <Button bsStyle="success" block onClick={this.saveShelf}>
+                        <Glyphicon glyph="save"/>&nbsp;Save Shelf
+                    </Button>
+                    <Button bsStyle="warning" block onClick={this.toggleShowResetter}>
+                        <Glyphicon glyph="trash"/>&nbsp;Clear Shelf
                     </Button>
                 </Panel>
                 {this.props.children}
