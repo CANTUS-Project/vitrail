@@ -44,7 +44,7 @@ import Row from 'react-bootstrap/lib/Row';
 
 import getters from '../nuclear/getters';
 import log from '../util/log';
-import {localforageKey, reactor} from '../nuclear/reactor';
+import reactor from '../nuclear/reactor';
 import ResultList from './result_list';
 import signals from '../nuclear/signals';
 
@@ -360,9 +360,7 @@ const Desk = React.createClass({
             log.error(`The collection ID (${colid}) does not exist.`);
         }
         else {
-            const members = state.collections.getIn([colid, 'members']);
-            signals.setSearchQuery({'any': `+id:(${members.join(' OR ')})`});
-            signals.submitSearchQuery();
+            signals.loadFromCache(state.collections.getIn([colid, 'members']));
         }
     },
     render() {
@@ -454,7 +452,7 @@ const Shelf = React.createClass({
     toggleAddingCollection() { this.setState({addingNewCollection: !this.state.addingNewCollection}); },
     toggleShowResetter() { this.setState({showResetter: !this.state.showResetter}); },
     addCollection(newName) { signals.addNewCollection(newName); },
-    saveShelf() { localforage.setItem(localforageKey, reactor.serialize()); },
+    saveShelf() { signals.saveCollections(); },
     render() {
         const collections = this.state.collections.map(value => {
             return <Collection key={value.get('colid')} collection={value}/>;
