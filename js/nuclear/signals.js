@@ -164,6 +164,68 @@ const SIGNALS = {
         }
     },
 
+    /** Given a list of resource IDs, load them into the results.
+     *
+     * @param (ImmutableJS.List) rids - A list of resource IDs to load for the collection.
+     *
+     * This function first tries to load the resources from the browser cache using localforage. If
+     * resoruces are missing, they are loaded from the server.
+     */
+    loadFromCache(rids) {
+        let results = rids.toArray();
+        const resultsLength = results.length;
+
+        // first, try recovering all the results from the localforage cache
+        for (let i = 0; i < resultsLength; i++) {
+            results[i] = localforage.getItem(results[i]);
+        }
+
+        // wait for all the Promises to resolve, then...
+        Promise.all(results).then(results => {
+            // check if any of the results are missing
+            for (let i = 0; i < resultsLength; i++) {
+                if (results[i] === null) {
+                    results[i] = CANTUS.search({any: `+id:${rids.get(i)}`});
+                }
+            }
+            Promise.all(results).then(results => {
+                // assemble the results into a CantusJS-like structure, then send them to the Reactor
+
+                // post-processing on resources we got just now
+                for (let i = 0; i < resultsLength; i++) {
+                    if (results[i].sort_order) {
+                        results[i] = results[i][results[i]['sort_order'][0]];
+                        localforage.setItem(results[i]['id'], results[i]);  // TODO: catch()
+                    }
+                }
+
+                // We have to fake a lot of CantusJS stuff to make this work.
+                // We also have to set things weirdly so that the key of an Object isn't accidentally
+                // set to "rid" instead of the value of the rid variable.
+                let post = {sort_order: rids, resources: {}};
+
+                for (let i = 0; i < resultsLength; i++) {
+                    let id = results[i]['id'];
+                    post[id] = results[i];
+                    post['resources'][id] = {};
+                }
+
+                post['headers'] = {page: '1', per_page: resultsLength, fields: '', extraFields: '',
+                    total_results: resultsLength};
+
+                SIGNALS.loadSearchResults(post);
+            }).catch(err => {
+                // TODO: write better error handling
+                log.error('Error in the inner loop of loadFromCache() (see the Console)');
+                throw err;
+            });
+        }).catch(err => {
+            // TODO: write better error handling
+            log.error('There was some problem in loadFromCache() (see the Console)');
+            throw err;
+        });
+    },
+
     /** Add resource with ID "rid" to the collection with ID "colid."
      *
      * @param (str) colid - The collection ID to amend.
@@ -230,8 +292,30 @@ const SIGNALS = {
     clearShelf() {
         // TODO: untested
         reactor.reset();
-        localforage.removeItem(localforageKey);
+        localforage.clear();
         // TODO: clear cached chants-and-stuff, once those are cached
+    },
+
+    /** Save extant collections with localforage. */
+    saveCollections() {
+        localforage.setItem(localforageKey, reactor.serialize()).then(() => {
+            // make sure all the resources in all the collections are cached
+            const collections = reactor.evaluate(getters.collectionsList);
+
+            collections.forEach(collection => {
+                CANTUS.search({'any': `+id:(${collection.get('members').join(' OR ')})`}).then(resp => {
+                    if (resp.code) {
+                        // TODO: panic over error
+                        console.log(`response was ${resp.cod}`);
+                    }
+                    else {
+                        for (let rid of resp.sort_order) {
+                            localforage.setItem(rid, resp[rid]);
+                        }
+                    }
+                });
+            });
+        });
     },
 };
 
