@@ -228,7 +228,7 @@ const ResultListTable = React.createClass({
         let tableHeader = [];
         let columns = this.props.headers.get('fields').split(',');
         let extraFields = this.props.headers.get('extra_fields');
-        if (null !== extraFields) {
+        if (extraFields) {
             extraFields = extraFields.split(',');
             columns = columns.concat(extraFields);
         }
