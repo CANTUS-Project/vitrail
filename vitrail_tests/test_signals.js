@@ -43,9 +43,9 @@ describe('setSearchResultsFormat()', () => {
     beforeEach(() => { reactor.reset(); });
 
     it('works', () => {
-        const to = 'table';
+        const to = 'ItemView';
         // make sure it's starting with the other value
-        expect(reactor.evaluate(getters.searchResultsFormat)).toBe('ItemView');
+        expect(reactor.evaluate(getters.searchResultsFormat)).toBe('table');
         signals.setSearchResultsFormat(to);
         expect(reactor.evaluate(getters.searchResultsFormat)).toBe(to);
     });
