@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,7 +20,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
@@ -37,6 +37,7 @@ import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {AlertView} from './vitrail';
 import {ResultListFrame} from './result_list';
 import {getters} from '../nuclear/getters';
+import log from '../util/log';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 
@@ -51,21 +52,24 @@ const TemplateTypeSelector = React.createClass({
             resourceType: getters.resourceType,
         };
     },
-    chooseNewType(event) {
+    handleClick(event) {
         let newType = 'chants';
 
         switch (event.target.id) {
-            case 'indexersTypeButton':
-                newType = 'indexers';
-                break;
+        case 'indexersTypeButton':
+            newType = 'indexers';
+            break;
 
-            case 'sourcesTypeButton':
-                newType = 'sources';
-                break;
+        case 'sourcesTypeButton':
+            newType = 'sources';
+            break;
 
-            case 'feastsTypeButton':
-                newType = 'feasts';
-                break;
+        case 'feastsTypeButton':
+            newType = 'feasts';
+            break;
+
+        default:
+            log.warn(`Unsupported resource type: ${newType}`);
         }
 
         signals.setSearchQuery('clear');
@@ -76,35 +80,43 @@ const TemplateTypeSelector = React.createClass({
         const className = '';
         const classNameActive = 'active';
 
-        let buttonProps = {
-            'chants': {'className': className, 'aria-pressed': 'false'},
-            'indexers': {'className': className, 'aria-pressed': 'false'},
-            'sources': {'className': className, 'aria-pressed': 'false'},
-            'feasts': {'className': className, 'aria-pressed': 'false'}
+        const buttonProps = {
+            chants: {'className': className, 'aria-pressed': 'false'},
+            indexers: {'className': className, 'aria-pressed': 'false'},
+            sources: {'className': className, 'aria-pressed': 'false'},
+            feasts: {'className': className, 'aria-pressed': 'false'},
         };
 
         if (this.supportedTypes.includes(this.state.resourceType)) {
             buttonProps[this.state.resourceType]['aria-pressed'] = 'true';
-            buttonProps[this.state.resourceType]['className'] = classNameActive;
+            buttonProps[this.state.resourceType].className = classNameActive;
         }
 
         return (
             <ButtonGroup role="group" aria-label="resource type selector">
                 <Button id="chantsTypeButton" className={buttonProps.chants.className}
-                        aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.chooseNewType}>
-                        Chants</Button>
+                    aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.handleClick}
+                >
+                    {`Chants`}
+                </Button>
                 <Button id="feastsTypeButton" className={buttonProps.feasts.className}
-                        aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.chooseNewType}>
-                        Feasts</Button>
+                    aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.handleClick}
+                >
+                    {`Feasts`}
+                </Button>
                 <Button id="indexersTypeButton" className={buttonProps.indexers.className}
-                        aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.chooseNewType}>
-                        Indexers</Button>
+                    aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.handleClick}
+                >
+                    {`Indexers`}
+                </Button>
                 <Button id="sourcesTypeButton" className={buttonProps.sources.className}
-                        aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.chooseNewType}>
-                        Sources</Button>
+                    aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.handleClick}
+                >
+                    {`Sources`}
+                </Button>
             </ButtonGroup>
         );
-    }
+    },
 });
 
 
@@ -113,10 +125,10 @@ const TemplateSearchField = React.createClass({
     //
 
     propTypes: {
-        // The field name according to the Cantus API.
-        field: React.PropTypes.string.isRequired,
         // The field name displayed in the GUI. If omitted, the "field" is displayed.
         displayName: React.PropTypes.string,
+        // The field name according to the Cantus API.
+        field: React.PropTypes.string.isRequired,
     },
     getDefaultProps() {
         return {displayName: null, contents: ''};
@@ -128,21 +140,22 @@ const TemplateSearchField = React.createClass({
             searchQuery: getters.searchQuery,
         };
     },
-    onChange(event) {
-        let post = {};
+    handleChange(event) {
+        const post = {};
         post[this.props.field] = event.target.value;
         signals.setSearchQuery(post);
     },
-    shouldComponentUpdate: function(nextProps, nextState) {
+    shouldComponentUpdate(nextProps, nextState) {
         // We should only update if *our* field changes value.
-        let field = this.props.field;
+        const field = this.props.field;
         if (this.state.searchQuery.get(field) !== nextState.searchQuery.get(field)) {
             return true;
-        } else if (this.props !== nextProps) {
-            return true;
-        } else {
+        }
+        else if (this.props === nextProps) {
             return false;
         }
+
+        return true;
     },
     render() {
         const displayName = this.props.displayName || this.props.field;
@@ -155,15 +168,15 @@ const TemplateSearchField = React.createClass({
 
         return (
             <Input id={fieldID}
-                   type="text"
-                   value={contents}
-                   onChange={this.onChange}
-                   label={displayName}
-                   labelClassName="col-xs-2"
-                   wrapperClassName="col-xs-10"
+                type="text"
+                value={contents}
+                onChange={this.handleChange}
+                label={displayName}
+                labelClassName="col-xs-2"
+                wrapperClassName="col-xs-10"
             />
         );
-    }
+    },
 });
 
 
@@ -184,13 +197,13 @@ const TemplateSearchFields = React.createClass({
         fieldNames: React.PropTypes.arrayOf(React.PropTypes.shape({
             field: React.PropTypes.string,
             displayName: React.PropTypes.string,
-            contents: React.PropTypes.string
+            contents: React.PropTypes.string,
         })).isRequired,
     },
     getInitialState() {
         return {isCollapsed: false};
     },
-    toggleCollapsion(event) {
+    handleCollapse(event) {
         // Toggle this.state.isCollapsed
         if (event.target.className === 'panel-title') {
             this.setState({isCollapsed: !this.state.isCollapsed});
@@ -198,21 +211,27 @@ const TemplateSearchFields = React.createClass({
     },
     render() {
         let headerText = this.state.isCollapsed ? 'expand' : 'collapse';
-        headerText = `Click or tap this header to ${headerText} the template.`
+        headerText = `Click or tap this header to ${headerText} the template.`;
 
         return (
-            <Panel header={headerText} collapsible expanded={!this.state.isCollapsed} onClick={this.toggleCollapsion}>
+            <Panel
+                header={headerText}
+                collapsible
+                expanded={!this.state.isCollapsed}
+                onClick={this.handleCollapse}
+            >
                 <form className="form-horizontal">
                     {this.props.fieldNames.map((field, index) =>
-                        <TemplateSearchField key={`template-field${index}`}
-                                             field={field.field}
-                                             displayName={field.displayName}
-                                             />
+                        <TemplateSearchField
+                            key={`template-field${index}`}
+                            field={field.field}
+                            displayName={field.displayName}
+                        />
                     )}
                 </form>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -228,97 +247,101 @@ const TemplateSearchTemplate = React.createClass({
             resourceType: getters.resourceType,
         };
     },
+    handleSubmit() {
+        signals.submitSearchQuery();
+    },
     render() {
         let fieldNames = [];
 
         switch (this.state.resourceType) {
-            case 'chants':
-                fieldNames = [
-                    {'field': 'incipit', 'displayName': 'Incipit'},
-                    {'field': 'full_text', 'displayName': 'Full Text (standard spelling)'},
-                    {'field': 'full_text_manuscript', 'displayName': 'Full Text (manuscript spelling)'},
-                    {'field': 'id', 'displayName': 'ID'},
-                    {'field': 'source', 'displayName': 'Source Name'},
-                    {'field': 'marginalia', 'displayName': 'Marginalia'},
-                    {'field': 'feast', 'displayName': 'Feast'},
-                    {'field': 'office', 'displayName': 'Office'},
-                    {'field': 'genre', 'displayName': 'Genre'},
-                    {'field': 'folio', 'displayName': 'Folio'},
-                    {'field': 'sequence', 'displayName': 'Sequence'},
-                    {'field': 'position', 'displayName': 'Position'},
-                    {'field': 'cantus_id', 'displayName': 'Cantus ID'},
-                    {'field': 'mode', 'displayName': 'Mode'},
-                    {'field': 'differentia', 'displayName': 'Differentia'},
-                    {'field': 'finalis', 'displayName': 'Finalis'},
-                    {'field': 'volpiano', 'displayName': 'Volpiano'},
-                    {'field': 'notes', 'displayName': 'Notes'},
-                    {'field': 'cao_concordances', 'displayName': 'CAO Concordances'},
-                    {'field': 'siglum', 'displayName': 'Siglum'},
-                    {'field': 'proofreader', 'displayName': 'Proofreader'},
-                    {'field': 'melody_id', 'displayName': 'Melody ID'}
-                ];
-                break;
+        case 'chants':
+            fieldNames = [
+                    {field: 'incipit', displayName: 'Incipit'},
+                    {field: 'full_text', displayName: 'Full Text (standard spelling)'},
+                    {field: 'full_text_manuscript', displayName: 'Full Text (manuscript spelling)'},
+                    {field: 'id', displayName: 'ID'},
+                    {field: 'source', displayName: 'Source Name'},
+                    {field: 'marginalia', displayName: 'Marginalia'},
+                    {field: 'feast', displayName: 'Feast'},
+                    {field: 'office', displayName: 'Office'},
+                    {field: 'genre', displayName: 'Genre'},
+                    {field: 'folio', displayName: 'Folio'},
+                    {field: 'sequence', displayName: 'Sequence'},
+                    {field: 'position', displayName: 'Position'},
+                    {field: 'cantus_id', displayName: 'Cantus ID'},
+                    {field: 'mode', displayName: 'Mode'},
+                    {field: 'differentia', displayName: 'Differentia'},
+                    {field: 'finalis', displayName: 'Finalis'},
+                    {field: 'volpiano', displayName: 'Volpiano'},
+                    {field: 'notes', displayName: 'Notes'},
+                    {field: 'cao_concordances', displayName: 'CAO Concordances'},
+                    {field: 'siglum', displayName: 'Siglum'},
+                    {field: 'proofreader', displayName: 'Proofreader'},
+                    {field: 'melody_id', displayName: 'Melody ID'},
+            ];
+            break;
 
-            case 'feasts':
-                fieldNames = [
-                    {'field': 'name', 'displayName': 'Name'},
-                    {'field': 'description', 'displayName': 'Description'},
-                    {'field': 'date', 'displayName': 'Date'},
-                    {'field': 'feast_code', 'displayName': 'Feast Code'}
-                ];
-                break;
+        case 'feasts':
+            fieldNames = [
+                    {field: 'name', displayName: 'Name'},
+                    {field: 'description', displayName: 'Description'},
+                    {field: 'date', displayName: 'Date'},
+                    {field: 'feast_code', displayName: 'Feast Code'},
+            ];
+            break;
 
-            case 'indexers':
-                fieldNames = [
-                    {'field': 'display_name', 'displayName': 'Full Name'},
-                    {'field': 'given_name', 'displayName': 'Given Name'},
-                    {'field': 'family_name', 'displayName': 'Family Name'},
-                    {'field': 'institution', 'displayName': 'Institution'},
-                    {'field': 'city', 'displayName': 'City'},
-                    {'field': 'country', 'displayName': 'Country'},
-                ];
-                break;
+        case 'indexers':
+            fieldNames = [
+                    {field: 'display_name', displayName: 'Full Name'},
+                    {field: 'given_name', displayName: 'Given Name'},
+                    {field: 'family_name', displayName: 'Family Name'},
+                    {field: 'institution', displayName: 'Institution'},
+                    {field: 'city', displayName: 'City'},
+                    {field: 'country', displayName: 'Country'},
+            ];
+            break;
 
-            case 'sources':
-                fieldNames = [
-                    {'field': 'title', 'displayName': 'Title'},
-                    {'field': 'summary', 'displayName': 'Summary'},
-                    {'field': 'description', 'displayName': 'Description'},
-                    {'field': 'rism', 'displayName': 'RISM'},
-                    {'field': 'siglum', 'displayName': 'Siglum'},
-                    {'field': 'provenance', 'displayName': 'Provenance'},
-                    {'field': 'date', 'displayName': 'Date'},
-                    {'field': 'century', 'displayName': 'Century'},
-                    {'field': 'notation_style', 'displayName': 'Notation Style'},
-                    {'field': 'editors', 'displayName': 'Editors'},
-                    {'field': 'indexers', 'displayName': 'Indexers'},
-                    {'field': 'proofreaders', 'displayName': 'Proofreaders'},
-                    {'field': 'segment', 'displayName': 'Database Segment'},
-                    {'field': 'source_status_desc', 'displayName': 'Source Status'},
-                    {'field': 'liturgical_occasions', 'displayName': 'Liturgical Occasions'},
-                    {'field': 'indexing_notes', 'displayName': 'Indexing Notes'},
-                    {'field': 'indexing_date', 'displayName': 'Indexing Date'},
-                ];
-                break;
+        case 'sources':
+            fieldNames = [
+                    {field: 'title', displayName: 'Title'},
+                    {field: 'summary', displayName: 'Summary'},
+                    {field: 'description', displayName: 'Description'},
+                    {field: 'rism', displayName: 'RISM'},
+                    {field: 'siglum', displayName: 'Siglum'},
+                    {field: 'provenance', displayName: 'Provenance'},
+                    {field: 'date', displayName: 'Date'},
+                    {field: 'century', displayName: 'Century'},
+                    {field: 'notation_style', displayName: 'Notation Style'},
+                    {field: 'editors', displayName: 'Editors'},
+                    {field: 'indexers', displayName: 'Indexers'},
+                    {field: 'proofreaders', displayName: 'Proofreaders'},
+                    {field: 'segment', displayName: 'Database Segment'},
+                    {field: 'source_status_desc', displayName: 'Source Status'},
+                    {field: 'liturgical_occasions', displayName: 'Liturgical Occasions'},
+                    {field: 'indexing_notes', displayName: 'Indexing Notes'},
+                    {field: 'indexing_date', displayName: 'Indexing Date'},
+            ];
+            break;
 
-            default:
-                fieldNames = 'error';
+        default:
+            fieldNames = 'error';
 
         }
 
         if (fieldNames === 'error') {
             const message = [
-                <h2><strong>Error</strong></h2>,
+                <h2 key="1"><strong>{`Error`}</strong></h2>,
                 'TemplateSearchTemplate received an invalid resource type.',
-                <br/>,
-                'Please report this to the developers, then choose a resource type above.'
+                <br key="3"/>,
+                'Please report this to the developers, then choose a resource type above.',
             ];
 
             fieldNames = (
                 <ListGroupItem>
-                    <AlertView class="danger"
-                               message={message}
-                               fields={Immutable.Map({'getters.resourceType': this.state.resourceType})}
+                    <AlertView
+                        class="danger"
+                        message={message}
+                        fields={Immutable.Map({'getters.resourceType': this.state.resourceType})}
                     />
                 </ListGroupItem>
             );
@@ -336,17 +359,22 @@ const TemplateSearchTemplate = React.createClass({
                 <ListGroup fill>
                     <ListGroupItem><TemplateTypeSelector/></ListGroupItem>
                     {fieldNames}
-                    <ListGroupItem><Button bsStyle="primary" onClick={signals.submitSearchQuery}>Search</Button></ListGroupItem>
+                    <ListGroupItem>
+                        <Button bsStyle="primary" onClick={this.handleSubmit}>{`Search`}</Button>
+                    </ListGroupItem>
                 </ListGroup>
             </Panel>
         );
-    }
+    },
 });
 
 
 const TemplateSearch = React.createClass({
     //
 
+    propTypes: {
+        children: React.PropTypes.element,
+    },
     componentWillMount() {
         // clear the search query
         signals.setSearchQuery('clear');
@@ -356,7 +384,10 @@ const TemplateSearch = React.createClass({
     render() {
         return (
             <div className="container">
-                <PageHeader>Template Search <small><i>{"Describe what you want, we'll fill in the blanks."}</i></small></PageHeader>
+                <PageHeader>
+                    {`Template Search `}
+                    <small><i>{`Describe what you want, we'll fill in the blanks.`}</i></small>
+                </PageHeader>
                 <PanelGroup>
                     <TemplateSearchTemplate/>
                     <ResultListFrame/>
@@ -364,7 +395,7 @@ const TemplateSearch = React.createClass({
                 {this.props.children}
             </div>
         );
-    }
+    },
 });
 
 

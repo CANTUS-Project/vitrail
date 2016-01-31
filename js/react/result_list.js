@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,7 +20,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
@@ -71,16 +71,18 @@ const ResultCell = React.createClass({
 
         if (this.props.link) {
             post = <a href={this.props.link}>{data}</a>;
-        } else {
+        }
+        else {
             post = data;
         }
         if (this.props.header) {
             post = <th>{post}</th>;
-        } else {
+        }
+        else {
             post = <td>{post}</td>;
         }
         return post;
-    }
+    },
 });
 
 
@@ -102,6 +104,7 @@ const ResultCell = React.createClass({
  */
 const ResultRow = React.createClass({
     propTypes: {
+        colid: React.PropTypes.string,
         // the column names to render, or the fields in "data" to render as columns
         columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
         // the object to render into columns
@@ -114,8 +117,8 @@ const ResultRow = React.createClass({
     },
     render() {
         //
-        let renderedColumns = [];
-        this.props.columns.forEach(columnName => {
+        const renderedColumns = [];
+        this.props.columns.forEach((columnName) => {
             let columnData = this.props.data.get(columnName);
             if (columnData) {
                 if (Immutable.List.isList(columnData)) {
@@ -128,8 +131,9 @@ const ResultRow = React.createClass({
             }
 
             let columnLink;
-            if (columnName === 'name')
-                columnLink = this.props.resources['self'];
+            if (columnName === 'name') {
+                columnLink = this.props.resources.self;
+            }
             else {
                 columnLink = this.props.resources[columnName];
             }
@@ -139,13 +143,12 @@ const ResultRow = React.createClass({
 
         //
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
-            const to = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
+            const url = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
             renderedColumns.push(
                 <ResultCell key="itemview" data={(
-                    <Link to={to} className="btn btn-default btn-sm">
-                        View
-                    </Link>
-                )}/>
+                    <Link to={url} className="btn btn-default btn-sm">{`View`}</Link>
+                )}
+                />
             );
         }
 
@@ -154,7 +157,8 @@ const ResultRow = React.createClass({
             renderedColumns.push(
                 <ResultCell key="collection-add" data={(
                     <AddRemoveCollection rid={this.props.data.get('id')} colid={this.props.colid}/>
-                )}/>
+                )}
+                />
             );
         }
 
@@ -164,7 +168,7 @@ const ResultRow = React.createClass({
                 {renderedColumns}
             </tr>
         );
-    }
+    },
 });
 
 
@@ -189,14 +193,15 @@ const ResultListItemView = React.createClass({
 
         return (
             <div className="row">
-                {sortOrder.map(rid => {
-                    return <ItemView
-                        key={rid}
-                        size="compact"
-                        data={this.props.data.get(rid)}
-                        resources={this.props.data.get('resources').get(rid)}
-                    />;
-                    },
+                {sortOrder.map((rid) => {  /* eslint arrow-body-style: 0 */
+                    return (
+                        <ItemView
+                            key={rid}
+                            size="compact"
+                            data={this.props.data.get(rid)}
+                            resources={this.props.data.get('resources').get(rid)}
+                        />
+                    ); },
                     this
                 )}
             </div>
@@ -221,11 +226,11 @@ const ResultListTable = React.createClass({
         headers: React.PropTypes.instanceOf(Immutable.Map),
         sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
-    getDefaultProps: function() {
+    getDefaultProps() {
         return {data: null, headers: null, sortOrder: []};
     },
     render() {
-        let tableHeader = [];
+        const tableHeader = [];
         let columns = this.props.headers.get('fields').split(',');
         let extraFields = this.props.headers.get('extra_fields');
         if (extraFields) {
@@ -235,10 +240,10 @@ const ResultListTable = React.createClass({
 
         // Remove the "id" field and, if the resource types are all the same, remove "type" too.
         // First find out whether all the "types" are the same.
-        let dontInclude = ['id'];
+        const dontInclude = ['id'];
         const firstResType = this.props.data.get(this.props.sortOrder.get(0)).get('type');
         let foundDifferent = false;
-        for (let id of this.props.sortOrder.values()) {
+        for (const id of this.props.sortOrder.values()) {
             if (this.props.data.get(id).get('type') !== firstResType) {
                 foundDifferent = true;
                 break;
@@ -249,11 +254,11 @@ const ResultListTable = React.createClass({
         }
 
         // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
-        let columnsAlreadyAdjusted = false;
+        let alreadyAdjusted = false;
         if (!foundDifferent) {
             // we'll show only the fields called "primary" in the ItemView
             if ('chant' === firstResType) {
-                columnsAlreadyAdjusted = true;
+                alreadyAdjusted = true;
                 //
                 columns = [
                     'incipit',
@@ -269,7 +274,7 @@ const ResultListTable = React.createClass({
                 ];
             }
             else if ('source' === firstResType) {
-                columnsAlreadyAdjusted = true;
+                alreadyAdjusted = true;
                 //
                 columns = [
                     'rism',
@@ -282,33 +287,32 @@ const ResultListTable = React.createClass({
         }
 
         // Now remove the unncessary fields.
-        if (!columnsAlreadyAdjusted) {
+        if (!alreadyAdjusted) {
             columns = columns.reduce((prev, curr) => {
                 if (dontInclude.indexOf(curr) >= 0) {
                     return prev;
                 }
-                else {
-                    prev.push(curr);
-                    return prev;
-                }
+
+                prev.push(curr);
+                return prev;
             }, []);
         }
 
         // Prepare the table header.
-        columns.forEach(function(columnName) {
+        columns.forEach((columnName) => {
             // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
-            let working = columnName.split("_");
-            let polishedName = "";
-            for (let i in working) {
+            const working = columnName.split('_');
+            let polishedName = '';
+            for (const i in working) {
                 let rawr = working[i][0];
                 rawr = rawr.toLocaleUpperCase();
                 polishedName += rawr;
-                polishedName += working[i].slice(1) + " ";
+                polishedName += `${working[i].slice(1)} `;
             }
             polishedName = polishedName.slice(0, polishedName.length);
 
             // now we can make the <th> cell itself
-            tableHeader.push(<ResultCell key={columnName} data={polishedName} header={true} />);
+            tableHeader.push(<ResultCell key={columnName} data={polishedName} header />);
         });
 
         return (
@@ -319,16 +323,16 @@ const ResultListTable = React.createClass({
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.sortOrder.map(id => {
+                    {this.props.sortOrder.map((id) => {
                         return (
                             <ResultRow key={id}
-                                       colid={this.props.colid}
-                                       columns={columns}
-                                       data={this.props.data.get(id)}
-                                       resources={this.props.data.get('resources').get(id)}
+                                colid={this.props.colid}
+                                columns={columns}
+                                data={this.props.data.get(id)}
+                                resources={this.props.data.get('resources').get(id)}
                             />
                         );
-                        },
+                    },
                         this)
                     }
                 </tbody>
@@ -359,22 +363,30 @@ const ResultList = React.createClass({
         // connection to NuclearJS
         return {
             searchResultsFormat: getters.searchResultsFormat,
-            results: getters.searchResults
+            results: getters.searchResults,
         };
     },
     render() {
-        let results = <p className="card-block">(No results to display).</p>;
+        let results = <p className="card-block">{'(No results to display).'}</p>;
 
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                results = <ResultListTable colid={this.props.colid}
-                                           data={this.state.results}
-                                           headers={this.state.results.get('headers')}
-                                           sortOrder={this.state.results.get('sort_order')}/>;
+                results = (
+                    <ResultListTable colid={this.props.colid}
+                        data={this.state.results}
+                        headers={this.state.results.get('headers')}
+                        sortOrder={this.state.results.get('sort_order')}
+                    />
+                );
             }
             else {
-                results = <ResultListItemView data={this.state.results} sortOrder={this.state.results.get('sort_order')}/>;
+                results = (
+                    <ResultListItemView
+                        data={this.state.results}
+                        sortOrder={this.state.results.get('sort_order')}
+                    />
+                );
             }
         }
 
@@ -383,7 +395,7 @@ const ResultList = React.createClass({
                 {results}
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -403,43 +415,57 @@ const Paginator = React.createClass({
             totalPages: getters.searchResultsPages,
         };
     },
-    changePage(button) {
+    handleClick(button) {
         // Determine which page-change button was clicked then emit the setPage() signal.
         //
 
         let newPage = this.state.page;
 
         switch (button.target.value) {
-            case 'previous':
-                newPage -= 1;
-                break;
-            case 'next':
-                newPage += 1;
-                break;
-            case 'first':
-                newPage = 1;
-                break;
-            case 'last':
-                newPage = this.state.totalPages;
-                break;
+        case 'previous':
+            newPage -= 1;
+            break;
+        case 'next':
+            newPage += 1;
+            break;
+        case 'first':
+            newPage = 1;
+            break;
+        case 'last':
+            newPage = this.state.totalPages;
+            break;
+        default:
+            return;
         }
 
-        if (newPage < 1 || newPage > this.state.totalPages) { /* do nothing! */ }
-        else { signals.setPage(newPage); signals.submitSearchQuery(); }
+        if (newPage > 0 && newPage <= this.state.totalPages) {
+            signals.setPage(newPage);
+            signals.submitSearchQuery();
+        }
     },
     render() {
         return (
             <ButtonGroup role="group" aria-label="paginator">
-                <Button name="pages" value="first" onClick={this.changePage}>&lt;&lt;</Button>
-                <Button name="pages" value="previous" onClick={this.changePage}>&lt;</Button>
-                <Button>
-                    {this.state.page} of {this.state.totalPages}
+                <Button name="pages" value="first" onClick={this.handleClick}>
+                    <Glyphicon glyph="chevron-left"/>
+                    <Glyphicon glyph="chevron-left"/>
                 </Button>
-                <Button name="pages" value="next" onClick={this.changePage}>&gt;</Button>
-                <Button name="pages" value="last" onClick={this.changePage}>&gt;&gt;</Button>
+                <Button name="pages" value="previous" onClick={this.handleClick}>
+                    <Glyphicon glyph="chevron-left"/>
+                </Button>
+                <Button>
+                    {`${this.state.page} of ${this.state.totalPages}`}
+                </Button>
+                <Button name="pages" value="next" onClick={this.handleClick}>
+                    <Glyphicon glyph="chevron-right"/>
+                </Button>
+                <Button name="pages" value="last" onClick={this.handleClick}>
+                    <Glyphicon glyph="chevron-right"/>
+                    <Glyphicon glyph="chevron-right"/>
+                </Button>
             </ButtonGroup>
         );
-    }
+    },
 });
 
 
@@ -455,7 +481,7 @@ const PerPageSelector = React.createClass({
         // connection to NuclearJS
         return {perPage: getters.searchResultsPerPage};
     },
-    onChange(event) {
+    handleChange(event) {
         signals.setPerPage(Number(event.target.value));
         signals.submitSearchQuery();
     },
@@ -464,15 +490,15 @@ const PerPageSelector = React.createClass({
         return (
             <form>
                 <Input type="number"
-                       name="perPage"
-                       id="perPageSelector"
-                       value={this.state.perPage}
-                       onChange={this.onChange}
-                       label="Number of Results per Page"
+                    name="perPage"
+                    id="perPageSelector"
+                    value={this.state.perPage}
+                    onChange={this.handleChange}
+                    label="Number of Results per Page"
                 />
             </form>
         );
-    }
+    },
 });
 
 
@@ -484,7 +510,7 @@ const RenderAsSelector = React.createClass({
         // connection to NuclearJS
         return {format: getters.searchResultsFormat};
     },
-    onChange(event) {
+    handleChange(event) {
         signals.setSearchResultsFormat(event.target.value);
     },
     render() {
@@ -493,29 +519,30 @@ const RenderAsSelector = React.createClass({
 
         if ('table' === this.state.format) {
             tableChecked = true;
-        } else {
+        }
+        else {
             viewChecked = true;
         }
 
         return (
             <form>
                 <Input type="radio"
-                       label="Render as Views"
-                       checked={viewChecked}
-                       onChange={this.onChange}
-                       id="renderAsView"
-                       value="ItemView"
+                    label="Render as Views"
+                    checked={viewChecked}
+                    onChange={this.handleChange}
+                    id="renderAsView"
+                    value="ItemView"
                 />
                 <Input type="radio"
-                       label="Render as a Table"
-                       checked={tableChecked}
-                       onChange={this.onChange}
-                       id="renderAsTable"
-                       value="table"
+                    label="Render as a Table"
+                    checked={tableChecked}
+                    onChange={this.handleChange}
+                    id="renderAsTable"
+                    value="table"
                 />
             </form>
         );
-    }
+    },
 });
 
 
@@ -549,20 +576,20 @@ const ErrorMessage = React.createClass({
 
         if (404 === this.props.code) {
             alertType = 'warning';
-            message = <p>The search returned no results.</p>;
+            message = <p>{`The search returned no results.`}</p>;
         }
         else if (502 === this.props.code) {
             technicalInfo = technicalInfo.set('Developer Message', 'Abbot returned 502');
             message = (
                 <div>
-                    <h2>Server Error</h2>
+                    <h2>{`Server Error`}</h2>
                     <p>
-                        Part of the CANTUS server is not working (called "Solr").
+                        {`Part of the CANTUS server is not working (called "Solr").`}
                     </p>
                     <p>
-                        Sometimes this is a temporary problem, so you may try your search again in
+                        {`Sometimes this is a temporary problem, so you may try your search again in
                         a few minutes. However, if this problem continues for several minutes, please
-                        report it to the developers, along with your search query.
+                        report it to the developers, along with your search query.`}
                     </p>
                 </div>
             );
@@ -570,14 +597,14 @@ const ErrorMessage = React.createClass({
         else if (500 === this.props.code && 'Programmer Error' === this.props.reason) {
             message = (
                 <div>
-                    <h2>Server Error</h2>
+                    <h2>{`Server Error`}</h2>
                     <p>
-                        The server indicates that it could not provide data because of an unhandled
-                        error condition.
+                        {`The server indicates that it could not provide data because of an unhandled
+                        error condition.`}
                     </p>
                     <p>
-                        You may report this to the developers to help them fix the problem. Please
-                        include your search query when you report the issue.
+                        {`You may report this to the developers to help them fix the problem. Please
+                        include your search query when you report the issue.`}
                     </p>
                 </div>
             );
@@ -587,8 +614,8 @@ const ErrorMessage = React.createClass({
             technicalInfo = technicalInfo.set('Reason', this.props.reason);
             message = (
                 <div>
-                    <h2>Client Error</h2>
-                    <p>This probably means that something in the browser made a mistake.</p>
+                    <h2>{`Client Error`}</h2>
+                    <p>{`This probably means that something in the browser made a mistake.`}</p>
                 </div>
             );
         }
@@ -597,16 +624,16 @@ const ErrorMessage = React.createClass({
             technicalInfo = technicalInfo.set('Reason', this.props.reason);
             message = (
                 <div>
-                    <h2>Server Error</h2>
-                    <p>This probably means that something in the server made a mistake.</p>
+                    <h2>{`Server Error`}</h2>
+                    <p>{`This probably means that something in the server made a mistake.`}</p>
                 </div>
             );
         }
 
         return (
             <AlertView class={alertType}
-                       message={message}
-                       fields={technicalInfo}
+                message={message}
+                fields={technicalInfo}
             />
         );
     },
@@ -624,7 +651,7 @@ const ResultListSettings = React.createClass({
     getInitialState() {
         return {isExpanded: false};
     },
-    toggleCollapsion(event) {
+    handleCollapse(event) {
         // Toggle this.state.isExpanded
         if (event.target.className === 'panel-title') {
             this.setState({isExpanded: !this.state.isExpanded});
@@ -633,7 +660,7 @@ const ResultListSettings = React.createClass({
     render() {
         return (
             <ListGroupItem>
-                <Panel collapsible expanded={this.state.isExpanded} onClick={this.toggleCollapsion} header="Display Settings">
+                <Panel collapsible expanded={this.state.isExpanded} onClick={this.handleCollapse} header="Display Settings">
                     <PerPageSelector/>
                     <RenderAsSelector/>
                 </Panel>
@@ -654,16 +681,18 @@ const ResultListFrame = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return { error: getters.searchError };
+        return {error: getters.searchError};
     },
     render() {
-
         let errorMessage;
         if (null !== this.state.error) {
-            errorMessage = <ErrorMessage code={this.state.error.get('code')}
-                                         reason={this.state.error.get('reason')}
-                                         response={this.state.error.get('response')}
-                                         />;
+            errorMessage = (
+                <ErrorMessage
+                    code={this.state.error.get('code')}
+                    reason={this.state.error.get('reason')}
+                    response={this.state.error.get('response')}
+                />
+            );
         }
 
         return (
@@ -677,7 +706,7 @@ const ResultListFrame = React.createClass({
                 </ListGroup>
             </Panel>
         );
-    }
+    },
 });
 
 

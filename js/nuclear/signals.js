@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,7 +20,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 import localforage from 'localforage';
@@ -57,10 +57,11 @@ const SIGNAL_NAMES = {
 const SIGNALS = {
     /** Load a resource in the ItemView, given a type and ID.
      *
-     * @param (str) type - The resource type to load.
-     * @param (str) id - The resource ID to load.
+     * @param {str} type - The resource type to load.
+     * @param {str} id - The resource ID to load.
+     * @returns {undefined}
      */
-    loadInItemView: function(type, id) {
+    loadInItemView(type, id) {
         if (undefined === type || undefined === id) {
             log.warn('SIGNALS.loadInItemView() requires "type" and "id" arguments');
             return;
@@ -72,8 +73,8 @@ const SIGNALS = {
 
         const settings = {type: type, id: id};
         CANTUS.get(settings)
-        .then(response => { reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response) })
-        .catch(response => {
+        .then((response) => reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response))
+        .catch((response) => {
             reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
             log.warn(response);
         });
@@ -81,7 +82,8 @@ const SIGNALS = {
 
     /** Set the "size" prop of the ItemViewOverlay component.
      *
-     * @param (str) to - Either "full" or "compact".
+     * @param {str} to - Either "full" or "compact".
+     * @returns {undefined}
      */
     setItemViewOverlaySize(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_ITEMVIEW_OVERLAY_SIZE, to);
@@ -89,21 +91,29 @@ const SIGNALS = {
 
     /** Set the format of search results to "table" or "ItemView". Calling this signal with other
      *  arguments will cause an error message.
+     * @param {str} to - Either "table" or "ItemView"
+     * @returns {undefined}
      */
-    setSearchResultsFormat: function(to) {
+    setSearchResultsFormat(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_RESULT_FORMAT, to);
     },
 
-    /** Set the currently-displayed page of search results. */
-    setPage: function(to) {
+    /** Set the currently-displayed page of search results.
+     * @param {int} to - The page of results.
+     * @returns {undefined}
+     */
+    setPage(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_PAGE, to);
     },
 
     /** Set the number of search results displayed per page.
      *
+     * @param {int} to - The per page.
+     * @returns {undefined}
+     *
      * NOTE: This function resets the current page to 1.
      */
-    setPerPage: function(to) {
+    setPerPage(to) {
         // To prevent inadvertently resetting the current page when per_page doesn't actually change,
         // we'll do this slightly weird thing.
         const initialPerPage = reactor.evaluate(getters.searchPerPage);
@@ -114,11 +124,11 @@ const SIGNALS = {
     },
 
     /** Set the resource type for which to search. */
-    setResourceType: function(to) {
+    setResourceType(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
     },
 
-    setSearchQuery: function(params) {
+    setSearchQuery(params) {
         // Set the search query parameters given in "params".
         // If "params" is an object, its members are assumed to be field names and the values are
         //    verified to be strings, which are assumed to be the sought field values. Members that
@@ -128,9 +138,11 @@ const SIGNALS = {
         //
         if ('object' === typeof params) {
             reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, params);
-        } else if ('clear' === params) {
+        }
+        else if ('clear' === params) {
             reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, 'clear');
-        } else {
+        }
+        else {
             log.warn('signals.setSearchQuery() was called with incorrect input.');
         }
     },
@@ -146,11 +158,11 @@ const SIGNALS = {
         //
 
         // default, unchanging things
-        let ajaxSettings = reactor.evaluate(getters.searchQuery).toObject();
+        const ajaxSettings = reactor.evaluate(getters.searchQuery).toObject();
 
         // pagination
-        ajaxSettings['page'] = reactor.evaluate(getters.searchPage);
-        ajaxSettings['per_page'] = reactor.evaluate(getters.searchPerPage);
+        ajaxSettings.page = reactor.evaluate(getters.searchPage);
+        ajaxSettings.per_page = reactor.evaluate(getters.searchPerPage);
 
         // submit the request
         // type, page, per_page will always be there. If "ajax Settings" has more members, that
@@ -158,7 +170,8 @@ const SIGNALS = {
         if (Object.keys(ajaxSettings).length > 3) {
             // search query
             CANTUS.search(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
-        } else {
+        }
+        else {
             // browse query
             CANTUS.get(ajaxSettings).then(SIGNALS.loadSearchResults).catch(SIGNALS.loadSearchResults);
         }
@@ -172,18 +185,18 @@ const SIGNALS = {
      * resoruces are missing, they are loaded from the server.
      */
     loadFromCache(rids) {
-        let results = rids.toArray();
+        const results = rids.toArray();
         const resultsLength = results.length;
 
         // first, try recovering all the results from the localforage cache
-        for (let i = 0; i < resultsLength; i++) {
+        for (let i = 0; i < resultsLength; i += 1) {
             results[i] = localforage.getItem(results[i]);
         }
 
         // wait for all the Promises to resolve, then...
         Promise.all(results).then(results => {
             // check if any of the results are missing
-            for (let i = 0; i < resultsLength; i++) {
+            for (let i = 0; i < resultsLength; i += 1) {
                 if (results[i] === null) {
                     results[i] = CANTUS.search({any: `+id:${rids.get(i)}`});
                 }
@@ -192,22 +205,22 @@ const SIGNALS = {
                 // assemble the results into a CantusJS-like structure, then send them to the Reactor
 
                 // post-processing on resources we got just now
-                for (let i = 0; i < resultsLength; i++) {
+                for (let i = 0; i < resultsLength; i += 1) {
                     if (results[i].sort_order) {
-                        results[i] = results[i][results[i]['sort_order'][0]];
-                        localforage.setItem(results[i]['id'], results[i]);  // TODO: catch()
+                        results[i] = results[i][results[i].sort_order[0]];
+                        localforage.setItem(results[i].id, results[i]);  // TODO: catch()
                     }
                 }
 
                 // We have to fake a lot of CantusJS stuff to make this work.
                 // We also have to set things weirdly so that the key of an Object isn't accidentally
                 // set to "rid" instead of the value of the rid variable.
-                let post = {sort_order: rids, resources: {}};
+                const post = {sort_order: rids, resources: {}};
 
-                for (let i = 0; i < resultsLength; i++) {
-                    let id = results[i]['id'];
+                for (let i = 0; i < resultsLength; i += 1) {
+                    const id = results[i].id;
                     post[id] = results[i];
-                    post['resources'][id] = {};
+                    post.resources[id] = {};
                 }
 
                 post['headers'] = {page: '1', per_page: resultsLength, fields: '', extraFields: '',
@@ -306,10 +319,10 @@ const SIGNALS = {
                 CANTUS.search({'any': `+id:(${collection.get('members').join(' OR ')})`}).then(resp => {
                     if (resp.code) {
                         // TODO: panic over error
-                        console.log(`response was ${resp.cod}`);
+                        log.warn(`response was ${resp.cod}`);
                     }
                     else {
-                        for (let rid of resp.sort_order) {
+                        for (const rid of resp.sort_order) {
                             localforage.setItem(rid, resp[rid]);
                         }
                     }

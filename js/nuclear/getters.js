@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,7 +20,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 
 // Submit these to reactor.evaluate().
@@ -32,33 +32,39 @@ const formatters = {
     //
 
     searchResultsPages(results) {
-        if (null !== results.get('results')) {
-            return Math.ceil(parseInt(results.get('results').get('headers').get('total_results'), 10) /
-                             parseInt(results.get('results').get('headers').get('per_page'), 10));
-        } else {
-            return 0;
+        if (results.get('results')) {
+            return Math.ceil(parseInt(results.getIn(['results', 'headers', 'total_results'])) /
+                             parseInt(results.getIn(['results', 'headers', 'per_page'])));
         }
+
+        return 0;
     },
 
     searchResultsPage(results) {
-        if (null !== results.get('results')) {
-            return parseInt(results.get('results').get('headers').get('page'), 10);
-        } else {
-            return 0;
+        if (results.get('results')) {
+            return parseInt(results.getIn(['results', 'headers', 'page']));
         }
+
+        return 0;
     },
 
     searchResultsPerPage(results) {
-        if (null !== results.get('results')) {
-            return parseInt(results.get('results').get('headers').get('per_page'), 10);
-        } else {
-            return 0;
+        if (results.get('results')) {
+            return parseInt(results.getIn(['results', 'headers', 'per_page']));
         }
+
+        return 0;
     },
 
-    resourceType(query) { return query.get('type'); },
-    searchResults(results) { return results.get('results'); },
-    searchError(results) { return results.get('error'); },
+    resourceType(query) {
+        return query.get('type');
+    },
+    searchResults(results) {
+        return results.get('results');
+    },
+    searchError(results) {
+        return results.get('error');
+    },
 };
 
 
@@ -68,8 +74,10 @@ const getters = {
     // related to the query already completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
-    searchResultsPage: [['searchResults'], formatters.searchResultsPage],  // current displayed page of results (not currently-requested page)
-    searchResultsPerPage: [['searchResults'], formatters.searchResultsPerPage],  // current displayed per-page of results (not currently-requested per-page)
+    // current displayed page of results (not currently-requested page)
+    searchResultsPage: [['searchResults'], formatters.searchResultsPage],
+    // current displayed per-page of results (not currently-requested per-page)
+    searchResultsPerPage: [['searchResults'], formatters.searchResultsPerPage],
     searchResults: [['searchResults'], formatters.searchResults],
     searchError: [['searchResults'], formatters.searchError],
     // related to the query before submission
@@ -78,9 +86,9 @@ const getters = {
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
     // for Collections in the Workspace
-    collectionsList: [['collectionsList'], (results) => { return results.get('collections') }],
-    showAddToCollection: [['collectionsList'], (results) => { return results.get('showAddToCollection') }],
-    candidateForCollection: [['collectionsList'], (results) => { return results.get('candidate') }],
+    collectionsList: [['collectionsList'], (results) => results.get('collections')],
+    showAddToCollection: [['collectionsList'], (results) => results.get('showAddToCollection')],
+    candidateForCollection: [['collectionsList'], (results) => results.get('candidate')],
 };
 
 export {getters, formatters};

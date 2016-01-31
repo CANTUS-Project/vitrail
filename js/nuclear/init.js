@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,7 +20,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 import localforage from 'localforage';
 
@@ -29,18 +29,18 @@ import stores from './stores';
 
 
 reactor.registerStores({
-    'currentItemView': stores.stores.CurrentItemView,
-    'itemViewOverlaySize': stores.stores.ItemViewOverlaySize,
-    'searchResultsFormat': stores.stores.SearchResultsFormat,
-    'searchPerPage': stores.stores.SearchPerPage,
-    'searchPage': stores.stores.SearchPage,
-    'searchQuery': stores.stores.SearchQuery,
-    'searchResults': stores.stores.SearchResults,
-    'collectionsList': stores.stores.CollectionsList,
+    currentItemView: stores.stores.CurrentItemView,
+    itemViewOverlaySize: stores.stores.ItemViewOverlaySize,
+    searchResultsFormat: stores.stores.SearchResultsFormat,
+    searchPerPage: stores.stores.SearchPerPage,
+    searchPage: stores.stores.SearchPage,
+    searchQuery: stores.stores.SearchQuery,
+    searchResults: stores.stores.SearchResults,
+    collectionsList: stores.stores.CollectionsList,
 });
 
 // load any saved collections; we don't want to load anything else though
-localforage.getItem(localforageKey).then(state => {
+localforage.getItem(localforageKey).then((state) => {
     if (state) {
         reactor.loadState({collectionsList: state.collectionsList});
     }

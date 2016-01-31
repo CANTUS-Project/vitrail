@@ -35,7 +35,6 @@ import cantusjs from '../js/cantusjs/cantus.src';
 
 import getters from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
-import {SIGNAL_NAMES as signal_names} from '../js/nuclear/signals';
 import {SIGNALS as signals} from '../js/nuclear/signals';
 
 

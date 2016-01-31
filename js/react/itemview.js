@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,13 +20,14 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
 
 import Button from 'react-bootstrap/lib/Button';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Label from 'react-bootstrap/lib/Label';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
@@ -41,8 +42,9 @@ import {AlertView} from './vitrail';
 
 /** Make the URL to an ItemViewOverlay over the current component.
  *
- * @param (str) type - The type of the resource.
- * @param (str) id - The ID of the resource.
+ * @param {str} type - The type of the resource.
+ * @param {str} id - The ID of the resource.
+ * @returns {str} The link to use to the ItemView.
  *
  * This function uses "window.location" to determine the current URL, in order to figure out which
  * path to request as the "to" prop to a react-router <Link> component.
@@ -73,13 +75,12 @@ const DrupalButton = React.createClass({
         if (this.props.drupalPath) {
             return (
                 <Button block bsStyle="primary" href={this.props.drupalPath} target="_blank">
-                    View on Drupal
+                    {'View on Drupal'}
                 </Button>
             );
         }
-        else {
-            return '';
-        }
+
+        return '';
     },
 });
 
@@ -87,17 +88,15 @@ const DrupalButton = React.createClass({
 /** ItemView sub-component for Chants. */
 const ItemViewChant = React.createClass({
     propTypes: {
-        data: React.PropTypes.object.isRequired,
-        resources: React.PropTypes.object.isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
     },
     render() {
-        let liClassName = 'list-group-item';
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Primary Fields:
         // ---------------
@@ -123,34 +122,34 @@ const ItemViewChant = React.createClass({
 
 
         // primary fields -----------------------------------------------------
-        let header = [data.get('incipit', '?'), <Label bsStyle="info">Chant</Label>];
+        const header = [data.get('incipit', '?'), <Label key="1" bsStyle="info">{'Chant'}</Label>];
 
         // genre, office, feast
-        header.push(<div>{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
+        header.push(<div key="2">{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
 
         // siglum, folio, sequence
         if (data.get('folio') && data.get('sequence')) {
-            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}</div>);
+            header.push(<div key="3">{`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}</div>);
         }
         else if (data.get('folio')) {
-            header.push(<div>{`${data.get('siglum')}: f. ${data.get('folio')}`}</div>);
+            header.push(<div key="4">{`${data.get('siglum')}: f. ${data.get('folio')}`}</div>);
         }
         else if (data.get('sequence')) {
-            header.push(<div>{`${data.get('siglum')}: seq. ${data.get('sequence')}`}</div>);
+            header.push(<div key="5">{`${data.get('siglum')}: seq. ${data.get('sequence')}`}</div>);
         }
         else {
-            header.push(<div>{`${data.get('siglum')}`}</div>);
+            header.push(<div key="6">{`${data.get('siglum')}`}</div>);
         }
 
         // mode, differentia
         if (data.get('mode') && data.get('differentia')) {
-            header.push(<div>{`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}</div>);
+            header.push(<div key="7">{`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}</div>);
         }
         else if (data.get('mode')) {
-            header.push(<div>{`Mode: ${data.get('mode')}`}</div>);
+            header.push(<div key="8">{`Mode: ${data.get('mode')}`}</div>);
         }
         else if (data.get('differentia')) {
-            header.push(<div>{`Differentia: ${data.get('differentia')}`}</div>);
+            header.push(<div key="9">{`Differentia: ${data.get('differentia')}`}</div>);
         }
 
         // secondary fields ---------------------------------------------------
@@ -159,76 +158,60 @@ const ItemViewChant = React.createClass({
         let volpiano;
         let notes;
         let marginalia;
-        let siglum;
         let proofreader;
         let melodyID;
         let cantusID;
         let finalis;
-        let drupalPath;
 
         // CAO Concordances
         if (data.get('cao_concordances')) {
-            concordances = <ListGroupItem>CAO Concordances: {data.get('cao_concordances')}</ListGroupItem>;
+            concordances = <ListGroupItem>{`CAO Concordances: ${data.get('cao_concordances')}`}</ListGroupItem>;
         }
 
         // Full Text
         if (data.get('full_text') && data.get('full_text_manuscript')) {
             fullText = [
-                <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>,
-                <ListGroupItem>Full Text (manuscript spelling):{data.get('full_text_manuscript')}</ListGroupItem>
+                <ListGroupItem key="1">{`Full Text: ${data.get('full_text')}`}</ListGroupItem>,
+                <ListGroupItem key="2">{`Full Text (manuscript spelling):${data.get('full_text_manuscript')}`}</ListGroupItem>,
             ];
-
-        } else if (data.get('full_text')) {
-            fullText = <ListGroupItem>Full Text: {data.get('full_text')}</ListGroupItem>;
+        }
+        else if (data.get('full_text')) {
+            fullText = <ListGroupItem>{`Full Text: ${data.get('full_text')}`}</ListGroupItem>;
         }
 
         // Volpiano
         if (data.get('volpiano')) {
-            volpiano = <ListGroupItem>Volpiano: {data.get('volpiano')}</ListGroupItem>;
+            volpiano = <ListGroupItem>{`Volpiano: ${data.get('volpiano')}`}</ListGroupItem>;
         }
 
         // Notes
         if (data.get('notes')) {
-            notes = <ListGroupItem>Notes: {data.get('notes')}</ListGroupItem>;
+            notes = <ListGroupItem>{`Notes: {data.get('notes')}`}</ListGroupItem>;
         }
 
         // Marginalia
         if (data.get('marginalia')) {
-            marginalia = <ListGroupItem>Marginalia: {data.get('marginalia')}</ListGroupItem>;
-        }
-
-        // Siglum
-        if (data.get('siglum')) {
-            siglum = <ListGroupItem>Siglum: {data.get('siglum')}</ListGroupItem>;
+            marginalia = <ListGroupItem>{`Marginalia: {data.get('marginalia')}`}</ListGroupItem>;
         }
 
         // Proofreader
         if (data.get('proofreader')) {
-            proofreader = <ListGroupItem>Proofreader: {data.get('proofreader')}</ListGroupItem>;
+            proofreader = <ListGroupItem>{`Proofreader: {data.get('proofreader')}`}</ListGroupItem>;
         }
 
         // Melody ID
         if (data.get('melody_id')) {
-            melodyID = <ListGroupItem>Melody ID: {data.get('melody_id')}</ListGroupItem>;
+            melodyID = <ListGroupItem>{`Melody ID: {data.get('melody_id')}`}</ListGroupItem>;
         }
 
         // Cantus ID
         if (data.get('cantus_id')) {
-            cantusID = <ListGroupItem>Cantus ID: {data.get('cantus_id')}</ListGroupItem>;
+            cantusID = <ListGroupItem>{`Cantus ID: {data.get('cantus_id')}`}</ListGroupItem>;
         }
 
         // Finalis
         if (data.get('finalis')) {
-            finalis = <ListGroupItem>Finalis: {data.get('finalis')}</ListGroupItem>;
-        }
-
-        // Link to Drupal
-        if (data.get('drupal_path')) {
-            drupalPath = (
-                <Button block bsStyle="primary" href={data.get('drupal_path')} target="_blank">
-                    View on Drupal
-                </Button>
-            );
+            finalis = <ListGroupItem>{`Finalis: {data.get('finalis')}`}</ListGroupItem>;
         }
 
         // Choose the column size
@@ -239,7 +222,7 @@ const ItemViewChant = React.createClass({
 
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 <ListGroup>
                     {concordances}
                     {fullText}
@@ -254,7 +237,7 @@ const ItemViewChant = React.createClass({
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -263,14 +246,13 @@ const ItemViewFeast = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
     },
     render() {
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Fields Available:
         // - name
@@ -279,27 +261,17 @@ const ItemViewFeast = React.createClass({
         // - feast code
 
         // Name and Feast Code
-        let header = [data.get('name', ''), <Label bsStyle="info">Feast</Label>];
+        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{`Feast`}</Label>];
         if (data.get('date')) {
-            header.push(<br/>);
-            header.push(<span className="text-muted">{data.get('date')}</span>);
+            header.push(<br key="2"/>);
+            header.push(<span key="3" className="text-muted">{data.get('date')}</span>);
         }
 
         const description = data.get('description', '');
 
         let feastCode = data.get('feast_code', '');
         if (feastCode) {
-            feastCode = [<br/>, feastCode];
-        }
-
-        // Link to Drupal
-        let drupalPath;
-        if (data.get('drupal_path')) {
-            drupalPath = (
-                <Button block bsStyle="primary" href={data.get('drupal_path')} target="_blank">
-                    View on Drupal
-                </Button>
-            );
+            feastCode = [<br key="1"/>, feastCode];
         }
 
         // Choose the column size
@@ -310,13 +282,13 @@ const ItemViewFeast = React.createClass({
 
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {feastCode}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -325,14 +297,13 @@ const ItemViewIndexer = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
     },
     render() {
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Fields Available:
         // - display_name
@@ -350,7 +321,7 @@ const ItemViewIndexer = React.createClass({
         else {
             name = data.get('display_name', '');
         }
-        const header = [name, <Label bsStyle="info">Indexer</Label>];
+        const header = [name, <Label key="1" bsStyle="info">{`Indexer`}</Label>];
 
         let institution;
         let cityAndCountry;
@@ -382,7 +353,7 @@ const ItemViewIndexer = React.createClass({
 
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 <ListGroup fill>
                     {institution}
                     {cityAndCountry}
@@ -390,7 +361,7 @@ const ItemViewIndexer = React.createClass({
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -399,23 +370,22 @@ const ItemViewGenre = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
     },
     render() {
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Fields Available:
         // - name
         // - description
         // - mass_or_office
 
-        const header = [data.get('name', ''), <Label bsStyle="info">Genre</Label>];
+        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{`Genre`}</Label>];
         const description = data.get('description', '');
-        const massOrOffice = <div className="text-muted">({data.get('mass_or_office', '')})</div>;
+        const massOrOffice = <div className="text-muted">{`(${data.get('mass_or_office', '')})`}</div>;
 
         // Choose the column size
         let className;
@@ -425,13 +395,13 @@ const ItemViewGenre = React.createClass({
 
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 {massOrOffice}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -440,15 +410,13 @@ const ItemViewSource = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
     },
     render() {
-        const liClassName = 'list-group-item';
         const data = this.props.data;
-        const resources = this.props.resources;
 
         // Primary Fields:
         // ---------------
@@ -475,23 +443,22 @@ const ItemViewSource = React.createClass({
         //
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
 
-        let header = [data.get('rism', ''), <Label bsStyle="info">Source</Label>];
-        header.push(<div>{`${data.get('title', '').slice(0, 40)}...`}</div>);
+        const header = [data.get('rism', ''), <Label key="1" bsStyle="info">{`Source`}</Label>];
+        header.push(<div key="2">{`${data.get('title', '').slice(0, 40)}...`}</div>);
         if (data.get('provenance') && data.get('date')) {
-            header.push(<div>{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
+            header.push(<div key="3">{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
         }
         else if (data.get('provenance')) {
-            header.push(<div>{data.get('provenance')}</div>);
+            header.push(<div key="4">{data.get('provenance')}</div>);
         }
         else if (data.get('date')) {
-            header.push(<div>{data.get('date')}</div>);
+            header.push(<div key="5">{data.get('date')}</div>);
         }
 
         let provenanceDetail;
         let status;
         let summary;
         let occasions;
-        let indexingInfo;
         let description;
 
         // Provenance Detail
@@ -576,6 +543,7 @@ const ItemViewSource = React.createClass({
                     {status}
                     {summary}
                     {provenanceDetail}
+                    {i_date}
                     {indexers}
                     {editors}
                     {proofreaders}
@@ -586,7 +554,7 @@ const ItemViewSource = React.createClass({
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -595,7 +563,7 @@ const ItemViewSimpleResource = React.createClass({
     propTypes: {
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         resources: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        size: React.PropTypes.oneOf(['compact', 'full'])
+        size: React.PropTypes.oneOf(['compact', 'full']),
     },
     getDefaultProps() {
         return {size: 'full'};
@@ -608,7 +576,7 @@ const ItemViewSimpleResource = React.createClass({
         // - description
 
         const type = data.get('type').slice(0, 1).toLocaleUpperCase() + data.get('type').slice(1);
-        const header = [data.get('name', ''), <Label bsStyle="info">{type}</Label>];
+        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{type}</Label>];
         const description = data.get('description', '');
 
         // Choose the column size
@@ -619,12 +587,12 @@ const ItemViewSimpleResource = React.createClass({
 
         // Build the final structure
         return (
-            <Panel collapsible={true} defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
                 {description}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
         );
-    }
+    },
 });
 
 
@@ -651,42 +619,45 @@ const ItemViewMultiplexer = React.createClass({
     render() {
         let rendered;
         switch (this.props.data.get('type')) {
-            case 'chant':
-                rendered = <ItemViewChant data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'chant':
+            rendered = <ItemViewChant data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            case 'feast':
-                rendered = <ItemViewFeast data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'feast':
+            rendered = <ItemViewFeast data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            case 'indexer':
-                rendered = <ItemViewIndexer data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'indexer':
+            rendered = <ItemViewIndexer data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            case 'genre':
-                rendered = <ItemViewGenre data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'genre':
+            rendered = <ItemViewGenre data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            case 'source':
-                rendered = <ItemViewSource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'source':
+            rendered = <ItemViewSource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            case 'century':
-            case 'notation':
-            case 'office':
-            case 'portfolio':
-            case 'provenance':
-            case 'siglum':
-            case 'segment':
-            case 'source_status':
-                rendered = <ItemViewSimpleResource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
-                break;
+        case 'century':
+        case 'notation':
+        case 'office':
+        case 'portfolio':
+        case 'provenance':
+        case 'siglum':
+        case 'segment':
+        case 'source_status':
+            rendered = <ItemViewSimpleResource data={this.props.data} resources={this.props.resources} size={this.props.size}/>;
+            break;
 
-            default:
-                rendered = <ItemViewError errorMessage="Resource type not implemented."
-                                          type={this.props.data.get('type')}
-                           />;
-                break;
+        default:
+            rendered = (
+                <ItemViewError
+                    errorMessage="Resource type not implemented."
+                    type={this.props.data.get('type')}
+                />
+            );
+            break;
         }
 
         return rendered;
@@ -710,11 +681,11 @@ const ItemViewMultiplexer = React.createClass({
  */
 const ItemViewError = React.createClass({
     propTypes: {
-        errorMessage: React.PropTypes.string.isRequired,
-        type: React.PropTypes.node,
-        rid: React.PropTypes.node,
         data: React.PropTypes.node,
+        errorMessage: React.PropTypes.string.isRequired,
         resources: React.PropTypes.node,
+        rid: React.PropTypes.node,
+        type: React.PropTypes.node,
     },
     getDefaultProps() {
         return {type: '', rid: '', data: '', resources: ''};
@@ -722,14 +693,14 @@ const ItemViewError = React.createClass({
     render() {
         return (
             <AlertView message={this.props.errorMessage}
-                       class="warning"
-                       fields={Immutable.Map({
-                           'Component': 'ItemView',
-                           'Type': this.props.type.toString(),
-                           'ID': this.props.rid.toString(),
-                           'Data': this.props.data.toString(),
-                           'Resources': this.props.resources.toString(),
-                       })}
+                class="warning"
+                fields={Immutable.Map({
+                    'Component': 'ItemView',
+                    'Type': this.props.type.toString(),
+                    'ID': this.props.rid.toString(),
+                    'Data': this.props.data.toString(),
+                    'Resources': this.props.resources.toString(),
+                })}
             />
         );
     },
@@ -784,11 +755,11 @@ const ItemView = React.createClass({
     //
 
     propTypes: {
-        size: React.PropTypes.oneOf(['compact', 'full']),
-        type: React.PropTypes.string,
-        rid: React.PropTypes.string,
         data: React.PropTypes.instanceOf(Immutable.Map),
         resources: React.PropTypes.instanceOf(Immutable.Map),
+        rid: React.PropTypes.string,
+        size: React.PropTypes.oneOf(['compact', 'full']),
+        type: React.PropTypes.string,
     },
     getDefaultProps() {
         return {size: 'full'};
@@ -826,16 +797,15 @@ const ItemView = React.createClass({
             undefined !== this.props.data && undefined !== this.props.resources) {
             return 'props';
         }
-        else {
-            return 'error';
-        }
+
+        return 'error';
     },
     canWeDisplaySomething() {
         // Check the props and state to determine whether we have enough information to display.
         //
 
         let answer = false;
-        let whatToDisplay = this.whatShouldWeDisplay();
+        const whatToDisplay = this.whatShouldWeDisplay();
 
         if ('nuclearjs' === whatToDisplay) {
             if (this.state && this.state.theItem && this.state.theItem.size > 0) {
@@ -856,30 +826,14 @@ const ItemView = React.createClass({
     },
     render() {
         let rendered;  // this holds the rendered component
-        let dataFormat = this.whatShouldWeDisplay();
+        const dataFormat = this.whatShouldWeDisplay();
 
-        if (!this.canWeDisplaySomething()) {
-            let errMsg;
-            if ('error' === dataFormat) {
-                errMsg = 'Developer error with the props.';
-            }
-            else {
-                errMsg = 'No data: maybe waiting on the Cantus server?';
-            }
-            rendered = (
-                <ItemViewError errorMessage={errMsg}
-                               type={this.props.type}
-                               rid={this.props.rid}
-                               data={this.props.data}
-                               resources={this.props.resources}
-                />
-            );
-        } else {
+        if (this.canWeDisplaySomething()) {
             // "item" will contain only fields for this item
             // "resources" will contain only URLs for this item
             let item, resources;
             if ('nuclearjs' === dataFormat) {
-                let itemID = this.state.theItem.get('sort_order').get(0);
+                const itemID = this.state.theItem.get('sort_order').get(0);
                 item = this.state.theItem.get(itemID);
                 resources = this.state.theItem.get('resources').get(itemID);
             }
@@ -890,18 +844,35 @@ const ItemView = React.createClass({
 
             rendered = <ItemViewMultiplexer data={item} resources={resources} size={this.props.size}/>;
         }
+        else {
+            let errMsg;
+            if ('error' === dataFormat) {
+                errMsg = 'Developer error with the props.';
+            }
+            else {
+                errMsg = 'No data: maybe waiting on the Cantus server?';
+            }
+            rendered = (
+                <ItemViewError errorMessage={errMsg}
+                    type={this.props.type}
+                    rid={this.props.rid}
+                    data={this.props.data}
+                    resources={this.props.resources}
+                />
+            );
+        }
 
         return rendered;
-    }
+    },
 });
 
 
 /** Make the URL to the "parent" of an ItemViewOverlay component.
  *
- * @param (array) routes - An array of objects that have a "path" member, which is a string
+ * @param {Array} routes - An array of objects that have a "path" member, which is a string
  *        containing part of the URL of a resource. Note that this should be the "routes" prop
  *        given to an ItemViewOverlay component.
- * @returns A string that is the URL to the "parent."
+ * @returns {str} The URL to the "parent."
  *
  * **Example**
  *
@@ -913,14 +884,13 @@ function pathToParent(routes) {
     const routesLength = routes.length;
     if (routesLength > 2) {
         let post;
-        for (let i = 1; i < routesLength - 1; i++) {
+        for (let i = 1; i < routesLength - 1; i += 1) {
             post = `${post}/${routes[i].path}`;
         }
         return post;
-    } else {
-        return '/';
     }
-};
+    return '/';
+}
 
 
 /** Wrapper for the ItemView component that causes its content to appear in front of all other
@@ -962,12 +932,14 @@ const ItemViewOverlay = React.createClass({
         return (
             <Modal show>
                 <Modal.Header>
-                    <Link className="btn btn-danger" to={pathToParent(this.props.routes)}>X</Link>
+                    <Link className="btn btn-danger" to={pathToParent(this.props.routes)}>
+                        <Glyphicon glyph="remove-circle"/>
+                    </Link>
                 </Modal.Header>
                 <ItemView type={this.props.params.type} rid={this.props.params.rid} size={this.state.size}/>
             </Modal>
         );
-    }
+    },
 });
 
 

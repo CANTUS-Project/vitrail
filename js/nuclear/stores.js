@@ -40,10 +40,10 @@ function isWholeNumber(num) {
             if (num >= 0) {
                 if (0 === num % 1) {
                     outcome = true;
-    }}}}
+                } } } }
 
     return outcome;
-};
+}
 
 
 const SETTERS = {
@@ -65,7 +65,7 @@ const SETTERS = {
         // Set the current page in the current search results.
         next = parseInt(next, 10);
         if (isWholeNumber(next)) {
-            let numOfPages = reactor.evaluate(getters.searchResultsPages);
+            const numOfPages = reactor.evaluate(getters.searchResultsPages);
             if (next <= numOfPages || 1 === next) {
                 return next;
             } else {
@@ -102,7 +102,7 @@ const SETTERS = {
             return STORES.SearchQuery.getInitialState();
         } else if ('object' === typeof next) {
             // iterate all the members in "next"
-            for (let field in next) {
+            for (const field in next) {
                 // check the field
                 if (!cantusjs.VALID_FIELDS.includes(field)) {
                     continue;
@@ -116,7 +116,7 @@ const SETTERS = {
 
                 // if the field is "type" check that it's a valid type (if not, print error and continue)
                 if ('type' === field) {
-                    let type = cantusjs.convertTypeNumber(next.type, 'plural');
+                    const type = cantusjs.convertTypeNumber(next.type, 'plural');
                     if (undefined !== type) {
                         post = post.set('type', type);
                     } else {
@@ -235,7 +235,7 @@ const SETTERS = {
         }
         else if (previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
             previous = previous.toJS();
-            let index = previous['collections'][next.colid]['members'].indexOf(next.rid);
+            const index = previous['collections'][next.colid]['members'].indexOf(next.rid);
             previous['collections'][next.colid]['members'].splice(index, 1);
             previous = toImmutable(previous);
         }
@@ -246,7 +246,7 @@ const SETTERS = {
      */
     toggleAddToCollection(previous) {
         // TODO: untested
-        return previous.update('showAddToCollection', () => { return !previous.get('showAddToCollection') });
+        return previous.update('showAddToCollection', () => { return !previous.get('showAddToCollection'); });
     },
 
     /** When you want to add a resource to a collection, but you don't know which collection.
@@ -255,7 +255,7 @@ const SETTERS = {
      */
     askWhichCollection(previous, next) {
         // TODO: untested
-        return previous.update('candidate', () => { return next });
+        return previous.update('candidate', () => { return next; });
     },
 
     /** Delete a collection.

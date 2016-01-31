@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,9 +20,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 
-import localforage from 'localforage';
 import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
@@ -65,30 +64,29 @@ const AddToCollection = React.createClass({
             candidate: getters.candidateForCollection,
         };
     },
-    addToCollection(event) {
-        signals.addResourceIDToCollection(event.target.id.slice(4), this.state.candidate);
-        this.justHide();
+    handleClick(event) {
+        const startOfSlice = 4;  // after the "col-" part
+        signals.addResourceIDToCollection(event.target.id.slice(startOfSlice), this.state.candidate);
+        this.handleHide();
     },
-    justHide() {
+    handleHide() {
         signals.toggleAddToCollection();
     },
     render() {
-        return(
-            <Modal show={this.state.show} onHide={this.justHide}>
+        return (
+            <Modal show={this.state.show} onHide={this.handleHide}>
                 <Modal.Header>
-                    Add resource to which collection?
+                    {`Add resource to which collection?`}
                 </Modal.Header>
                 <Modal.Body>
-                    {this.state.collections.map((value, key) => {
-                        return (
-                            <Button onClick={this.addToCollection} id={`col-${key}`} key={key} block>
-                                {value.get('name')}
-                            </Button>
-                        );
-                    }).toList()}
+                    {this.state.collections.map((value, key) =>
+                        <Button onClick={this.handleClick} id={`col-${key}`} key={key} block>
+                            {value.get('name')}
+                        </Button>
+                    ).toList()}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button bsStyle="danger" onClick={this.justHide}>Cancel</Button>
+                    <Button bsStyle="danger" onClick={this.handleHide}>{`Cancel`}</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -110,31 +108,31 @@ const AddToCollection = React.createClass({
  */
 const AddRemoveCollection = React.createClass({
     propTypes: {
-        rid: React.PropTypes.string.isRequired,
         colid: React.PropTypes.string,
+        rid: React.PropTypes.string.isRequired,
     },
-    addToCollection() {
+    handleAdd() {
         signals.askWhichCollection(this.props.rid);
     },
-    removeFromCollection() {
+    handleRemove() {
         signals.removeResourceIDFromCollection(this.props.colid, this.props.rid);
     },
     render() {
         let removeButton;
         if (this.props.colid) {
             removeButton = (
-                <Button onClick={this.removeFromCollection} bsSize="small">
+                <Button onClick={this.handleRemove} bsSize="small">
                     <Glyphicon glyph="minus"/>
-                    <span className="sr-only">Remove from Collection</span>
+                    <span className="sr-only">{`Remove from Collection`}</span>
                 </Button>
             );
         }
 
         return (
             <ButtonGroup>
-                <Button onClick={this.addToCollection} bsSize="small">
+                <Button onClick={this.handleAdd} bsSize="small">
                     <Glyphicon glyph="plus"/>
-                    <span className="sr-only">Add to a Collection</span>
+                    <span className="sr-only">{`Add to a Collection`}</span>
                 </Button>
                 {removeButton}
             </ButtonGroup>
@@ -149,7 +147,7 @@ const AddRemoveCollection = React.createClass({
  * ------
  * @param (ImmutableJS.Map) collection - Optional. The collection corresponding to this Collection.
  *     If this is omitted, we assume this is for a new collection.
- * @param (function) hideMe - This function is called to hide the component.
+ * @param (function) handleHide - This function is called to hide the component.
  * @param (function) chooseName - This function is called with the newly-chosen name.
  *
  * State:
@@ -158,31 +156,33 @@ const AddRemoveCollection = React.createClass({
  */
 const CollectionRename = React.createClass({
     propTypes: {
-        collection: React.PropTypes.instanceOf(Immutable.Map),
-        hideMe: React.PropTypes.func.isRequired,
         chooseName: React.PropTypes.func.isRequired,
+        collection: React.PropTypes.instanceOf(Immutable.Map),
+        handleHide: React.PropTypes.func.isRequired,
     },
     getInitialState() {
         if (this.props.collection) {
             return {name: this.props.collection.get('name')};
         }
-        else {
-            return {name: ''};
-        }
+        return {name: ''};
     },
-    updateName(event) { this.setState({name: event.target.value}); },
-    submitRename() { this.props.chooseName(this.state.name); this.props.hideMe(); },
+    handleNameChange(event) {
+        this.setState({name: event.target.value});
+    },
+    handleRename() {
+        this.props.chooseName(this.state.name); this.props.handleHide();
+    },
     render() {
         let header;
         if (this.props.collection) {
-            header = `Rename "${this.props.collection.get('name')}"`
+            header = `Rename "${this.props.collection.get('name')}"`;
         }
         else {
             header = 'New collection';
         }
 
         return (
-            <Modal show onHide={this.props.hideMe}>
+            <Modal show onHide={this.props.handleHide}>
                 <Modal.Header>
                     {header}
                 </Modal.Header>
@@ -192,12 +192,12 @@ const CollectionRename = React.createClass({
                         label="New name for the collection"
                         ref="input"
                         value={this.state.name}
-                        onChange={this.updateName}
+                        onChange={this.handleNameChange}
                     />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button bsStyle="danger" onClick={this.props.hideMe}>Cancel</Button>
-                    <Button bsStyle="primary" onClick={this.submitRename}>Choose Name</Button>
+                    <Button bsStyle="danger" onClick={this.props.handleHide}>{`Cancel`}</Button>
+                    <Button bsStyle="primary" onClick={this.handleRename}>{`Choose Name`}</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -222,10 +222,10 @@ const Collection = React.createClass({
     getInitialState() {
         return {showRenamer: false};
     },
-    delete() {
+    handleDelete() {
         signals.deleteCollection(this.props.collection.get('colid'));
     },
-    toggleRenamer() {
+    handleShowRenamer() {
         this.setState({showRenamer: !this.state.showRenamer});
     },
     submitRename(newName) {
@@ -239,10 +239,10 @@ const Collection = React.createClass({
             <Popover id={`coll-${colid}`} title={name}>
                 <ButtonGroup>
                     <Link className="btn btn-default" to={`/workspace/collection/${colid}`}>
-                        Open
+                        {`Open`}
                     </Link>
-                    <Button onClick={this.toggleRenamer}>Rename</Button>
-                    <Button onClick={this.delete}>Delete</Button>
+                    <Button onClick={this.handleShowRenamer}>{`Rename`}</Button>
+                    <Button onClick={this.handleDelete}>{`Delete`}</Button>
                 </ButtonGroup>
             </Popover>
         );
@@ -250,10 +250,12 @@ const Collection = React.createClass({
         let renamer;
         if (this.state.showRenamer) {
             renamer = (
-                <CollectionRename collection={this.props.collection}
-                                  hideMe={this.toggleRenamer}
-                                  chooseName={this.submitRename}
-            />);
+                <CollectionRename
+                    collection={this.props.collection}
+                    handleHide={this.handleShowRenamer}
+                    chooseName={this.submitRename}
+                />
+            );
         }
 
         return (
@@ -272,19 +274,19 @@ const Collection = React.createClass({
  *
  * Props:
  * ------
- * @param (func) closeFunc - This function can be called without arguments to close the DeskAdvanced.
+ * @param (func) handleClose - This function can be called without arguments to close the DeskAdvanced.
  */
 const DeskAdvanced = React.createClass({
     propTypes: {
-        collection: React.PropTypes.object.isRequired,  // TODO: turn this into requiring a Map
-        closeFunc: React.PropTypes.func.isRequired,
+        collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        handleClose: React.PropTypes.func.isRequired,
     },
     render() {
         const title = `Advanced Settings: "${this.props.collection.get('name')}"`;
         const message = `IDs in this collection: ${this.props.collection.get('members').join(', ')}.`;
 
         return (
-            <Modal show onHide={this.props.closeFunc}>
+            <Modal show onHide={this.props.handleClose}>
                 <Modal.Header>
                     <Modal.Title>{title}</Modal.Title>
                 </Modal.Header>
@@ -296,7 +298,7 @@ const DeskAdvanced = React.createClass({
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button onClick={this.props.closeFunc}>Close</Button>
+                    <Button onClick={this.props.handleClose}>{`Close`}</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -321,7 +323,7 @@ const Desk = React.createClass({
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return { collections: getters.collectionsList };
+        return {collections: getters.collectionsList};
     },
     componentWillMount() {
         signals.loadSearchResults('reset');
@@ -330,10 +332,11 @@ const Desk = React.createClass({
     componentWillUpdate(nextProps, nextState) {
         // When the props.colid is changing, or *our* collection changes, we need to ask
         // loadCollection() to help us update.
+        const currentMembers = this.state.collections.getIn([this.props.colid, 'members']);
         if (nextProps.colid !== this.props.colid) {
             this.loadCollection(nextProps.colid);
         }
-        else if (!nextState.collections.getIn([this.props.colid, 'members']).equals(this.state.collections.getIn([this.props.colid, 'members']))) {
+        else if (!nextState.collections.getIn([this.props.colid, 'members']).equals(currentMembers)) {
             this.loadCollection(nextProps.colid, nextState);
         }
     },
@@ -345,9 +348,10 @@ const Desk = React.createClass({
     },
     /** Load the data for the collection given by "colid."
      *
-     * @param (str) colid - The collection ID to load.
-     * @param (ImmutableJS.Map) nextState - If updating the collection to a value not yet in
+     * @param {str} colid - The collection ID to load.
+     * @param {ImmutableJS.Map} nextState - If updating the collection to a value not yet in
      *     "this.state" then this argument should be "nextState."
+     * @returns {undefined}
      */
     loadCollection(colid, nextState) {
         let state = this.state;
@@ -355,12 +359,12 @@ const Desk = React.createClass({
             state = nextState;
         }
 
-        if (!state.collections.has(colid)) {
-            signals.loadSearchResults('reset');
-            log.error(`The collection ID (${colid}) does not exist.`);
+        if (state.collections.has(colid)) {
+            signals.loadFromCache(state.collections.getIn([colid, 'members']));
         }
         else {
-            signals.loadFromCache(state.collections.getIn([colid, 'members']));
+            signals.loadSearchResults('reset');
+            log.error(`The collection ID (${colid}) does not exist.`);
         }
     },
     render() {
@@ -371,14 +375,16 @@ const Desk = React.createClass({
             openCollectionName = this.state.collections.get(this.props.colid).get('name');
             if (this.state.showAdvanced) {
                 advanced = (
-                    <DeskAdvanced closeFunc={this.toggleShowAdvanced}
-                                  collection={this.state.collections.get(this.props.colid)}
-                />);
+                    <DeskAdvanced
+                        handleClose={this.toggleShowAdvanced}
+                        collection={this.state.collections.get(this.props.colid)}
+                    />
+                );
             }
         }
         const header = [
             <span key="1">{`Desk (viewing "${openCollectionName}")`}</span>,
-            <Button key="2" onClick={this.toggleShowAdvanced}>Advanced</Button>
+            <Button key="2" onClick={this.toggleShowAdvanced}>{`Advanced`}</Button>,
         ];
         // TODO: if we have an invalid collection ID, also don't show the "Advanced" button
 
@@ -396,35 +402,36 @@ const Desk = React.createClass({
 
 /** Confirm with the user that they want to reset the NuclearJS reactor.
  *
- * @param (function) hideMe - This function is called to hide the component.
+ * @param (function) handleHide - This function is called to hide the component.
  */
 const ReactorResetter = React.createClass({
     propTypes: {
-        hideMe: React.PropTypes.func.isRequired,
+        handleHide: React.PropTypes.func.isRequired,
     },
-    doTheReset() {
+    handleClear() {
         signals.clearShelf();
-        this.props.hideMe();
+        this.props.handleHide();
     },
     render() {
-        return(
-            <Modal show onHide={this.props.hideMe}>
-                <Modal.Header>
-                    Really clear your shelf?
-                </Modal.Header>
+        return (
+            <Modal show onHide={this.props.handleHide}>
+                <Modal.Header>{`Really clear your shelf?`}</Modal.Header>
                 <Modal.Body>
-                    When you clear your shelf:
+                    {`When you clear your shelf:`}
                     <ul>
-                        <li>all your collections are deleted,</li>
-                        <li>all your saved collections are deleted, and</li>
-                        <li>all your saved chants are deleted too.</li>
+                        <li>{`all your collections are deleted,`}</li>
+                        <li>{`all your saved collections are deleted, and`}</li>
+                        <li>{`all your saved chants are deleted too.`}</li>
                     </ul>
-                    This does not affect data on the server. Only your local data are affected.
-                    <div className="alert alert-danger"><strong>NOTE</strong>: it does not fully work, so you have to refresh the page after you clear</div>
+                    {`This does not affect data on the server. Only your local data are affected.`}
+                    <div className="alert alert-danger">
+                        <strong>{`NOTE`}</strong>
+                        {`: it does not fully work, so you have to refresh the page after you clear`}
+                    </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button bsStyle="danger" onClick={this.doTheReset}>Clear</Button>
-                    <Button bsStyle="success" onClick={this.props.hideMe}>Keep Shelf</Button>
+                    <Button bsStyle="danger" onClick={this.handleClear}>{`Clear`}</Button>
+                    <Button bsStyle="success" onClick={this.props.handleHide}>{`Keep Shelf`}</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -443,29 +450,47 @@ const ReactorResetter = React.createClass({
  *     the NuclearJS Reactor, and should therefore show the "ReactorResetter" component.
  */
 const Shelf = React.createClass({
+    propTypes: {
+        children: React.PropTypes.element,
+    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
-        return { collections: getters.collectionsList };
+        return {collections: getters.collectionsList};
     },
-    getInitialState() { return {addingNewCollection: false, showResetter: false}; },
-    toggleAddingCollection() { this.setState({addingNewCollection: !this.state.addingNewCollection}); },
-    toggleShowResetter() { this.setState({showResetter: !this.state.showResetter}); },
-    addCollection(newName) { signals.addNewCollection(newName); },
-    saveShelf() { signals.saveCollections(); },
+    getInitialState() {
+        return {addingNewCollection: false, showResetter: false};
+    },
+    toggleAddingCollection() {
+        this.setState({addingNewCollection: !this.state.addingNewCollection});
+    },
+    toggleShowResetter() {
+        this.setState({showResetter: !this.state.showResetter});
+    },
+    addCollection(newName) {
+        signals.addNewCollection(newName);
+    },
+    saveShelf() {
+        signals.saveCollections();
+    },
     render() {
-        const collections = this.state.collections.map(value => {
-            return <Collection key={value.get('colid')} collection={value}/>;
-        }).toArray();
+        const collections = this.state.collections.map((value) =>
+            <Collection key={value.get('colid')} collection={value}/>
+        ).toArray();
 
         let renamer;
         if (this.state.addingNewCollection) {
-            renamer = <CollectionRename hideMe={this.toggleAddingCollection} chooseName={this.addCollection}/>;
+            renamer = (
+                <CollectionRename
+                    handleHide={this.toggleAddingCollection}
+                    chooseName={this.addCollection}
+                />
+            );
         }
 
         let resetter;
         if (this.state.showResetter) {
-            resetter = <ReactorResetter hideMe={this.toggleShowResetter}/>;
+            resetter = <ReactorResetter handleHide={this.toggleShowResetter}/>;
         }
 
         return (
@@ -477,13 +502,13 @@ const Shelf = React.createClass({
                         {collections}
                     </ListGroup>
                     <Button bsStyle="success" block onClick={this.toggleAddingCollection}>
-                        <Glyphicon glyph="plus"/>&nbsp;New Collection
+                        <Glyphicon glyph="plus"/>{` New Collection`}
                     </Button>
                     <Button bsStyle="success" block onClick={this.saveShelf}>
-                        <Glyphicon glyph="save"/>&nbsp;Save Shelf
+                        <Glyphicon glyph="save"/>{` Save Shelf`}
                     </Button>
                     <Button bsStyle="warning" block onClick={this.toggleShowResetter}>
-                        <Glyphicon glyph="trash"/>&nbsp;Clear Shelf
+                        <Glyphicon glyph="trash"/>{` Clear Shelf`}
                     </Button>
                 </Panel>
                 {this.props.children}
@@ -502,6 +527,7 @@ const Shelf = React.createClass({
  // TODO: the ItemViewOverlay doesn't work very well here... the way it goes up a level puts ":colid" in the URL!!!
 const DeskAndShelf = React.createClass({
     propTypes: {
+        children: React.PropTypes.element,
         params: React.PropTypes.shape({
             colid: React.PropTypes.string.isRequired,
         }).isRequired,
@@ -525,10 +551,10 @@ const JustShelf = React.createClass({
                 <Col lg={10}>
                     <Panel header="Desk">
                         <p>
-                            Your desk is empty. Good job keeping everything clean!
+                            {`Your desk is empty. Good job keeping everything clean!`}
                         </p>
                         <p>
-                            Choose a Collection from your Shelf to start working.
+                            {`Choose a Collection from your Shelf to start working.`}
                         </p>
                     </Panel>
                 </Col>
@@ -541,39 +567,39 @@ const JustShelf = React.createClass({
 
 const WorkspaceHelp = React.createClass({
     propTypes: {
-        hideHelp: React.PropTypes.func,
+        handleHide: React.PropTypes.func,
     },
     render() {
         return (
-            <Modal show={true} onHide={this.props.hideHelp} >
+            <Modal show onHide={this.props.handleHide} >
                 <Modal.Header>
-                    <Modal.Title>About the Workspace</Modal.Title>
+                    <Modal.Title>{`About the Workspace`}</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     <p>
-                        In the Workspace, you can create private "Collections" of resources. Store them
-                        on the "Shelf" or view them on the "Desk."
+                        {`In the Workspace, you can create private "Collections" of resources. Store them
+                        on the "Shelf" or view them on the "Desk."`}
                     </p>
                     <p>
-                        Collections help you compile resources, and keep track of search results or other
-                        groups of resources that you may want to view later.
+                        {`Collections help you compile resources, and keep track of search results or other
+                        groups of resources that you may want to view later.`}
                     </p>
                     <p>
-                        Soon, you will be able to save collections, and all the resources in them,
+                        {`Soon, you will be able to save collections, and all the resources in them,
                         in your browser across restarts. That way, you can access the CANTUS Database
-                        offline.
+                        offline.`}
                     </p>
                     <p>
-                        You can name your collections, but remember that they are always private, they
+                        {`You can name your collections, but remember that they are always private, they
                         cannot be shared, and they are not backed up to a CANTUS server. If you lose your
                         collections, such as by resetting your browser cache, there is unfortunately no
-                        way to get them back.
+                        way to get them back.`}
                     </p>
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button bsStyle="primary" onClick={this.props.hideHelp}>Close</Button>
+                    <Button bsStyle="primary" onClick={this.props.handleHide}>{`Close`}</Button>
                 </Modal.Footer>
             </Modal>
         );
@@ -582,24 +608,29 @@ const WorkspaceHelp = React.createClass({
 
 
 const Workspace = React.createClass({
+    propTypes: {
+        children: React.PropTypes.element,
+    },
     getInitialState() {
         return {showHelp: false};
     },
-    toggleShowHelp() {
+    handleHelp() {
         this.setState({showHelp: !this.state.showHelp});
     },
     render() {
-        const help = this.state.showHelp ? <WorkspaceHelp hideHelp={this.toggleShowHelp}/> : undefined;
+        const help = this.state.showHelp ? <WorkspaceHelp handleHide={this.handleHelp}/> : undefined;
 
         return (
             <Grid id="vitrail-workspace" fluid>
-                <div className="alert alert-warning"><strong>The Workspace is a draft. It only sort of works.</strong></div>
+                <div className="alert alert-warning">
+                    <strong>{`The Workspace is a draft. It only sort of works.`}</strong>
+                </div>
                 {help}
                 <PageHeader>
-                    Workspace&emsp;
+                    {`Workspace\u2003`}
                     <small>
-                        <i>Manage your personal collections.</i>&emsp;
-                        <Button bsStyle="info" onClick={this.toggleShowHelp}>
+                        <i>{`Manage your personal collections.\u2003`}</i>
+                        <Button bsStyle="info" onClick={this.handleHelp}>
                             <Glyphicon glyph="question-sign"/>
                         </Button>
                     </small>
@@ -617,4 +648,4 @@ const Workspace = React.createClass({
 const moduleForTesting = {
     Workspace: Workspace,
 };
-export {AddToCollection, AddRemoveCollection, DeskAndShelf, JustShelf, Workspace};
+export {AddToCollection, AddRemoveCollection, DeskAndShelf, JustShelf, Workspace, moduleForTesting};
