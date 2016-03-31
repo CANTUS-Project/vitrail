@@ -584,7 +584,7 @@ const ErrorMessage = React.createClass({
                 <div>
                     <h2>{`Server Error`}</h2>
                     <p>
-                        {`Part of the CANTUS server is not working (called "Solr").`}
+                        {`Part of the Cantus server is not working (called "Solr").`}
                     </p>
                     <p>
                         {`Sometimes this is a temporary problem, so you may try your search again in

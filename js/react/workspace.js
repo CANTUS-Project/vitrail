@@ -587,12 +587,12 @@ const WorkspaceHelp = React.createClass({
                     </p>
                     <p>
                         {`Soon, you will be able to save collections, and all the resources in them,
-                        in your browser across restarts. That way, you can access the CANTUS Database
+                        in your browser across restarts. That way, you can access the Cantus Database
                         offline.`}
                     </p>
                     <p>
                         {`You can name your collections, but remember that they are always private, they
-                        cannot be shared, and they are not backed up to a CANTUS server. If you lose your
+                        cannot be shared, and they are not backed up to a Cantus server. If you lose your
                         collections, such as by resetting your browser cache, there is unfortunately no
                         way to get them back.`}
                     </p>

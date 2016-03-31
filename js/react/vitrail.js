@@ -38,7 +38,7 @@ const listOfSoftware = [
     {
         name: 'Abbot',
         version: 'TODO (0.5.1+)',
-        description: 'The "CANTUS Server" that provides data for Vitrail.',
+        description: 'The "Cantus Server" that provides data for Vitrail.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/abbot',
     },
@@ -59,7 +59,7 @@ const listOfSoftware = [
     {
         name: 'Vitrail',
         version: 'TODO (0.2.5+)',
-        description: 'The browser-based application to access CANTUS data.',
+        description: 'The browser-based application to access Cantus data.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/vitrail',
     },
@@ -179,16 +179,16 @@ const Colophon = React.createClass({
         return (
             <article className="container">
                 <section>
-                    <h1>{`About the CANTUS Database`}</h1>
+                    <h1>{`About the Cantus Database`}</h1>
                     <p className="lead">
-                        {`CANTUS is a database of the Latin chants found in over 130 manuscripts and early
+                        {`Cantus is a database of the Latin chants found in over 130 manuscripts and early
                         printed books.`}
                     </p>
                     <p>
                         {`This searchable digital archive holds inventories of primarily
                         antiphoners and breviaries from medieval Europe; these are the main sources for
                         the music sung in the liturgical Office. You are currently accessing the
-                        CANTUS Database through a secondary user interface called Vitrail. The primary
+                        Cantus Database through a secondary user interface called Vitrail. The primary
                         user interface, called Drupal, is available at `}
                         <a href="http://cantus.uwaterloo.ca/">{`http://cantus.uwaterloo.ca/`}</a>{`.`}
                     </p>
@@ -197,17 +197,17 @@ const Colophon = React.createClass({
                 <section>
                     <h2>{`Differences between the User Interfaces`}</h2>
                     <p>
-                        {`Drupal is the usual way of accessing the CANTUS Database. Drupal holds the authoritative
+                        {`Drupal is the usual way of accessing the Cantus Database. Drupal holds the authoritative
                         version of the database. Registered users may edit the database.`}
                     </p>
                     <p>
-                        {`Vitrail is a new way to access the CANTUS Database, currently under development.
+                        {`Vitrail is a new way to access the Cantus Database, currently under development.
                         Vitrail uses a replica of the Drupal database, which may occasionally be out-of-sync
                         with what you see on Drupal. However, Vitrail automatically updates itself, so
                         any differences are temporary.`}
                     </p>
                     <p>
-                        {`Vitrail is being developed to provide a mobile-friendly way to access the CANTUS
+                        {`Vitrail is being developed to provide a mobile-friendly way to access the Cantus
                         Database. Drupal will continue to exist alongside Vitrail for several
                         years\u2014perhaps indefinitely.`}
                     </p>
@@ -218,7 +218,7 @@ const Colophon = React.createClass({
                     <p>
                         {`Vitrail is currently under development. This is not \u201Cproduction-ready\u201D
                         software, so you can expect to encounter bugs and things that don\u0027t look right.
-                        When you find these, please do report them to the CANTUS team, whose contact
+                        When you find these, please do report them to the Cantus team, whose contact
                         information is available on `}<a href="http://cantus.uwaterloo.ca/">{`Drupal`}</a>{`.`}
                     </p>
                     <p>
@@ -231,7 +231,7 @@ const Colophon = React.createClass({
                     </p>
                     <SoftwareTable software={listOfSoftware}/>
                     <p>
-                        {`This list only includes software built by the CANTUS team. You may learn about
+                        {`This list only includes software built by the Cantus team. You may learn about
                         additional software we use by visiting the source code repository of the project
                         you wish to learn about.`}
                     </p>
@@ -277,7 +277,7 @@ const VitrailNavbar = React.createClass({
     render() {
         return (
             <Navbar>
-                <Navbar.Header><Navbar.Brand><a href="/">{`CANTUS Database`}</a></Navbar.Brand></Navbar.Header>
+                <Navbar.Header><Navbar.Brand><a href="/">{`Cantus Database`}</a></Navbar.Brand></Navbar.Header>
                 <Nav>
                     {this.props.navbarItems.map((item, index) =>
                         <NavbarItem key={index} name={item.name} link={item.link}/>
