@@ -35,7 +35,9 @@ import {localforageKey, reactor} from './reactor';
 // supply a default server URL. NOTE that we can't use the full "<< SERVER URL HERE >>" string
 // twice because the playbook would replace both instances, leading the default URL to be used every
 // time!
-let urlToCantusServer = '<< SERVER URL HERE >>';
+let urlToCantusServer =
+'<< SERVER URL HERE >>'
+;
 if (urlToCantusServer.includes('SERVER URL HERE')) {
     urlToCantusServer = 'http://abbot.adjectivenoun.ca:8888/';
 }
