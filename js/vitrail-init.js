@@ -26,7 +26,7 @@ import init from './nuclear/init';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {IndexRoute, Route, Router} from 'react-router';
+import {hashHistory, IndexRoute, Route, Router} from 'react-router';
 
 // TODO: we won't need this eventually (after testing)
 // import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
@@ -41,7 +41,7 @@ import {DeskAndShelf, JustShelf, Workspace} from './react/workspace';
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
 ReactDOM.render(
     (
-        <Router>
+        <Router history={hashHistory}>
             <Route path="/" component={Vitrail}>
                 <IndexRoute component={Colophon}/>
 
