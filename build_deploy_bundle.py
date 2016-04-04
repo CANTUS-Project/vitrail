@@ -31,7 +31,9 @@ import subprocess
 import tarfile
 
 BROWSERIFY = 'node_modules/.bin/browserify'
+UGLIFY = 'node_modules/.bin/uglifyjs'
 VITRAIL_SRC = 'js/vitrail-init.js'
+VITRAIL_MID = 'js/vitrail-compiled.js'
 VITRAIL_OUT = 'js/vitrail.js'
 ARCHIVE = 'deploy.xz'
 FILES_IN_ARCHIVE = [
@@ -48,18 +50,21 @@ FILES_IN_ARCHIVE = [
 
 
 # 1.) build JavaScript asset
+print('Compiling with Browserify')
 vit_out = pathlib.Path(VITRAIL_OUT)
 if vit_out.exists():
     vit_out.unlink()
 
-subprocess.check_call([BROWSERIFY, VITRAIL_SRC, '-o', VITRAIL_OUT])
+subprocess.check_call([BROWSERIFY, VITRAIL_SRC, '-o', VITRAIL_MID])
 
 
 # 2.) minify JavaScript asset
-print("Remember it's not minified yet!")
+print('Minifying with Uglify')
+subprocess.check_call([UGLIFY, VITRAIL_MID, '-o', VITRAIL_OUT])
 
 
 # 3.) copy everything we need into a build directory
+print('Creating archive')
 arch_path = pathlib.Path(ARCHIVE)
 if arch_path.exists():
     arch_path.unlink()
