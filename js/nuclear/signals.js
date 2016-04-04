@@ -30,7 +30,16 @@ import {log} from '../util/log';
 import {localforageKey, reactor} from './reactor';
 
 
-const CANTUS = new cantusjs.Cantus('http://abbot.adjectivenoun.ca:8888/');
+// The Ansible playbook used for deployment will swap out the "<< SERVER URL HERE >>" string with
+// the actual URL of the server. At runtime, we check whether the string was replaced; if not, we'll
+// supply a default server URL. NOTE that we can't use the full "<< SERVER URL HERE >>" string
+// twice because the playbook would replace both instances, leading the default URL to be used every
+// time!
+let urlToCantusServer = '<< SERVER URL HERE >>';
+if (urlToCantusServer.includes('SERVER URL HERE')) {
+    urlToCantusServer = 'http://abbot.adjectivenoun.ca:8888/';
+}
+const CANTUS = new cantusjs.Cantus(urlToCantusServer);
 
 
 const SIGNAL_NAMES = {
