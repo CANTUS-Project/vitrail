@@ -80,7 +80,7 @@ const DrupalButton = React.createClass({
             );
         }
 
-        return '';
+        return <div/>;
     },
 });
 
