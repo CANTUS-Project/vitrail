@@ -186,32 +186,32 @@ const ItemViewChant = React.createClass({
 
         // Notes
         if (data.get('notes')) {
-            notes = <ListGroupItem>{`Notes: {data.get('notes')}`}</ListGroupItem>;
+            notes = <ListGroupItem>{`Notes: ${data.get('notes')}`}</ListGroupItem>;
         }
 
         // Marginalia
         if (data.get('marginalia')) {
-            marginalia = <ListGroupItem>{`Marginalia: {data.get('marginalia')}`}</ListGroupItem>;
+            marginalia = <ListGroupItem>{`Marginalia: ${data.get('marginalia')}`}</ListGroupItem>;
         }
 
         // Proofreader
         if (data.get('proofreader')) {
-            proofreader = <ListGroupItem>{`Proofreader: {data.get('proofreader')}`}</ListGroupItem>;
+            proofreader = <ListGroupItem>{`Proofreader: ${data.get('proofreader')}`}</ListGroupItem>;
         }
 
         // Melody ID
         if (data.get('melody_id')) {
-            melodyID = <ListGroupItem>{`Melody ID: {data.get('melody_id')}`}</ListGroupItem>;
+            melodyID = <ListGroupItem>{`Melody ID: ${data.get('melody_id')}`}</ListGroupItem>;
         }
 
         // Cantus ID
         if (data.get('cantus_id')) {
-            cantusID = <ListGroupItem>{`Cantus ID: {data.get('cantus_id')}`}</ListGroupItem>;
+            cantusID = <ListGroupItem>{`Cantus ID: ${data.get('cantus_id')}`}</ListGroupItem>;
         }
 
         // Finalis
         if (data.get('finalis')) {
-            finalis = <ListGroupItem>{`Finalis: {data.get('finalis')}`}</ListGroupItem>;
+            finalis = <ListGroupItem>{`Finalis: ${data.get('finalis')}`}</ListGroupItem>;
         }
 
         // Choose the column size
