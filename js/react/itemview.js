@@ -883,7 +883,7 @@ const ItemView = React.createClass({
 function pathToParent(routes) {
     const routesLength = routes.length;
     if (routesLength > 2) {
-        let post;
+        let post = '';
         for (let i = 1; i < routesLength - 1; i += 1) {
             post = `${post}/${routes[i].path}`;
         }
