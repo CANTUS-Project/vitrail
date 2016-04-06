@@ -33,7 +33,7 @@ import reactor from '../js/nuclear/reactor';
 import {SIGNAL_NAMES} from '../js/nuclear/signals';
 
 jest.dontMock('../js/react/itemview.js');  // module under test
-// jest.dontMock('../js/react/vitrail.js');  // imported to 'itemview' for AlertView
+jest.dontMock('../js/react/vitrail.js');  // imported to 'itemview' for AlertView
 const itemview = require('../js/react/itemview.js').moduleForTesting;
 
 
@@ -296,20 +296,28 @@ describe('ItemViewError', () => {
 describe('ItemViewOverlay', () => {
     beforeEach(() => { reactor.reset(); });
 
+    // NOTE:
+    // react-bootstrap renders the Modal component in a weird way that prevents ReactDOM from
+    // knowing about it, so we need to use document.getElementsByClassName() to find the rendered
+    // component. For more information, please visit our website at:
+    // https://stackoverflow.com/questions/35086297/testing-a-react-modal-component
+
     it('works as intended', () => {
         const params = {type: 'chant', rid: '1234'};
         const routes = [{path: '/'}, {path: 'lolz'}, {path: ':type/:rid'}];
 
-        const overlay = TestUtils.renderIntoDocument( <itemview.ItemViewOverlay params={params} routes={routes}/> );
-        const overlayNode = ReactDOM.findDOMNode(overlay);
+        const overlay = TestUtils.renderIntoDocument(
+            <itemview.ItemViewOverlay params={params} routes={routes}/>
+        );
 
-        expect(overlayNode.className).toBe('itemview-overlay');
-        expect(overlayNode.children[0].className).toBe('itemview-button-container');
-        // just make sure it's an <a> like returned by Link; we'll trust that component did its stuff
-        expect(overlayNode.children[0].children[0].tagName).toBe('A');
-        // just make sure it's a <div> like returned by ItemView
-        expect(overlayNode.children[0].children[1].tagName).toBe('DIV');
-        expect(overlayNode.children[0].children[1].className).toBe('itemview');
+        // prove the Modal component rendered
+        const outModal = document.getElementsByClassName('modal')[0];
+        expect(outModal.tagName).toBe('DIV');
+
+        // prove the ItemView rendered an ItemViewError inside the Modal (there is no data, so a
+        // full ItemView can't render)
+        const outAlert = outModal.getElementsByClassName('alert')[0];
+        expect(outAlert.getAttribute('role')).toBe('alert');
     });
 });
 
