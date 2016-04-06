@@ -3,7 +3,7 @@ Vitrail
 
 *Vitrail* is a JavaScript front-end client for the Cantus API.
 
-.. image:: https://img.shields.io/travis/CANTUS-Project/master/vitrail.svg?style=flat-square
+.. image:: https://img.shields.io/travis/CANTUS-Project/vitrail/master.svg?style=flat-square
     :target: https://travis-ci.org/CANTUS-Project/vitrail
 .. image:: https://david-dm.org/cantus-project/vitrail.svg?style=flat-square
     :target: https://david-dm.org/cantus-project/vitrail
