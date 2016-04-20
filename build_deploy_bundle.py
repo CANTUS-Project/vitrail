@@ -46,6 +46,17 @@ FILES_IN_ARCHIVE = [
     'fonts/glyphicons-halflings-regular.woff',
     'fonts/glyphicons-halflings-regular.woff2',
     'index.html',
+    'manifest.json',
+    'img/favicon.ico',
+    'img/apple-touch-icon.png',
+    'img/apple-touch-icon-57x57.png',
+    'img/apple-touch-icon-72x72.png',
+    'img/apple-touch-icon-76x76.png',
+    'img/apple-touch-icon-114x114.png',
+    'img/apple-touch-icon-120x120.png',
+    'img/apple-touch-icon-144x144.png',
+    'img/apple-touch-icon-152x152.png',
+    'img/apple-touch-icon-180x180.png',
 ]
 
 
