@@ -1,7 +1,7 @@
 {
     "name": "Cantus App",
     "start_url": "index.html",
-    "display": "fullscreen",
+    "display": "standalone",
     "icons": [
         {
             "src": "img/apple-touch-icon-57x57.png",
