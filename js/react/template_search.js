@@ -27,7 +27,11 @@ import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
-import Input from 'react-bootstrap/lib/Input';
+import Col from 'react-bootstrap/lib/Col';
+import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import Form from 'react-bootstrap/lib/Form';
+import FormControl from 'react-bootstrap/lib/FormControl';
+import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
@@ -159,7 +163,6 @@ const TemplateSearchField = React.createClass({
     },
     render() {
         const displayName = this.props.displayName || this.props.field;
-        const fieldID = `template-field-${this.props.field}`;
         let contents;
 
         if (this.state.searchQuery.get(this.props.field)) {
@@ -167,14 +170,14 @@ const TemplateSearchField = React.createClass({
         }
 
         return (
-            <Input id={fieldID}
-                type="text"
-                value={contents}
-                onChange={this.handleChange}
-                label={displayName}
-                labelClassName="col-xs-2"
-                wrapperClassName="col-xs-10"
-            />
+            <FormGroup controlId="formHorizontalEmail">
+                <Col componentClass={ControlLabel} xs={2}>
+                    {displayName}
+                </Col>
+                <Col xs={10}>
+                    <FormControl type="text" value={contents} onChange={this.handleChange}/>
+                </Col>
+            </FormGroup>
         );
     },
 });
@@ -220,7 +223,7 @@ const TemplateSearchFields = React.createClass({
                 expanded={!this.state.isCollapsed}
                 onClick={this.handleCollapse}
             >
-                <form className="form-horizontal">
+                <Form horizontal>
                     {this.props.fieldNames.map((field, index) =>
                         <TemplateSearchField
                             key={`template-field${index}`}
@@ -228,7 +231,7 @@ const TemplateSearchFields = React.createClass({
                             displayName={field.displayName}
                         />
                     )}
-                </form>
+                </Form>
             </Panel>
         );
     },

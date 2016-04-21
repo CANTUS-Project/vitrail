@@ -29,9 +29,11 @@ import {Link} from 'react-router';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Col from 'react-bootstrap/lib/Col';
+import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import FormControl from 'react-bootstrap/lib/FormControl';
+import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
-import Input from 'react-bootstrap/lib/Input';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Modal from 'react-bootstrap/lib/Modal';
@@ -187,13 +189,10 @@ const CollectionRename = React.createClass({
                     {header}
                 </Modal.Header>
                 <Modal.Body>
-                    <Input
-                        type="text"
-                        label="New name for the collection"
-                        ref="input"
-                        value={this.state.name}
-                        onChange={this.handleNameChange}
-                    />
+                    <FormGroup controlId="formControlsTextarea">
+                        <ControlLabel>{`New name for the collection`}</ControlLabel>
+                        <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
+                    </FormGroup>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button bsStyle="danger" onClick={this.props.handleHide}>{`Cancel`}</Button>

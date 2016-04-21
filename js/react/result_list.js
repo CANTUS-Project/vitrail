@@ -28,11 +28,12 @@ import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
+import FormControl from 'react-bootstrap/lib/FormControl';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import Input from 'react-bootstrap/lib/Input';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
+import Radio from 'react-bootstrap/lib/Radio';
 import Table from 'react-bootstrap/lib/Table';
 
 import {SIGNALS as signals} from '../nuclear/signals';
@@ -489,7 +490,8 @@ const PerPageSelector = React.createClass({
         // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
         return (
             <form>
-                <Input type="number"
+                <FormControl
+                    type="number"
                     name="perPage"
                     id="perPageSelector"
                     value={this.state.perPage}
@@ -526,20 +528,12 @@ const RenderAsSelector = React.createClass({
 
         return (
             <form>
-                <Input type="radio"
-                    label="Render as Views"
-                    checked={viewChecked}
-                    onChange={this.handleChange}
-                    id="renderAsView"
-                    value="ItemView"
-                />
-                <Input type="radio"
-                    label="Render as a Table"
-                    checked={tableChecked}
-                    onChange={this.handleChange}
-                    id="renderAsTable"
-                    value="table"
-                />
+                <Radio checked={viewChecked} onChange={this.handleChange} id="renderAsView" value="ItemView">
+                    {`Render as Views`}
+                </Radio>
+                <Radio checked={tableChecked} onChange={this.handleChange} id="renderAsTable" value="table">
+                    {`Render as a Table`}
+                </Radio>
             </form>
         );
     },

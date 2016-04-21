@@ -26,8 +26,8 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
+import FormControl from 'react-bootstrap/lib/FormControl';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import Input from 'react-bootstrap/lib/Input';
 import Modal from 'react-bootstrap/lib/Modal';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 
@@ -65,7 +65,8 @@ const SearchBox = React.createClass({
     },
     render() {
         return (
-            <Input type="search"
+            <FormControl
+                type="search"
                 id="searchQuery"
                 value={this.state.searchQuery.get('any')}
                 onChange={this.handleChange}
