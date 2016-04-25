@@ -242,22 +242,6 @@ const SETTERS = {
         return previous;
     },
 
-    /** Toggle the "add to which collection? Modal component.
-     */
-    toggleAddToCollection(previous) {
-        // TODO: untested
-        return previous.update('showAddToCollection', () => { return !previous.get('showAddToCollection'); });
-    },
-
-    /** When you want to add a resource to a collection, but you don't know which collection.
-     *
-     * @param (str) next - The resource ID to add to ??? collection.
-     */
-    askWhichCollection(previous, next) {
-        // TODO: untested
-        return previous.update('candidate', () => { return next; });
-    },
-
     /** Delete a collection.
      *
      * @param (str) next - The ID of the collection to delete.
@@ -414,8 +398,6 @@ const STORES = {
         initialize() {
             this.on(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, SETTERS.addResourceIDToCollection);
             this.on(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, SETTERS.removeResourceIDFromCollection);
-            this.on(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION, SETTERS.toggleAddToCollection);
-            this.on(SIGNAL_NAMES.ASK_WHICH_COLLECTION, SETTERS.askWhichCollection);
             this.on(SIGNAL_NAMES.DELETE_COLLECTION, SETTERS.deleteCollection);
             this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
             this.on(SIGNAL_NAMES.ADD_COLLECTION, SETTERS.addNewCollection);

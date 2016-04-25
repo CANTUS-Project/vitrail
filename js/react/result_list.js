@@ -41,7 +41,7 @@ import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {AlertView} from './vitrail';
 import {ItemView, makeLinkToItemView} from './itemview';
-import {AddToCollection, AddRemoveCollection} from './workspace';
+import {AddRemoveCollection} from './workspace';
 
 
 /** A cell in the ResultListTable.
@@ -666,6 +666,8 @@ const ResultListSettings = React.createClass({
 
 /** TODO: rename this to "ResultList" and the other component to something else
  *
+ * Props
+ * -----
  * @param (string) colid - The collection ID being displayed, if relevant.
  */
 const ResultListFrame = React.createClass({
@@ -691,7 +693,6 @@ const ResultListFrame = React.createClass({
 
         return (
             <Panel>
-                <AddToCollection/>
                 <ListGroup fill>
                     {errorMessage}
                     <ResultListSettings/>

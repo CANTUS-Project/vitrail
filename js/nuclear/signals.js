@@ -279,7 +279,6 @@ const SIGNALS = {
     addResourceIDToCollection(colid, rid) {
         // TODO: untested
         reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
-        reactor.dispatch(SIGNAL_NAMES.ASK_WHICH_COLLECTION, undefined);
     },
 
     /** Remove resource with ID "rid" from the collection with ID "colid."
@@ -290,20 +289,6 @@ const SIGNALS = {
     removeResourceIDFromCollection(colid, rid) {
         // TODO: untested
         reactor.dispatch(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, {colid: colid, rid: rid});
-    },
-
-    /** Toggle the "add to which collection?" Modal component. */
-    toggleAddToCollection() {
-        reactor.dispatch(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION);
-    },
-
-    /** When you want to add a resource to a collection, but you don't know which collection.
-     *
-     * @param (str) rid - The resource ID to add to ??? collection.
-     */
-    askWhichCollection(rid) {
-        reactor.dispatch(SIGNAL_NAMES.ASK_WHICH_COLLECTION, rid);
-        reactor.dispatch(SIGNAL_NAMES.TOGGLE_ADD_TO_COLLECTION);
     },
 
     /** Delete a collection.

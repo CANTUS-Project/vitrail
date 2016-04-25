@@ -57,26 +57,25 @@ import signals from '../nuclear/signals';
  * @param (ImmutableJS.Map) collections - The collections that exist.
  */
 const AddToCollection = React.createClass({
+    propTypes: {
+        rid: React.PropTypes.string,
+        close: React.PropTypes.func.isRequired,
+    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
-        // connection to NuclearJS
-        return {
-            collections: getters.collectionsList,
-            show: getters.showAddToCollection,
-            candidate: getters.candidateForCollection,
-        };
+        return { collections: getters.collectionsList };
     },
     handleClick(event) {
         const startOfSlice = 4;  // after the "col-" part
-        signals.addResourceIDToCollection(event.target.id.slice(startOfSlice), this.state.candidate);
+        signals.addResourceIDToCollection(event.target.id.slice(startOfSlice), this.props.rid);
         this.handleHide();
     },
     handleHide() {
-        signals.toggleAddToCollection();
+        this.props.close();
     },
     render() {
         return (
-            <Modal show={this.state.show} onHide={this.handleHide}>
+            <Modal show onHide={this.handleHide}>
                 <Modal.Header>
                     {`Add resource to which collection?`}
                 </Modal.Header>
@@ -98,10 +97,14 @@ const AddToCollection = React.createClass({
 
 /** Produces a <ButtonGroup> with buttons for adding/removing a resource to a collection, as applicable.
  *
- * Props:
- * ------
+ * Props
+ * -----
  * @param (string) rid - The resource ID to add or remove.
  * @param (string) colid - The collection ID this resource is in, if applicable.
+ *
+ * State
+ * -----
+ * @param {bool} showAddToCollection - Whether to render the AddToCollection subcomponent.
  *
  * Note that a "remove" button will only be produced if the "colid" prop is given. Otherwise, we
  * don't know from which collection to remove the resource.
@@ -113,11 +116,17 @@ const AddRemoveCollection = React.createClass({
         colid: React.PropTypes.string,
         rid: React.PropTypes.string.isRequired,
     },
-    handleAdd() {
-        signals.askWhichCollection(this.props.rid);
+    getInitialState() {
+        return {showAddToCollection: false};
     },
     handleRemove() {
         signals.removeResourceIDFromCollection(this.props.colid, this.props.rid);
+    },
+    openAddToCollection() {
+        this.setState({showAddToCollection: true});
+    },
+    closeAddToCollection() {
+        this.setState({showAddToCollection: false});
     },
     render() {
         let removeButton;
@@ -130,9 +139,15 @@ const AddRemoveCollection = React.createClass({
             );
         }
 
+        let addToCollection;
+        if (this.state.showAddToCollection) {
+            addToCollection = <AddToCollection rid={this.props.rid} close={this.closeAddToCollection}/>;
+        }
+
         return (
             <ButtonGroup>
-                <Button onClick={this.handleAdd} bsSize="small">
+                {addToCollection}
+                <Button onClick={this.openAddToCollection} bsSize="small">
                     <Glyphicon glyph="plus"/>
                     <span className="sr-only">{`Add to a Collection`}</span>
                 </Button>
