@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Program Name:           vitrail
 // Program Description:    HTML/CSS/JavaScript user agent for the Cantus API.
 //
@@ -20,16 +20,14 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//-------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
-import init from './nuclear/init';
+// this is imported for the side-effect of setting up our NuclearJS Stores
+import init from './nuclear/init';  // eslint-disable-line no-unused-vars
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {hashHistory, IndexRoute, Route, Router} from 'react-router';
-
-// TODO: we won't need this eventually (after testing)
-// import {SIGNAL_NAMES, SIGNALS} from './nuclear/signals';
 
 import {Colophon, NotImplemented, Vitrail} from './react/vitrail';
 import {ItemViewOverlay} from './react/itemview';
@@ -40,29 +38,27 @@ import {DeskAndShelf, JustShelf, Workspace} from './react/workspace';
 
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
 ReactDOM.render(
-    (
-        <Router history={hashHistory}>
-            <Route path="/" component={Vitrail}>
-                <IndexRoute component={Colophon}/>
+    <Router history={hashHistory}>
+        <Route path="/" component={Vitrail}>
+            <IndexRoute component={Colophon}/>
 
-                <Route path="onebox" component={OneboxSearch}>
-                    <Route path=":type/:rid" component={ItemViewOverlay}/>
-                </Route>
-
-                <Route path="template" component={TemplateSearch}>
-                    <Route path=":type/:rid" component={ItemViewOverlay}/>
-                </Route>
-
-                <Route path="workspace" component={Workspace}>
-                    <IndexRoute component={JustShelf}/>
-                    <Route path="collection/:colid" component={DeskAndShelf}>
-                        <Route path=":type/:rid" component={ItemViewOverlay}/>
-                    </Route>
-                </Route>
-
-                <Route path="bookview" component={NotImplemented}/>
+            <Route path="onebox" component={OneboxSearch}>
+                <Route path=":type/:rid" component={ItemViewOverlay}/>
             </Route>
-        </Router>
-    ),
+
+            <Route path="template" component={TemplateSearch}>
+                <Route path=":type/:rid" component={ItemViewOverlay}/>
+            </Route>
+
+            <Route path="workspace" component={Workspace}>
+                <IndexRoute component={JustShelf}/>
+                <Route path="collection/:colid" component={DeskAndShelf}>
+                    <Route path=":type/:rid" component={ItemViewOverlay}/>
+                </Route>
+            </Route>
+
+            <Route path="bookview" component={NotImplemented}/>
+        </Route>
+    </Router>,
     document.getElementById('vitrail-goes-here')
 );

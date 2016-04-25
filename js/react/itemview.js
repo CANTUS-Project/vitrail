@@ -125,11 +125,19 @@ const ItemViewChant = React.createClass({
         const header = [data.get('incipit', '?'), <Label key="1" bsStyle="info">{'Chant'}</Label>];
 
         // genre, office, feast
-        header.push(<div key="2">{`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}</div>);
+        header.push(
+            <div key="2">
+                {`${data.get('genre', '?')} for ${data.get('office', '?')} during ${data.get('feast', '?')}`}
+            </div>
+        );
 
         // siglum, folio, sequence
         if (data.get('folio') && data.get('sequence')) {
-            header.push(<div key="3">{`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}</div>);
+            header.push(
+                <div key="3">
+                    {`${data.get('siglum')}: f. ${data.get('folio')} #${data.get('sequence')}`}
+                </div>
+            );
         }
         else if (data.get('folio')) {
             header.push(<div key="4">{`${data.get('siglum')}: f. ${data.get('folio')}`}</div>);
@@ -143,7 +151,11 @@ const ItemViewChant = React.createClass({
 
         // mode, differentia
         if (data.get('mode') && data.get('differentia')) {
-            header.push(<div key="7">{`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}</div>);
+            header.push(
+                <div key="7">
+                    {`Mode: ${data.get('mode')}; differentia: ${data.get('differentia')}`}
+                </div>
+            );
         }
         else if (data.get('mode')) {
             header.push(<div key="8">{`Mode: ${data.get('mode')}`}</div>);
@@ -165,14 +177,20 @@ const ItemViewChant = React.createClass({
 
         // CAO Concordances
         if (data.get('cao_concordances')) {
-            concordances = <ListGroupItem>{`CAO Concordances: ${data.get('cao_concordances')}`}</ListGroupItem>;
+            concordances = (
+                <ListGroupItem>
+                    {`CAO Concordances: ${data.get('cao_concordances')}`}
+                </ListGroupItem>
+            );
         }
 
         // Full Text
         if (data.get('full_text') && data.get('full_text_manuscript')) {
             fullText = [
                 <ListGroupItem key="1">{`Full Text: ${data.get('full_text')}`}</ListGroupItem>,
-                <ListGroupItem key="2">{`Full Text (manuscript spelling):${data.get('full_text_manuscript')}`}</ListGroupItem>,
+                <ListGroupItem key="2">
+                    {`Full Text (manuscript spelling):${data.get('full_text_manuscript')}`}
+                </ListGroupItem>,
             ];
         }
         else if (data.get('full_text')) {
@@ -221,8 +239,9 @@ const ItemViewChant = React.createClass({
         }
 
         // Build the final structure
+        const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
                 <ListGroup>
                     {concordances}
                     {fullText}
@@ -281,8 +300,9 @@ const ItemViewFeast = React.createClass({
         }
 
         // Build the final structure
+        const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
                 {description}
                 {feastCode}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
@@ -352,8 +372,9 @@ const ItemViewIndexer = React.createClass({
         }
 
         // Build the final structure
+        const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
                 <ListGroup fill>
                     {institution}
                     {cityAndCountry}
@@ -420,7 +441,8 @@ const ItemViewSource = React.createClass({
 
         // Primary Fields:
         // ---------------
-        // - "rism" (siglum)  // TODO: should the siglum actually be cross-referenced with the Siglum resource?
+        // - "rism" (siglum)  // TODO: should the siglum actually be cross-referenced with the
+        //    Siglum resource?
         // - abbr. full name
         // - date
         // - provenance
@@ -489,14 +511,14 @@ const ItemViewSource = React.createClass({
 
         // Indexing Information -----------------------
         let notes;
-        let i_date;
+        let indexingDate;
         let editors;
         let indexers;
         let proofreaders;
 
         // Indexing Date
         if (data.get('indexing_date')) {
-            i_date = <ListGroupItem>{`Indexed ${data.get('indexing_date')}`}</ListGroupItem>;
+            indexingDate = <ListGroupItem>{`Indexed ${data.get('indexing_date')}`}</ListGroupItem>;
         }
 
         // Notes
@@ -516,7 +538,11 @@ const ItemViewSource = React.createClass({
 
         // Proofreaders
         if (data.get('proofreaders')) {
-            proofreaders = <ListGroupItem>{`Proofreaders: ${data.get('proofreaders').join(', ')}`}</ListGroupItem>;
+            proofreaders = (
+                <ListGroupItem>
+                    {`Proofreaders: ${data.get('proofreaders').join(', ')}`}
+                </ListGroupItem>
+            );
         }
 
         // Description --------------------------------
@@ -536,14 +562,15 @@ const ItemViewSource = React.createClass({
         }
 
         // Build the final structure
+        const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
                 <ListGroup>
                     <ListGroupItem>{data.get('title', '')}</ListGroupItem>
                     {status}
                     {summary}
                     {provenanceDetail}
-                    {i_date}
+                    {indexingDate}
                     {indexers}
                     {editors}
                     {proofreaders}
@@ -586,8 +613,9 @@ const ItemViewSimpleResource = React.createClass({
         }
 
         // Build the final structure
+        const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
                 {description}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
@@ -695,11 +723,11 @@ const ItemViewError = React.createClass({
             <AlertView message={this.props.errorMessage}
                 class="warning"
                 fields={Immutable.Map({
-                    'Component': 'ItemView',
-                    'Type': this.props.type.toString(),
-                    'ID': this.props.rid.toString(),
-                    'Data': this.props.data.toString(),
-                    'Resources': this.props.resources.toString(),
+                    Component: 'ItemView',
+                    Type: this.props.type.toString(),
+                    ID: this.props.rid.toString(),
+                    Data: this.props.data.toString(),
+                    Resources: this.props.resources.toString(),
                 })}
             />
         );

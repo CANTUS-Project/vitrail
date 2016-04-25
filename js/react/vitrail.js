@@ -155,7 +155,7 @@ const SoftwareTable = React.createClass({
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.software.map(software =>
+                    {this.props.software.map((software) =>
                         <tr key={software.name.toLocaleLowerCase()}>
                             <td>{software.name}</td>
                             <td>{software.version}</td>
