@@ -269,34 +269,12 @@ const SIGNALS = {
         });
     },
 
-    /** Add resource with ID "rid" to the collection with ID "colid."
+    /** Make a new collection.
      *
-     * @param (str) colid - The collection ID to amend.
-     * @param (str) rid - The resource ID to append.
-     *
-     * NOTE: this signal also clears the resource in "ask_which_collection."
+     * @param (str) name - The name of the new collection.
      */
-    addResourceIDToCollection(colid, rid) {
-        // TODO: untested
-        reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
-    },
-
-    /** Remove resource with ID "rid" from the collection with ID "colid."
-     *
-     * @param (str) colid - The collection ID to amend.
-     * @param (str) rid - The resource ID to remove.
-     */
-    removeResourceIDFromCollection(colid, rid) {
-        // TODO: untested
-        reactor.dispatch(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, {colid: colid, rid: rid});
-    },
-
-    /** Delete a collection.
-     *
-     * @param (str) colid - The ID of the collection to delete.
-     */
-    deleteCollection(colid) {
-        reactor.dispatch(SIGNAL_NAMES.DELETE_COLLECTION, colid);
+    addNewCollection(name) {
+        reactor.dispatch(SIGNAL_NAMES.ADD_COLLECTION, name);
     },
 
     /** Rename a collection.
@@ -308,12 +286,32 @@ const SIGNALS = {
         reactor.dispatch(SIGNAL_NAMES.RENAME_COLLECTION, {colid: colid, name: name});
     },
 
-    /** Make a new collection.
+    /** Delete a collection.
      *
-     * @param (str) name - The name of the new collection.
+     * @param (str) colid - The ID of the collection to delete.
      */
-    addNewCollection(name) {
-        reactor.dispatch(SIGNAL_NAMES.ADD_COLLECTION, name);
+    deleteCollection(colid) {
+        reactor.dispatch(SIGNAL_NAMES.DELETE_COLLECTION, colid);
+    },
+
+    /** Add resource with ID "rid" to the collection with ID "colid."
+     *
+     * @param (str) colid - The collection ID to amend.
+     * @param (str) rid - The resource ID to append.
+     *
+     * NOTE: this signal also clears the resource in "ask_which_collection."
+     */
+    addResourceIDToCollection(colid, rid) {
+        reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
+    },
+
+    /** Remove resource with ID "rid" from the collection with ID "colid."
+     *
+     * @param (str) colid - The collection ID to amend.
+     * @param (str) rid - The resource ID to remove.
+     */
+    removeResourceIDFromCollection(colid, rid) {
+        reactor.dispatch(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, {colid: colid, rid: rid});
     },
 
     /** Clear all data in "localforage" and all cached chants. */

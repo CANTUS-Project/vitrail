@@ -287,3 +287,85 @@ describe('loadInItemView()', () => {
         expect(mockThen.catch.mock.calls.length === 1).toBe(true);
     });
 });
+
+
+describe('Collection management signals', () => {
+    beforeEach(() => { reactor.reset(); });
+
+    describe('addNewCollection()', () =>{
+        it('works', () => {
+            const name = 'Tester Bester';
+
+            signals.addNewCollection(name);
+
+            const collections = reactor.evaluate(getters.collectionsList);
+            expect(collections.size).toBe(1);
+            const newColl = collections.first();
+            expect(newColl.get('name')).toBe(name);
+            expect(newColl.get('members').size).toBe(0);
+        });
+    });
+
+    describe('renameCollection()', () =>{
+        it('works', () => {
+            // setup: make a collection
+            const name = 'Tester Bester';
+            signals.addNewCollection(name);
+            const newName = 'Broccoli is a "gateway vegetable."';
+
+            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+            signals.renameCollection(colid, newName);
+
+            const collection = reactor.evaluate(getters.collectionsList).first();
+            expect(collection.get('name')).toBe(newName);
+        });
+    });
+
+    describe('deleteCollection()', () =>{
+        it('works', () => {
+            // setup: make a collection
+            const name = 'Tester Bester';
+            signals.addNewCollection(name);
+
+            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+            signals.deleteCollection(colid);
+
+            const collections = reactor.evaluate(getters.collectionsList);
+            expect(collections.size).toBe(0);
+        });
+    });
+
+    describe('addResourceIDToCollection()', () =>{
+        it('works', () => {
+            // setup: make a collection
+            const rid = '123';
+            signals.addNewCollection('whatever');
+            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+
+            signals.addResourceIDToCollection(colid, rid);
+
+            const collection = reactor.evaluate(getters.collectionsList).get(colid);
+            expect(collection.get('members').first()).toBe(rid);
+        });
+    });
+
+    describe('removeResourceIDFromCollection()', () =>{
+        it('works', () => {
+            // setup: make a collection and put a resource in it
+            const rid = '123';
+            signals.addNewCollection('whatever');
+            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+            signals.addResourceIDToCollection(colid, rid);
+
+            signals.removeResourceIDFromCollection(colid, rid);
+
+            const collection = reactor.evaluate(getters.collectionsList).get(colid);
+            expect(collection.get('members').size).toBe(0);
+        });
+    });
+
+    // TODO: still to test...
+    // - clearShelf()
+    // - saveCollections()
+    // - loadFromCache()
+});
