@@ -134,19 +134,28 @@ const SIGNALS = {
         }
     },
 
-    /** Set the resource type for which to search. */
+    /** Set the resource type for which to search.
+     *
+     * @param {str} to - The new resource type to search for.
+     */
     setResourceType(to) {
         reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, {type: to});
     },
 
+    /** Set the parameters for a search query.
+     *
+     * @param {object} params - Parameters for the search query. Each member is assumed to be a
+     *     field name, and the member's value is what to search for in that field. Members that
+     *     are not valid fields for CantusJS are silently ignored.
+     *
+     * The fields in "params" augment or replace existing fields in the search query. If you want
+     * to "start from scratch," first call this function with the "clear" argument, then set new
+     * search parameters as you wish.
+     *
+     * NOTE: "params" may also be the string "clear," in which case all current search parameters
+     *     are cleared and the resourceType is reset to "all."
+     */
     setSearchQuery(params) {
-        // Set the search query parameters given in "params".
-        // If "params" is an object, its members are assumed to be field names and the values are
-        //    verified to be strings, which are assumed to be the sought field values. Members that
-        //    are not valid field names for CantusJS are silently ignored.
-        // If "params" is the string "clear", all current search parameters are cleared, and the
-        //    resourceType is also reset to "all".
-        //
         if ('object' === typeof params) {
             reactor.dispatch(SIGNAL_NAMES.SET_SEARCH_QUERY, params);
         }
@@ -158,12 +167,22 @@ const SIGNALS = {
         }
     },
 
-    /** TODO: write the docs for this, including the "reset" special arg
+    /** Load search results from CantusJS.
      *
+     * You may call this function with "reset" to clear previously-loaded results from CantusJS.
+     * Otherwise, this function expects the result of a call to CantusJS.
      */
     loadSearchResults(result) {
         reactor.dispatch(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, result);
     },
+    /** Submit a search query to the Cantus server.
+     *
+     * This function uses CantusJS to submit a request to the Cantus server according to the settings
+     * previously set in the Stores. Whether this is actually an HTTP SEARCH request depends on the
+     * query settings.
+     *
+     * When the request completes or fails, the "loadSearchResults" signal function is called.
+     */
     submitSearchQuery() {
         // Submit a search query to the Cantus server with the settings currently in NuclearJS.
         //
