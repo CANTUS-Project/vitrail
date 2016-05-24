@@ -38,19 +38,18 @@ import {ResultListFrame} from './result_list';
 import {AlertView} from './vitrail';
 
 
+/** SearchBox: primary textual search field for the user.
+ *
+ * This component connects to the "SearchQuery" store by putting its contents in the "any" field.
+ *
+ * State
+ * -----
+ * @param (str) searchQuery - value of getters.searchQuery
+ */
 const SearchBox = React.createClass({
-    // Generic search box.
-    //
-    // This component is designed to be used as the primary search box visible for the user at the
-    // moment. This box's contents are always given to the SearchQuery store as the "any" field.
-    //
-
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
-        return {
-            searchQuery: getters.searchQuery,
-        };
+        return {searchQuery: getters.searchQuery};
     },
     handleChange(event) {
         signals.setSearchQuery({any: event.target.value});
