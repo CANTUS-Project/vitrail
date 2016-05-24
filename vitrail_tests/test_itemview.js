@@ -29,12 +29,41 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
+import Button from 'react-bootstrap/lib/Button';
+
 import reactor from '../js/nuclear/reactor';
 import {SIGNAL_NAMES} from '../js/nuclear/signals';
 
 jest.dontMock('../js/react/itemview.js');  // module under test
 jest.dontMock('../js/react/vitrail.js');  // imported to 'itemview' for AlertView
 const itemview = require('../js/react/itemview.js').moduleForTesting;
+
+
+describe('DrupalButton', () => {
+    it('renders a button when given a "drupalPath" prop', () => {
+        const renderer = TestUtils.createRenderer();
+        const actualComponent = renderer.render(
+            <itemview.DrupalButton drupalPath="a"/>
+        );
+        const actual = renderer.getRenderOutput(actualComponent);
+
+        expect(actual.type).toBe(Button);
+        expect(actual.props.target).toBe('_blank');
+        expect(actual.props.bsStyle).toBe('primary');
+        expect(actual.props.children).toBe('View on Drupal');
+    });
+
+    it('renders an empty <div> when not given a "drupalPath" prop', () => {
+        const renderer = TestUtils.createRenderer();
+        const actualComponent = renderer.render(
+            <itemview.DrupalButton drupalPath={undefined}/>
+        );
+        const actual = renderer.getRenderOutput(actualComponent);
+
+        expect(actual.type).toBe('div');
+        expect(actual.props).toEqual({});
+    });
+});
 
 
 describe('ItemView', () => {

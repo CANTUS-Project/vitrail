@@ -972,6 +972,7 @@ const ItemViewOverlay = React.createClass({
 
 
 const moduleForTesting = {
+    DrupalButton: DrupalButton,
     ItemViewError: ItemViewError,
     ItemView: ItemView,
     pathToParent: pathToParent,
