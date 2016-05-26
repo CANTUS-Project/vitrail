@@ -34,7 +34,7 @@ import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
-import {ResultListFrame} from './result_list';
+import ResultList from './result_list';
 import {AlertView} from './vitrail';
 
 
@@ -151,7 +151,7 @@ const OneboxSearch = React.createClass({
                 <form onSubmit={this.handleSubmit}>
                     <SearchBox/>
                 </form>
-                <ResultListFrame/>
+                <ResultList/>
                 {this.props.children}
             </div>
         );

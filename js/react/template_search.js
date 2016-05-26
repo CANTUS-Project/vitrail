@@ -39,7 +39,7 @@ import PanelGroup from 'react-bootstrap/lib/PanelGroup';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {AlertView} from './vitrail';
-import {ResultListFrame} from './result_list';
+import ResultList from './result_list';
 import {getters} from '../nuclear/getters';
 import log from '../util/log';
 import {reactor} from '../nuclear/reactor';
@@ -393,7 +393,7 @@ const TemplateSearch = React.createClass({
                 </PageHeader>
                 <PanelGroup>
                     <TemplateSearchTemplate/>
-                    <ResultListFrame/>
+                    <ResultList/>
                 </PanelGroup>
                 {this.props.children}
             </div>

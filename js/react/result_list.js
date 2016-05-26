@@ -343,13 +343,13 @@ const ResultListTable = React.createClass({
 });
 
 
-/** TODO
+/** ResultListMultiplexer: container that decides whether to show ResultListTable or ResultListItemView.
  *
  * Props:
  * ------
  * @param (string) colid - The collection ID being displayed, if applicable.
  */
-const ResultList = React.createClass({
+const ResultListMultiplexer = React.createClass({
     //
     // NuclearJS State:
     // - searchResultsFormat (str) Whether to render the results in a "table" or with "ItemView" components.
@@ -664,13 +664,13 @@ const ResultListSettings = React.createClass({
 });
 
 
-/** TODO: rename this to "ResultList" and the other component to something else
+/**
  *
  * Props
  * -----
  * @param (string) colid - The collection ID being displayed, if relevant.
  */
-const ResultListFrame = React.createClass({
+const ResultList = React.createClass({
     propTypes: {
         colid: React.PropTypes.string,
     },
@@ -696,7 +696,7 @@ const ResultListFrame = React.createClass({
                 <ListGroup fill>
                     {errorMessage}
                     <ResultListSettings/>
-                    <ListGroupItem><ResultList colid={this.props.colid}/></ListGroupItem>
+                    <ListGroupItem><ResultListMultiplexer colid={this.props.colid}/></ListGroupItem>
                     <ListGroupItem><Paginator/></ListGroupItem>
                 </ListGroup>
             </Panel>
@@ -705,5 +705,5 @@ const ResultListFrame = React.createClass({
 });
 
 
-export {ResultListFrame};
-export default ResultListFrame;
+export {ResultList};
+export default ResultList;

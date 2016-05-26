@@ -35,7 +35,7 @@ import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {getters} from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
-import {ResultListFrame} from '../js/react/result_list';
+import ResultList from '../js/react/result_list';
 import {SIGNALS as signals} from '../js/nuclear/signals';
 
 jest.dontMock('../js/react/onebox.js');  // module under test
@@ -128,7 +128,7 @@ describe('OneboxSearch', () => {
         expect(child.type()).toBe('form');
         //
         child = actual.childAt(3);
-        expect(child.type()).toBe(ResultListFrame);
+        expect(child.type()).toBe(ResultList);
         //
         child = actual.childAt(4);
         expect(child.type()).toBe('div');
