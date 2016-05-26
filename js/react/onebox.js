@@ -38,6 +38,24 @@ import {ResultListFrame} from './result_list';
 import {AlertView} from './vitrail';
 
 
+const searchFieldExamples = Immutable.OrderedMap({
+    'Phrases': <pre>{'"gloria in excelsis"'}</pre>,
+    'Look in a Field': <pre>{'genre:antiphon'}</pre>,
+    'Phrase in a Field': <pre>{'genre:"Antiphon Verse"'}</pre>,
+    'Boolean Operators (AND)': <pre>{'incipit:gloria AND genre:psalm'}</pre>,
+    '(OR)': <pre>{'incipit:gloria OR incipit:deus'}</pre>,
+    '(NOT)': <pre>{'incipit:gloria NOT genre:InR'}</pre>,
+    'Term Grouping': <pre>{'finalis:C AND (mode:6T OR differentia:A01)'}</pre>,
+    'Grouping on a Field': <pre>{'finalis:C AND mode:(5T OR 6T)'}</pre>,
+    'Wildcard *': [<pre key="1">{'antiphon*'}</pre>, '(matches "antiphon" and "antiphoner")'],
+    'Wildcard ?': [<pre key="1">{'antiphon?'}</pre>, '(matches "antiphone" and "antiphons" but not "antiphon" or "antiphoner")'],
+    'Combined Wildcards': [<pre key="1">{'christ?*'}</pre>, '(matches "christe," "christus," "christmas," "christopher," etc.)'],
+    'Require a Value in a Field': <pre>{'+type:genre'}</pre>,
+    'Forbid a Value in a Field': <pre>{'-type:genre'}</pre>,
+    'Require the Field Has any Value': <pre>{'+differentia:*'}</pre>,
+});
+
+
 /** SearchBox: primary textual search field for the user.
  *
  * This component connects to the "SearchQuery" store by putting its contents in the "any" field.
@@ -77,6 +95,17 @@ const SearchBox = React.createClass({
 });
 
 
+/** OneboxSearch: full "onebox search" widget, with search box, settings, and results.
+ *
+ * Props
+ * -----
+ * @param (ReactElement) children - Provided by react-router, expected to be ItemViewOverlay.
+ *
+ * State
+ * -----
+ * @param (bool) showHelp - Whether to display the AlertView modal subcomponent with help on the
+ *     permitted query syntax.
+ */
 const OneboxSearch = React.createClass({
     // Complete OneboxSearch widget.
     //
@@ -100,26 +129,9 @@ const OneboxSearch = React.createClass({
         this.setState({showHelp: !this.state.showHelp});
     },
     render() {
-        const examples = Immutable.OrderedMap({
-            'Phrases': <pre>{'"gloria in excelsis"'}</pre>,
-            'Look in a Field': <pre>{'genre:antiphon'}</pre>,
-            'Phrase in a Field': <pre>{'genre:"Antiphon Verse"'}</pre>,
-            'Boolean Operators (AND)': <pre>{'incipit:gloria AND genre:psalm'}</pre>,
-            '(OR)': <pre>{'incipit:gloria OR incipit:deus'}</pre>,
-            '(NOT)': <pre>{'incipit:gloria NOT genre:InR'}</pre>,
-            'Term Grouping': <pre>{'finalis:C AND (mode:6T OR differentia:A01)'}</pre>,
-            'Grouping on a Field': <pre>{'finalis:C AND mode:(5T OR 6T)'}</pre>,
-            'Wildcard *': [<pre key="1">{'antiphon*'}</pre>, '(matches "antiphon" and "antiphoner")'],
-            'Wildcard ?': [<pre key="1">{'antiphon?'}</pre>, '(matches "antiphone" and "antiphons" but not "antiphon" or "antiphoner")'],
-            'Combined Wildcards': [<pre key="1">{'christ?*'}</pre>, '(matches "christe," "christus," "christmas," "christopher," etc.)'],
-            'Require a Value in a Field': <pre>{'+type:genre'}</pre>,
-            'Forbid a Value in a Field': <pre>{'-type:genre'}</pre>,
-            'Require the Field Has any Value': <pre>{'+differentia:*'}</pre>,
-        });
-
         const help = (
             <Modal show={this.state.showHelp} onHide={this.handleShowHelp} >
-                <AlertView class="info" message="Examples of Search Queries" fields={examples}/>
+                <AlertView class="info" message="Examples of Search Queries" fields={searchFieldExamples}/>
                 <Modal.Footer><Button onClick={this.handleShowHelp}>{`Close`}</Button></Modal.Footer>
             </Modal>
         );

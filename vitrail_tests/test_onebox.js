@@ -30,9 +30,12 @@ import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import Modal from 'react-bootstrap/lib/Modal';
+import PageHeader from 'react-bootstrap/lib/PageHeader';
 
 import {getters} from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
+import {ResultListFrame} from '../js/react/result_list';
 import {SIGNALS as signals} from '../js/nuclear/signals';
 
 jest.dontMock('../js/react/onebox.js');  // module under test
@@ -101,5 +104,68 @@ describe('SearchBox', () => {
         // make sure the second value is set in the Store
         const expected = Immutable.Map({type: 'all', any: secondQuery});
         expect(reactor.evaluate(getters.searchQuery)).toEqual(expected);
+    });
+});
+
+
+describe('OneboxSearch', () => {
+    beforeEach(() => { reactor.reset(); });
+
+    it('renders properly', () => {
+        const actual = shallow(<onebox.OneboxSearch children={<div className="lol"/>}/>);
+
+        let child;
+        expect(actual.type()).toBe('div');
+        expect(actual.hasClass('container')).toBe(true);
+        //
+        child = actual.childAt(0);
+        expect(child.type()).toBe(Modal);
+        //
+        child = actual.childAt(1);
+        expect(child.type()).toBe(PageHeader);
+        //
+        child = actual.childAt(2);
+        expect(child.type()).toBe('form');
+        //
+        child = actual.childAt(3);
+        expect(child.type()).toBe(ResultListFrame);
+        //
+        child = actual.childAt(4);
+        expect(child.type()).toBe('div');
+        expect(child.hasClass('lol')).toBe(true);
+    });
+
+    it('resets the search query before mounting', () => {
+        signals.setSearchQuery({any: 'grilled cheese'});
+        const actual = shallow(<onebox.OneboxSearch/>);
+        expect(reactor.evaluate(getters.searchQuery)).toEqual(Immutable.Map({type: 'all'}));
+    });
+
+    it('toggles the AlertView help window when requested', () => {
+        const actual = mount(<onebox.OneboxSearch/>);
+        const helpButton = actual.find(Button);
+        const helpModal = actual.find(Modal);
+        expect(helpModal.props().show).toBe(false);  // pre-condition
+
+        // click the "?" button, it open the modal
+        helpButton.simulate('click');
+        expect(helpModal.props().show).toBe(true);
+
+        // click the help window's close button, it closes the modal
+        const closeButton = helpButton.find(Button);
+        closeButton.simulate('click');
+        expect(helpModal.props().show).toBe(false);
+    });
+
+    it('calls signals.submitSearchQuery() when the SearchBox is submitted', () => {
+        const actual = mount(<onebox.OneboxSearch/>);
+        const searchBox = actual.find(FormControl);
+        const origSubmit = signals.submitSearchQuery;
+        signals.submitSearchQuery = jest.genMockFn();
+
+        searchBox.simulate('submit');
+        expect(signals.submitSearchQuery).toBeCalled();
+
+        signals.submitSearchQuery = origSubmit;
     });
 });
