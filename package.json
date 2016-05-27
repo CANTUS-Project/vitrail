@@ -1,6 +1,6 @@
 {
     "name": "vitrail",
-    "version": "0.2.6",
+    "version": "0.3.0",
     "description": "User agent for the Cantus API. NOTE: the dependencies and everything are only used when running Vitrail with Node, which only happens when running the tests.",
     "keywords": ["music", "musicology", "mediaeval", "Gregorian chant", "manuscript"],
     "homepage": "https://github.com/CANTUS-Project/vitrail",

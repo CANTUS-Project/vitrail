@@ -214,7 +214,7 @@ const SIGNALS = {
      * This function first tries to load the resources from the browser cache using localforage. If
      * resoruces are missing, they are loaded from the server.
      */
-    loadFromCache(rids) {
+    loadFromCache(rids) {  // TODO: untested
         const results = rids.toArray();
         const resultsLength = results.length;
 
@@ -315,15 +315,14 @@ const SIGNALS = {
     },
 
     /** Clear all data in "localforage" and all cached chants. */
-    clearShelf() {
-        // TODO: untested
+    clearShelf() {  // TODO: untested
         reactor.reset();
         localforage.clear();
         // TODO: clear cached chants-and-stuff, once those are cached
     },
 
     /** Save extant collections with localforage. */
-    saveCollections() {
+    saveCollections() {  // TODO: untested
         localforage.setItem(localforageKey, reactor.serialize()).then(() => {
             // make sure all the resources in all the collections are cached
             const collections = reactor.evaluate(getters.collectionsList);
