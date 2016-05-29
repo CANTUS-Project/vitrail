@@ -22,7 +22,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ------------------------------------------------------------------------------------------------
 
-import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
@@ -41,79 +40,71 @@ import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {AlertView} from './vitrail';
 import ResultList from './result_list';
 import {getters} from '../nuclear/getters';
-import log from '../util/log';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS as signals} from '../nuclear/signals';
 
 
+/** TemplateTypeSelector: Resource type selection component for the TemplateSearch.
+ *
+ * While this component only allows setting the resource type to chants, indexers, sources, or
+ * feasts, any other resource type will *not* be corrected.
+ *
+ * State
+ * -----
+ * @param (str) resourceType - From NuclearJS, the currently-selected resource type.
+ */
 const TemplateTypeSelector = React.createClass({
-    // Type selection component for the TemplateSearch.
-
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
         return {
             resourceType: getters.resourceType,
         };
     },
     handleClick(event) {
-        let newType = 'chants';
+        const mapperThing = {
+            chantsTypeButton: 'chants',
+            feastsTypeButton: 'feasts',
+            indexersTypeButton: 'indexers',
+            sourcesTypeButton: 'sources',
+        };
 
-        switch (event.target.id) {
-        case 'indexersTypeButton':
-            newType = 'indexers';
-            break;
-
-        case 'sourcesTypeButton':
-            newType = 'sources';
-            break;
-
-        case 'feastsTypeButton':
-            newType = 'feasts';
-            break;
-
-        default:
-            log.warn(`Unsupported resource type: ${newType}`);
+        if (mapperThing[event.target.id] !== this.state.resourceType) {
+            signals.setSearchQuery('clear');
+            signals.setResourceType(mapperThing[event.target.id]);
         }
-
-        signals.setSearchQuery('clear');
-        signals.setResourceType(newType);
     },
     supportedTypes: ['chants', 'feasts', 'indexers', 'sources'],
     render() {
-        const className = '';
-        const classNameActive = 'active';
-
         const buttonProps = {
-            chants: {'className': className, 'aria-pressed': 'false'},
-            indexers: {'className': className, 'aria-pressed': 'false'},
-            sources: {'className': className, 'aria-pressed': 'false'},
-            feasts: {'className': className, 'aria-pressed': 'false'},
+            chants: {'aria-pressed': 'false', 'active': false},
+            indexers: {'aria-pressed': 'false', 'active': false},
+            sources: {'aria-pressed': 'false', 'active': false},
+            feasts: {'aria-pressed': 'false', 'active': false},
         };
 
         if (this.supportedTypes.includes(this.state.resourceType)) {
             buttonProps[this.state.resourceType]['aria-pressed'] = 'true';
-            buttonProps[this.state.resourceType].className = classNameActive;
+            buttonProps[this.state.resourceType].active = true;
         }
 
         return (
             <ButtonGroup role="group" aria-label="resource type selector">
-                <Button id="chantsTypeButton" className={buttonProps.chants.className}
+                <Button id="chantsTypeButton" active={buttonProps.chants.active}
                     aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.handleClick}
                 >
                     {`Chants`}
                 </Button>
-                <Button id="feastsTypeButton" className={buttonProps.feasts.className}
+                <Button id="feastsTypeButton" active={buttonProps.feasts.active}
                     aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.handleClick}
                 >
                     {`Feasts`}
                 </Button>
-                <Button id="indexersTypeButton" className={buttonProps.indexers.className}
+                <Button id="indexersTypeButton" active={buttonProps.indexers.active}
                     aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.handleClick}
                 >
                     {`Indexers`}
                 </Button>
-                <Button id="sourcesTypeButton" className={buttonProps.sources.className}
+                <Button id="sourcesTypeButton" active={buttonProps.sources.active}
                     aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.handleClick}
                 >
                     {`Sources`}
@@ -124,22 +115,30 @@ const TemplateTypeSelector = React.createClass({
 });
 
 
+/** TemplateSearchField: A single field in the TemplateSearch's template.
+ *
+ * Given the display name and Abbot's field name, this component keeps its contents in sync with
+ * the NuclearJS "SearchQuery" Store.
+ *
+ * Props
+ * -----
+ * @param (str) displayName - Optional display name to use as the field's label. We use "field" if
+ *     this is not provided.
+ * @param (str) field - The field name according to Abbot.
+ *
+ * State
+ * -----
+ * @param (ImmutableJS.Map) searchQuery - From the NuclearJS "getters.searchQuery" getter.
+ */
 const TemplateSearchField = React.createClass({
-    // A single field in the TemplateSearch template.
-    //
-
     propTypes: {
         // The field name displayed in the GUI. If omitted, the "field" is displayed.
         displayName: React.PropTypes.string,
         // The field name according to the Cantus API.
         field: React.PropTypes.string.isRequired,
     },
-    getDefaultProps() {
-        return {displayName: null, contents: ''};
-    },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
         return {
             searchQuery: getters.searchQuery,
         };
@@ -155,11 +154,11 @@ const TemplateSearchField = React.createClass({
         if (this.state.searchQuery.get(field) !== nextState.searchQuery.get(field)) {
             return true;
         }
-        else if (this.props === nextProps) {
-            return false;
+        else if (this.props !== nextProps) {
+            return true;
         }
 
-        return true;
+        return false;
     },
     render() {
         const displayName = this.props.displayName || this.props.field;
@@ -183,24 +182,27 @@ const TemplateSearchField = React.createClass({
 });
 
 
+/** TemplateSearchFields: all the fields in a TemplateSearch template.
+ *
+ * Contained by TemplateSearchTemplate.
+ * Contains a bunch of TemplateSearchField.
+ *
+ * Props
+ * -----
+ * @param (array of Object) fieldNames - Details about the fields in this template. It's an array
+ *     of objects, each of which contains two members that are passed on to a TemplateSearchField
+ *     elements: field, displayName.
+ *
+ * State
+ * -----
+ * @param (bool) isCollapsed - Whether the fields are actually shown (if "false," the default) or
+ *     the component should be collapsed to save space.
+ */
 const TemplateSearchFields = React.createClass({
-    // All the fields in a TemplateSearch template.
-    //
-    // Contained by TemplateSearchTemplate.
-    // Contains a bunch of TemplateSearchField.
-    //
-    // State:
-    // - isCollapsed (bool) Whether the fields are actually shown (if "false," the default) or the
-    //   component should be collapsed to save space.
-
     propTypes: {
-        // A list of objects, each with three members: 'field', 'displayName', and 'contents'.
-        // These are the internal and GUI names for the fields required in this template, plus the
-        // current contents of the field.
         fieldNames: React.PropTypes.arrayOf(React.PropTypes.shape({
             field: React.PropTypes.string,
             displayName: React.PropTypes.string,
-            contents: React.PropTypes.string,
         })).isRequired,
     },
     getInitialState() {
@@ -238,14 +240,40 @@ const TemplateSearchFields = React.createClass({
 });
 
 
-const TemplateSearchTemplate = React.createClass({
-    // For TemplateSearch, this is the template. This just selects the proper sub-component, but it
-    // leaves TemplateSearch much cleaner.
-    //
+/** WrongTypeAlertView: shown in TemplateSearchTemplate when the resourceType doesn't have a template.
+ *
+ * Props
+ * -----
+ * @param (str) resourceType - The resource type for which there isn't a template.
+ */
+const WrongTypeAlertView = React.createClass({
+    propTypes: {
+        resourceType: React.PropTypes.string.isRequired,
+    },
+    render() {
+        const message = [
+            <h2 key="1"><strong>{`Error`}</strong></h2>,
+            `TemplateSearchTemplate doesn't have a template for this resource type.`,
+            <br key="3"/>,
+            `Please report this to the developers, then choose a resource type above.`,
+            <br key="5"/>,
+            `Mention the resource type was set to "${this.props.resourceType}"`,
+        ];
 
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+        return <AlertView class="danger" message={message}/>;
+    },
+});
+
+
+/** TemplateSearchTemplate: either renders the template itself or an error message.
+ *
+ * State
+ * -----
+ * @param (str) resourceType - "getters.resourceType" from NuclearJS.
+ */
+const TemplateSearchTemplate = React.createClass({
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
         return {
             resourceType: getters.resourceType,
         };
@@ -328,40 +356,23 @@ const TemplateSearchTemplate = React.createClass({
 
         default:
             fieldNames = 'error';
-
         }
 
+        let content;  // the main content---either the template or an error message
         if (fieldNames === 'error') {
-            const message = [
-                <h2 key="1"><strong>{`Error`}</strong></h2>,
-                'TemplateSearchTemplate received an invalid resource type.',
-                <br key="3"/>,
-                'Please report this to the developers, then choose a resource type above.',
-            ];
-
-            fieldNames = (
-                <ListGroupItem>
-                    <AlertView
-                        class="danger"
-                        message={message}
-                        fields={Immutable.Map({'getters.resourceType': this.state.resourceType})}
-                    />
-                </ListGroupItem>
-            );
+            content = <WrongTypeAlertView resourceType={this.state.resourceType}/>;
         }
         else {
-            fieldNames = (
-                <ListGroupItem>
-                    <TemplateSearchFields fieldNames={fieldNames}/>
-                </ListGroupItem>
-            );
+            content = <TemplateSearchFields fieldNames={fieldNames}/>;
         }
 
         return (
             <Panel>
                 <ListGroup fill>
                     <ListGroupItem><TemplateTypeSelector/></ListGroupItem>
-                    {fieldNames}
+                    <ListGroupItem>
+                        {content}
+                    </ListGroupItem>
                     <ListGroupItem>
                         <Button bsStyle="primary" onClick={this.handleSubmit}>{`Search`}</Button>
                     </ListGroupItem>
@@ -372,14 +383,19 @@ const TemplateSearchTemplate = React.createClass({
 });
 
 
+/** TemplateSearch: Top-level component for the TemplateSearch and its ResultList.
+ *
+ * Props
+ * -----
+ * @param (ReactElement) children - From react-router, an optional ItemViewOverlay.
+ */
 const TemplateSearch = React.createClass({
-    //
-
     propTypes: {
         children: React.PropTypes.element,
     },
     componentWillMount() {
-        // clear the search query
+        // Clear the search query. Must happen in this component, and in this function, to ensure
+        // that the template starts with a supported resource type.
         signals.setSearchQuery('clear');
         signals.loadSearchResults('reset');
         signals.setResourceType('chant');
@@ -402,6 +418,13 @@ const TemplateSearch = React.createClass({
 });
 
 
-export {TemplateSearch, TemplateSearchTemplate, TemplateSearchFields, TemplateSearchField,
-        TemplateTypeSelector};
+const MODULE_FOR_TESTING = {
+    TemplateSearch,
+    TemplateSearchTemplate,
+    TemplateSearchFields,
+    TemplateSearchField,
+    TemplateTypeSelector,
+    WrongTypeAlertView,
+};
+export {TemplateSearch, MODULE_FOR_TESTING};
 export default TemplateSearch;
