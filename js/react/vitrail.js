@@ -66,6 +66,46 @@ const listOfSoftware = [
 ];
 
 
+/** AlertFieldList: AlertView subcomponent, a table of fields to values
+ *
+ * Props
+ * -----
+ * @param (ImmutableJS.Map) fields - A Map of key/value pairs with additional information for the
+ *     user. These should help the user either solve the problem, or report it to the developers.
+ */
+const AlertFieldList = React.createClass({
+    propTypes: {
+        fields: React.PropTypes.instanceOf(Immutable.Map),
+    },
+    getDefaultProps() {
+        return {fields: Immutable.Map()};
+    },
+    render() {
+        if (this.props.fields.size < 1) {
+            return null;
+        }
+
+        const innerList = [];
+        this.props.fields.forEach((value, key) => {
+            innerList.push(
+                <tr key={key.toLocaleLowerCase()}>
+                    <td className="td-align-right">{`${key}:`}</td>
+                    <td>{value}</td>
+                </tr>
+            );
+        });
+
+        return (
+            <Table fill striped>
+                <tbody>
+                    {innerList}
+                </tbody>
+            </Table>
+        );
+    },
+});
+
+
 /** Alert the user about something.
  *
  * This component is intended primarily for alerting users about errors, but may also be used for
@@ -79,7 +119,6 @@ const listOfSoftware = [
  * @param (str) children - The error message to display to the user. Required.
  * @param (str) class - A Bootstrap 4 "contextual class" for the message (success, info, warning,
  *     danger). Defaults to "info."
- * @param (bool) overlay - Display in front of the rest of the UI. Default is false.
  * @param (ImmutableJS.Map) fields - A Map of key/value pairs with additional information for the
  *     user. These should help the user either solve the problem, or report it to the developers.
  *
@@ -89,39 +128,17 @@ const AlertView = React.createClass({
         // children
         class: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
         fields: React.PropTypes.instanceOf(Immutable.Map),
-        overlay: React.PropTypes.bool,
     },
     getDefaultProps() {
-        return {overlay: false, class: 'info', fields: Immutable.Map()};
+        return {class: 'info'};
     },
     render() {
-        let fields;
-        if (this.props.fields.size > 0) {
-            const innerList = [];
-            this.props.fields.forEach((value, key) => {
-                innerList.push(
-                    <tr key={key.toLocaleLowerCase()}>
-                        <td className="td-align-right">{`${key}:`}</td>
-                        <td>{value}</td>
-                    </tr>
-                );
-            });
-
-            fields = (
-                <Table fill striped>
-                    <tbody>
-                    {innerList}
-                    </tbody>
-                </Table>
-        );
-        }
-
         return (
             <Panel>
                 <Alert bsStyle={this.props.class}>
                     {this.props.children}
                 </Alert>
-                {fields}
+                <AlertFieldList fields={this.props.fields}/>
             </Panel>
         );
     },
@@ -323,4 +340,7 @@ const Vitrail = React.createClass({
 });
 
 
-export {AlertView, Colophon, NotImplemented, Vitrail};
+const MODULE_FOR_TESTING = {
+    AlertView, AlertFieldList, Colophon, NotImplemented, Vitrail
+};
+export {AlertView, Colophon, NotImplemented, Vitrail, MODULE_FOR_TESTING};
