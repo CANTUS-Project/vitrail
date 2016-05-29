@@ -625,10 +625,9 @@ const ErrorMessage = React.createClass({
         }
 
         return (
-            <AlertView class={alertType}
-                message={message}
-                fields={technicalInfo}
-            />
+            <AlertView class={alertType} fields={technicalInfo}>
+                {message}
+            </AlertView>
         );
     },
 });

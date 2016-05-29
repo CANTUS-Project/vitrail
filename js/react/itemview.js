@@ -720,7 +720,7 @@ const ItemViewError = React.createClass({
     },
     render() {
         return (
-            <AlertView message={this.props.errorMessage}
+            <AlertView
                 class="warning"
                 fields={Immutable.Map({
                     Component: 'ItemView',
@@ -729,7 +729,9 @@ const ItemViewError = React.createClass({
                     Data: this.props.data.toString(),
                     Resources: this.props.resources.toString(),
                 })}
-            />
+            >
+                {this.props.errorMessage}
+            </AlertView>
         );
     },
 });

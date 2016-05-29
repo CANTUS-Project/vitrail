@@ -131,7 +131,9 @@ const OneboxSearch = React.createClass({
     render() {
         const help = (
             <Modal show={this.state.showHelp} onHide={this.handleShowHelp} >
-                <AlertView class="info" message="Examples of Search Queries" fields={searchFieldExamples}/>
+                <AlertView class="info" fields={searchFieldExamples}>
+                    {`Examples of Search Queries`}
+                </AlertView>
                 <Modal.Footer><Button onClick={this.handleShowHelp}>{`Close`}</Button></Modal.Footer>
             </Modal>
         );

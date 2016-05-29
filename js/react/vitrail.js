@@ -37,7 +37,7 @@ import Table from 'react-bootstrap/lib/Table';
 const listOfSoftware = [
     {
         name: 'Abbot',
-        version: 'TODO (0.5.1+)',
+        version: 'TODO (0.6.1+)',
         description: 'The "Cantus Server" that provides data for Vitrail.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/abbot',
@@ -58,7 +58,7 @@ const listOfSoftware = [
     },
     {
         name: 'Vitrail',
-        version: 'TODO (0.2.5+)',
+        version: 'TODO (0.3.1+)',
         description: 'The browser-based application to access Cantus data.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/vitrail',
@@ -76,7 +76,7 @@ const listOfSoftware = [
  *
  * Props
  * -----
- * @param (str) message - The error message to display to the user. Required.
+ * @param (str) children - The error message to display to the user. Required.
  * @param (str) class - A Bootstrap 4 "contextual class" for the message (success, info, warning,
  *     danger). Defaults to "info."
  * @param (bool) overlay - Display in front of the rest of the UI. Default is false.
@@ -86,9 +86,9 @@ const listOfSoftware = [
  */
 const AlertView = React.createClass({
     propTypes: {
+        // children
         class: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
         fields: React.PropTypes.instanceOf(Immutable.Map),
-        message: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
         overlay: React.PropTypes.bool,
     },
     getDefaultProps() {
@@ -119,7 +119,7 @@ const AlertView = React.createClass({
         return (
             <Panel>
                 <Alert bsStyle={this.props.class}>
-                    {this.props.message}
+                    {this.props.children}
                 </Alert>
                 {fields}
             </Panel>

@@ -260,7 +260,7 @@ const WrongTypeAlertView = React.createClass({
             `Mention the resource type was set to "${this.props.resourceType}"`,
         ];
 
-        return <AlertView class="danger" message={message}/>;
+        return <AlertView class="danger">{message}</AlertView>;
     },
 });
 

@@ -311,7 +311,7 @@ describe('ItemViewError', () => {
 
         expect(actual.type.displayName).toBe('AlertView');
         const props = actual.props;
-        expect(props.message).toBe(errorMessage);
+        expect(props.children).toBe(errorMessage);
         expect(props.class).toBe('warning');
         expect(props.fields.get('Component')).toBe('ItemView');
         expect(props.fields.get('Type')).toBe(type.toString());
