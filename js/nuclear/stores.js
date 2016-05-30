@@ -144,10 +144,15 @@ const SETTERS = {
      *
      * TODO: describe all this
      * TODO: test the "reset" functionality, which disregards both arguments and sets to initial state
+     * TODO: test the Error raising functionality
      */
     loadSearchResults(previous, next) {
         if ('reset' === next) {
             return STORES.SearchResults.getInitialState();
+        }
+        else if (next instanceof Error) {
+            log.error(next.toString());
+            return previous;
         }
         else if (undefined === next.code) {
             // request was successful
