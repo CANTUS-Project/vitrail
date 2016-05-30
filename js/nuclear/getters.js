@@ -23,6 +23,9 @@
 // ------------------------------------------------------------------------------------------------
 
 
+import {Immutable} from 'nuclear-js';
+
+
 // Submit these to reactor.evaluate().
 // Key are whatever; values use the names of Stores registered in vitrail-init.js.
 
@@ -65,6 +68,145 @@ const formatters = {
     searchError(results) {
         return results.get('error');
     },
+
+    resultsFields(results) {
+        if (results.getIn(['results', 'headers', 'fields'])) {
+            return Immutable.List(results.getIn(['results', 'headers', 'fields']).split(','));
+        }
+        else {
+            return Immutable.List();
+        }
+    },
+    resultsExtraFields(results) {
+        if (results.getIn(['results', 'headers', 'extra_fields'])) {
+            return Immutable.List(results.getIn(['results', 'headers', 'extra_fields']).split(','));
+        }
+        else {
+            return Immutable.List();
+        }
+    },
+    resultsAllFields(results) {
+        return formatters.resultsFields(results).concat(formatters.resultsExtraFields(results));
+    },
+
+    /** resultsAllSameType: Determine whether all the search results are the same resource type.
+     *
+     * @param (ImmutableJS.Map) results - From the SearchResults store.
+     * @returns (bool) Whether all of the resources in "results" have the same "resource_type."
+     */
+    resultsAllSameType(results) {
+        const sortOrder = results.getIn(['results', 'sort_order']);
+        const data = results.get('results');
+        const firstResType = data.get(sortOrder.get(0)).get('type');
+        for (const id of sortOrder.values()) {
+            if (data.get(id).get('type') !== firstResType) {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    /** ResultListTable_columns: Determine the columns to display in the ResultListTable.
+     *
+     * @param (ImmutableJS.Map) results - From the SearchResults store.
+     * @returns (ImmutableJS.Map) Details about the column names to display. See below.
+     *
+     * The Map returned by this function contains two keys:
+     *    - names: with a List of the field names to display, as they appear in the resources.
+     *    - display: with a List of corresponding column headers for the ResultListTable.
+     * The Lists are the same length. Items with the same index correspond to each other. They are
+     * sorted in the order they should appear, from left to right. For example:
+     *
+     * {
+     *     'names': ['incipit', 'genre', 'cao_concordances'],
+     *     'display': ['Incipit', 'Genre', 'CAO Concordances'],
+     * }
+     */
+    ResultListTable_columns(results) {
+        // from other getters...
+        const data = formatters.searchResults(results);
+        const sortOrder = formatters.resultsSortOrder(results);
+        const resultsAllSameType = formatters.resultsAllSameType(results)
+
+        let columns = formatters.resultsAllFields(results);
+
+        // Remove the "id" field and, if the resource types are all the same, remove "type" too.
+        // First find out whether all the "types" are the same.
+        const dontInclude = ['id'];
+        const firstResType = data.get(sortOrder.get(0)).get('type');
+        if (!resultsAllSameType) {
+            dontInclude.push('type');
+        }
+
+        // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
+        let alreadyAdjusted = false;
+        if (!resultsAllSameType) {
+            // we'll show only the fields called "primary" in the ItemView
+            if ('chant' === firstResType) {
+                alreadyAdjusted = true;
+                //
+                columns = [
+                    'incipit',
+                    'genre',
+                    'office',
+                    'feast',
+                    'position',
+                    'siglum',
+                    'folio',
+                    'sequence',
+                    'mode',
+                    'differentia',
+                ];
+            }
+            else if ('source' === firstResType) {
+                alreadyAdjusted = true;
+                //
+                columns = [
+                    'rism',
+                    'title',
+                    'date',
+                    'provenance',
+                    'summary',
+                ];
+            }
+        }
+
+        // Now remove the unncessary fields.
+        if (!alreadyAdjusted) {
+            columns = columns.reduce((prev, curr) => {
+                if (dontInclude.indexOf(curr) >= 0) {
+                    return prev;
+                }
+
+                prev.push(curr);
+                return prev;
+            }, []);
+        }
+
+        // and make the formatted display names
+        const display = columns.map((columnName) => {
+            // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
+            const working = columnName.split('_');
+            let polishedName = '';
+            for (const i in working) {
+                let rawr = working[i][0];
+                rawr = rawr.toLocaleUpperCase();
+                polishedName += rawr;
+                polishedName += `${working[i].slice(1)} `;
+            }
+            polishedName = polishedName.slice(0, polishedName.length - 1);
+            return polishedName;
+        });
+
+        return Immutable.fromJS({names: columns, display: display});
+    },
+
+    resultsSortOrder(results) {
+        return results.getIn(['results', 'sort_order']);
+    },
+    searchResultsHeaders(results) {
+        return results.getIn(['results', 'headers']);
+    },
 };
 
 
@@ -74,6 +216,13 @@ const getters = {
     // related to the query already completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
+    searchResultsHeaders: [['searchResults'], formatters.searchResultsHeaders],  // TODO: test
+    resultsSortOrder: [['searchResults'], formatters.resultsSortOrder],  // TODO: test
+    resultsFields: [['searchResults'], formatters.resultsFields],  // ImmutableJS.List of X-Cantus-Fields  // TODO: test
+    resultsExtraFields: [['searchResults'], formatters.resultsExtraFields],  // ImmutableJS.List of X-Cantus-Extra-Fields  // TODO: test
+    resultsAllFields: [['searchResults'], formatters.resultsAllFields],  // ImmutableJS.List of previous two combined  // TODO: test
+    resultsAllSameType: [['searchResults'], formatters.resultsAllSameType],  // boolean: whether all the results are the same resourceType  // TODO: test
+    ResultListTable_columns: [['searchResults'], formatters.ResultListTable_columns],  // TODO: test
     // current displayed page of results (not currently-requested page)
     searchResultsPage: [['searchResults'], formatters.searchResultsPage],
     // current displayed per-page of results (not currently-requested per-page)

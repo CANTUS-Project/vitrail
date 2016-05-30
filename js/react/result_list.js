@@ -216,104 +216,39 @@ const ResultListItemView = React.createClass({
  * Props:
  * ------
  * @param (string) colid - The collection ID being displayed, if applicable.
- * @param (ImmutableJS.Map) headers - ???
- * @param (ImmutableJS.Map) data - ???
- * @param (ImmutableJS.List) sortOrder - ???
  */
 const ResultListTable = React.createClass({
     propTypes: {
         colid: React.PropTypes.string,
-        data: React.PropTypes.instanceOf(Immutable.Map),
-        headers: React.PropTypes.instanceOf(Immutable.Map),
-        sortOrder: React.PropTypes.instanceOf(Immutable.List),
     },
-    getDefaultProps() {
-        return {data: null, headers: null, sortOrder: []};
+    mixins: [reactor.ReactMixin],
+    getDataBindings() {
+        return {
+            columns: getters.ResultListTable_columns,
+            data: getters.searchResults,
+            sortOrder: getters.resultsSortOrder,
+        };
+    },
+    shouldComponentUpdate(nextProps, nextState) {
+        // Is there any difference that would necessitate an update?
+        if (this.props !== nextProps || this.state !== nextState) {
+            // If so, are all the fields in the "sort order" already present in the "data?"
+            for (const id of nextState.sortOrder.values()) {
+                if (!nextState.data.has(id)) {
+                    return false;
+                }
+            }
+            // Reaching here, all the IDs are present
+            return true;
+        }
+        else {
+            return false;
+        }
     },
     render() {
-        const tableHeader = [];
-        let columns = this.props.headers.get('fields').split(',');
-        let extraFields = this.props.headers.get('extra_fields');
-        if (extraFields) {
-            extraFields = extraFields.split(',');
-            columns = columns.concat(extraFields);
-        }
-
-        // Remove the "id" field and, if the resource types are all the same, remove "type" too.
-        // First find out whether all the "types" are the same.
-        const dontInclude = ['id'];
-        const firstResType = this.props.data.get(this.props.sortOrder.get(0)).get('type');
-        let foundDifferent = false;
-        for (const id of this.props.sortOrder.values()) {
-            if (this.props.data.get(id).get('type') !== firstResType) {
-                foundDifferent = true;
-                break;
-            }
-        }
-        if (!foundDifferent) {
-            dontInclude.push('type');
-        }
-
-        // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
-        let alreadyAdjusted = false;
-        if (!foundDifferent) {
-            // we'll show only the fields called "primary" in the ItemView
-            if ('chant' === firstResType) {
-                alreadyAdjusted = true;
-                //
-                columns = [
-                    'incipit',
-                    'genre',
-                    'office',
-                    'feast',
-                    'position',
-                    'siglum',
-                    'folio',
-                    'sequence',
-                    'mode',
-                    'differentia',
-                ];
-            }
-            else if ('source' === firstResType) {
-                alreadyAdjusted = true;
-                //
-                columns = [
-                    'rism',
-                    'title',
-                    'date',
-                    'provenance',
-                    'summary',
-                ];
-            }
-        }
-
-        // Now remove the unncessary fields.
-        if (!alreadyAdjusted) {
-            columns = columns.reduce((prev, curr) => {
-                if (dontInclude.indexOf(curr) >= 0) {
-                    return prev;
-                }
-
-                prev.push(curr);
-                return prev;
-            }, []);
-        }
-
-        // Prepare the table header.
-        columns.forEach((columnName) => {
-            // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
-            const working = columnName.split('_');
-            let polishedName = '';
-            for (const i in working) {
-                let rawr = working[i][0];
-                rawr = rawr.toLocaleUpperCase();
-                polishedName += rawr;
-                polishedName += `${working[i].slice(1)} `;
-            }
-            polishedName = polishedName.slice(0, polishedName.length);
-
-            // now we can make the <th> cell itself
-            tableHeader.push(<ResultCell key={columnName} data={polishedName} header />);
+        const display = this.state.columns.get('display');
+        const tableHeader = this.state.columns.get('names').map((name, key) => {
+            return <ResultCell key={name} data={display.get(key)} header/>;
         });
 
         return (
@@ -324,13 +259,13 @@ const ResultListTable = React.createClass({
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.sortOrder.map((id) => {
+                    {this.state.sortOrder.map((id) => {
                         return (
                             <ResultRow key={id}
                                 colid={this.props.colid}
-                                columns={columns}
-                                data={this.props.data.get(id)}
-                                resources={this.props.data.get('resources').get(id)}
+                                columns={this.state.columns.get('names')}
+                                data={this.state.data.get(id)}
+                                resources={this.state.data.get('resources').get(id)}
                             />
                         );
                     },
@@ -364,6 +299,7 @@ const ResultListMultiplexer = React.createClass({
         // connection to NuclearJS
         return {
             searchResultsFormat: getters.searchResultsFormat,
+            sortOrder: getters.resultsSortOrder,
             results: getters.searchResults,
         };
     },
@@ -373,19 +309,13 @@ const ResultListMultiplexer = React.createClass({
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                results = (
-                    <ResultListTable colid={this.props.colid}
-                        data={this.state.results}
-                        headers={this.state.results.get('headers')}
-                        sortOrder={this.state.results.get('sort_order')}
-                    />
-                );
+                results = <ResultListTable colid={this.props.colid}/>;
             }
             else {
                 results = (
                     <ResultListItemView
                         data={this.state.results}
-                        sortOrder={this.state.results.get('sort_order')}
+                        sortOrder={this.state.sortOrder}
                     />
                 );
             }
