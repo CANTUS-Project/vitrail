@@ -39,7 +39,7 @@ let urlToCantusServer =
 '<< SERVER URL HERE >>'
 ;
 if (urlToCantusServer.includes('SERVER URL HERE')) {
-    urlToCantusServer = 'http://abbot.adjectivenoun.ca:8888/';
+    urlToCantusServer = 'https://abbot.adjectivenoun.ca:8888/';
 }
 const CANTUS = new cantusjs.Cantus(urlToCantusServer);
 
