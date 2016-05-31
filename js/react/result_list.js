@@ -48,13 +48,13 @@ import {AddRemoveCollection} from './workspace';
  *
  * Props:
  * ------
- * @param (string) data - The cell's textual contents.
+ * @param (string) children - The cell's contents.
  * @param (boolean) header - Whether to render this cell as <th> (otherwise as <td>).
  * @param (string) link - A URL for the table contents.
  */
 const ResultCell = React.createClass({
     propTypes: {
-        data: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
+        children: React.PropTypes.node,
         header: React.PropTypes.bool,
         link: React.PropTypes.string,
     },
@@ -65,7 +65,8 @@ const ResultCell = React.createClass({
         let post;
 
         // if the text data for this cell is longer than 55 characters, abbreviate it at 50 chars
-        let data = this.props.data;
+        let data = this.props.children;
+        // let data = this.props.data;
         if ('string' === typeof data && data.length > 55) {
             data = `${data.slice(0, 50)} ... (abbr.)`;
         }
@@ -107,7 +108,7 @@ const ResultRow = React.createClass({
     propTypes: {
         colid: React.PropTypes.string,
         // the column names to render, or the fields in "data" to render as columns
-        columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+        columns: React.PropTypes.instanceOf(Immutable.List).isRequired,
         // the object to render into columns
         data: React.PropTypes.instanceOf(Immutable.Map).isRequired,
         // members here are the URL for the same-name member in "data"
@@ -116,50 +117,56 @@ const ResultRow = React.createClass({
     getDefaultProps() {
         return {resources: {}};
     },
-    render() {
-        //
-        const renderedColumns = [];
-        this.props.columns.forEach((columnName) => {
-            let columnData = this.props.data.get(columnName);
-            if (columnData) {
-                if (Immutable.List.isList(columnData)) {
-                    // a few fields are given as lists
-                    columnData = columnData.join(', ');
-                }
-                else {
-                    columnData = columnData.toString();
-                }
-            }
-
-            let columnLink;
-            if (columnName === 'name') {
-                columnLink = this.props.resources.self;
+    /** cleanColumn(): Prepare "columnData" to appear in a ResultCell.
+     * @param (string or Immutable.List) columnData - Data to prepare.
+     * @returns The argument as a well-formatted string.
+     */
+    cleanColumn(columnData) {
+        if (columnData) {
+            if (Immutable.List.isList(columnData)) {
+                return columnData.join(', ');
             }
             else {
-                columnLink = this.props.resources[columnName];
+                return columnData.toString();
             }
+        }
+        return '';
+    },
+    /** getColumnLink(): Find the resources URL for this column.
+     * @param (string) columnName - The column's name.
+     * @return The URL for this column, or undefined.
+     */
+    getColumnLink(columnName) {
+        if (columnName === 'name') {
+            return this.props.resources.get('self');
+        }
+        else {
+            return this.props.resources.get(columnName);
+        }
+    },
+    render() {
+        const renderedColumns = this.props.columns.map((columnName) =>
+            <ResultCell key={columnName} link={this.getColumnLink(columnName)}>
+                {this.cleanColumn(this.props.data.get(columnName))}
+            </ResultCell>
+        );
 
-            renderedColumns.push(<ResultCell key={columnName} data={columnData} link={columnLink}/>);
-        }, this);
-
-        //
+        // add a button to the ItemViewOverlay, if relevant
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
             const url = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
             renderedColumns.push(
-                <ResultCell key="itemview" data={(
+                <ResultCell key="itemview">
                     <Link to={url} className="btn btn-default btn-sm">{`View`}</Link>
-                )}
-                />
+                </ResultCell>
             );
         }
 
         // add the Collection add/remove buttons
         if (this.props.data.get('type') === 'chant') {
             renderedColumns.push(
-                <ResultCell key="collection-add" data={(
+                <ResultCell key="collection-add">
                     <AddRemoveCollection rid={this.props.data.get('id')} colid={this.props.colid}/>
-                )}
-                />
+                </ResultCell>
             );
         }
 
@@ -247,9 +254,9 @@ const ResultListTable = React.createClass({
     },
     render() {
         const display = this.state.columns.get('display');
-        const tableHeader = this.state.columns.get('names').map((name, key) => {
-            return <ResultCell key={name} data={display.get(key)} header/>;
-        });
+        const tableHeader = this.state.columns.get('names').map((name, key) =>
+            <ResultCell key={name} header>{display.get(key)}</ResultCell>
+        );
 
         return (
             <Table hover responsive>
@@ -259,16 +266,14 @@ const ResultListTable = React.createClass({
                     </tr>
                 </thead>
                 <tbody>
-                    {this.state.sortOrder.map((id) => {
-                        return (
-                            <ResultRow key={id}
-                                colid={this.props.colid}
-                                columns={this.state.columns.get('names')}
-                                data={this.state.data.get(id)}
-                                resources={this.state.data.get('resources').get(id)}
-                            />
-                        );
-                    },
+                    {this.state.sortOrder.map((id) =>
+                        <ResultRow key={id}
+                            colid={this.props.colid}
+                            columns={this.state.columns.get('names')}
+                            data={this.state.data.get(id)}
+                            resources={this.state.data.get('resources').get(id)}
+                        />
+                    ,
                         this)
                     }
                 </tbody>
