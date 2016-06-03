@@ -104,7 +104,7 @@ const SETTERS = {
             // iterate all the members in "next"
             for (const field in next) {
                 // check the field
-                if (!cantusjs.VALID_FIELDS.includes(field)) {
+                if (cantusjs.VALID_FIELDS.indexOf(field) < 0) {
                     continue;
                 }
 
@@ -216,7 +216,7 @@ const SETTERS = {
         else if (!previous.get('collections').has(next.colid)) {
             log.warn('addResourceIDToCollection() received nonexistent collection ID');
         }
-        else if (!previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+        else if (previous.getIn(['collections', next.colid, 'members']).indexOf(next.rid) < 0) {
             // TODO: figure out how to do this elegantly with ImmutableJS
             previous = previous.toJS();
             previous['collections'][next.colid]['members'].push(next.rid);
@@ -238,7 +238,7 @@ const SETTERS = {
         else if (!previous.get('collections').has(next.colid)) {
             log.warn('removeResourceIDFromCollection() received nonexistent collection ID');
         }
-        else if (previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+        else if (previous.getIn(['collections', next.colid, 'members']).indexOf(next.rid) >= 0) {
             previous = previous.toJS();
             const index = previous['collections'][next.colid]['members'].indexOf(next.rid);
             previous['collections'][next.colid]['members'].splice(index, 1);

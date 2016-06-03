@@ -38,7 +38,7 @@ import {localforageKey, reactor} from './reactor';
 let urlToCantusServer =
 '<< SERVER URL HERE >>'
 ;
-if (urlToCantusServer.includes('SERVER URL HERE')) {
+if (urlToCantusServer.indexOf('SERVER URL HERE') >= 0) {
     urlToCantusServer = 'https://abbot.adjectivenoun.ca:8888/';
 }
 const CANTUS = new cantusjs.Cantus(urlToCantusServer);

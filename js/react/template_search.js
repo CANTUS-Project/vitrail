@@ -82,7 +82,7 @@ const TemplateTypeSelector = React.createClass({
             feasts: {'aria-pressed': 'false', 'active': false},
         };
 
-        if (this.supportedTypes.includes(this.state.resourceType)) {
+        if (this.supportedTypes.indexOf(this.state.resourceType) >= 0) {
             buttonProps[this.state.resourceType]['aria-pressed'] = 'true';
             buttonProps[this.state.resourceType].active = true;
         }
