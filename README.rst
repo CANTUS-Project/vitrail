@@ -5,9 +5,13 @@ Vitrail
 
 .. image:: https://img.shields.io/travis/CANTUS-Project/vitrail/master.svg?style=flat-square
     :target: https://travis-ci.org/CANTUS-Project/vitrail
+    :alt: Vitrail on Travis-CI
 .. image:: https://david-dm.org/cantus-project/vitrail.svg?style=flat-square
     :target: https://david-dm.org/cantus-project/vitrail
-
+    :alt: Vitrail on David DM
+.. image:: https://api.codacy.com/project/badge/Grade/1e57e712f7d14fe39e7e4c6d8837af10
+    :target: https://www.codacy.com/app/christopher/vitrail
+    :alt: Vitrail on Codacy
 
 License
 -------
