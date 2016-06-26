@@ -36,6 +36,10 @@ import {TemplateSearch} from './react/template_search';
 import {DeskAndShelf, JustShelf, Workspace} from './react/workspace';
 
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceworker.js');
+}
+
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
 ReactDOM.render(
     <Router history={hashHistory}>
