@@ -46,6 +46,17 @@ function isWholeNumber(num) {
 }
 
 
+/** Determine whether the ServiceWorker features Vitrail uses are supported.
+ *
+ * Currently this checks for the "serviceWorker" object and "caches" object.
+ */
+function checkSWSupported() {
+    return _swInNav() && _cachesInWindow();
+}
+function _swInNav() { return 'serviceWorker' in navigator; }
+function _cachesInWindow() { return 'caches' in window; }
+
+
 const SETTERS = {
     setSearchResultsFormat(previous, next) {
         // Set the format of search results to "table" or "ItemView". Other arguments won't change
@@ -310,6 +321,15 @@ const SETTERS = {
         }
         return previous;
     },
+
+    /** Record that the ServiceWorker was installed. */
+    swInstalled(previous, next) {  // TODO: untested
+        return previous.set('installed', true);
+    },
+    /** Record that the ServiceWorker was uninstalled. */
+    swUninstalled(previous, next) {  // TODO: untested
+        return previous.set('installed', false);
+    },
 };
 
 
@@ -408,9 +428,34 @@ const STORES = {
             this.on(SIGNAL_NAMES.ADD_COLLECTION, SETTERS.addNewCollection);
         },
     }),
+
+    ServiceWorkerStatus: Store({
+        // Record information about how Vitrail is using ServiceWorker functionality.
+        //
+        // NOTE: you should call the isAppCached() signal right after registering this Store.
+        //
+        // Map({
+        //     // whether this browser supports the ServiceWorker and Cache APIs
+        //     supported: true,
+        //     // whether the Vitrail ServiceWorker script is installed and assets are cached
+        //     installed: true,
+        // })
+        //
+        getInitialState() {
+            const supported = checkSWSupported();
+            const installed = false;  // determined and set by the asynchronous function just below
+
+            return Immutable.Map({supported, installed});
+        },
+        initialize() {
+            this.on(SIGNAL_NAMES.SW_INSTALLED, SETTERS.swInstalled);
+            this.on(SIGNAL_NAMES.SW_UNINSTALLED, SETTERS.swUninstalled);
+        },
+    }),
 };
 
 
-const theModule = {stores: STORES, setters: SETTERS, isWholeNumber: isWholeNumber};
+const theModule = {stores: STORES, setters: SETTERS, isWholeNumber: isWholeNumber,
+    checkSWSupported: checkSWSupported, _swInNav: _swInNav, _cachesInWindow: _cachesInWindow};
 export {theModule};
 export default theModule;

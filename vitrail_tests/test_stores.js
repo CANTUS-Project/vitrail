@@ -70,6 +70,43 @@ describe('isWholeNumber()', function() {
 });
 
 
+describe('checkSWSupported()', () => {
+    let o_cachesInWindow, o_swInNav;
+    beforeAll(() => {
+        o_cachesInWindow = stores._cachesInWindow;
+        o_swInNav = stores._swInNav;
+    });
+    afterAll(() => {
+        stores._cachesInWindow = o_cachesInWindow;
+        stores._swInNav = o_swInNav;
+    });
+
+    it('returns true when everything is supported', () => {
+        stores._cachesInWindow = jest.fn(() => true);
+        stores._swInNav = jest.fn(() => true);
+        const actual = stores.checkSWSupported()
+    });
+
+    it('returns false when only Cache API is supported', () => {
+        stores._cachesInWindow = jest.fn(() => false);
+        stores._swInNav = jest.fn(() => true);
+        const actual = stores.checkSWSupported()
+    });
+
+    it('returns false when only ServiceWorker API is supported', () => {
+        stores._cachesInWindow = jest.fn(() => true);
+        stores._swInNav = jest.fn(() => false);
+        const actual = stores.checkSWSupported()
+    });
+
+    it('returns false when nothing is supported', () => {
+        stores._cachesInWindow = jest.fn(() => false);
+        stores._swInNav = jest.fn(() => false);
+        const actual = stores.checkSWSupported()
+    });
+});
+
+
 describe('SETTERS.setSearchResultsFormat()', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
@@ -328,5 +365,22 @@ describe('setCurrentItemView()', () => {
         const expected = previous;
         expect(stores.setters.setCurrentItemView(previous, next)).toBe(expected);
         expect(log.warn).toBeCalled();
+    });
+});
+
+
+describe('swInstalled() and swUnintsalled() setters', () => {
+    afterAll(() => reactor.reset());
+
+    it('swInstalled() works', () => {
+        const previous = Immutable.Map({supported: 5, installed: 6});
+        const actual = stores.setters.swInstalled(previous);
+        expect(actual).toEqual(Immutable.Map({supported: 5, installed: true}));
+    });
+
+    it('swUninstalled() works', () => {
+        const previous = Immutable.Map({supported: 5, installed: 6});
+        const actual = stores.setters.swUninstalled(previous);
+        expect(actual).toEqual(Immutable.Map({supported: 5, installed: false}));
     });
 });
