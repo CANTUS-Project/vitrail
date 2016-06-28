@@ -117,3 +117,16 @@ describe('searchError()', () => {
         expect(formatters.searchError(results)).toBe(404);
     });
 });
+
+
+describe('ServiceWorker-related getters', () => {
+    it('swSupported() works', () => {
+        const results = Immutable.Map({supported: 'yes'});
+        expect(formatters.swSupported(results)).toBe('yes');
+    });
+
+    it('swInstalled() works', () => {
+        const results = Immutable.Map({installed: 'sure'});
+        expect(formatters.swInstalled(results)).toBe('sure');
+    });
+});

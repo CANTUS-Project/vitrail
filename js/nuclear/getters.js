@@ -207,6 +207,13 @@ const formatters = {
     searchResultsHeaders(results) {
         return results.getIn(['results', 'headers']);
     },
+
+    swSupported(status) {
+        return status.get('supported');
+    },
+    swInstalled(status) {
+        return status.get('installed');
+    },
 };
 
 
@@ -236,6 +243,9 @@ const getters = {
     searchPerPage: ['searchPerPage'],
     // for Collections in the Workspace
     collectionsList: [['collectionsList'], (results) => results.get('collections')],
+    // for ServiceWorker
+    swSupported: [['serviceWorkerStatus'], formatters.swSupported],
+    swInstalled: [['serviceWorkerStatus'], formatters.swInstalled],
 };
 
 export {getters, formatters};
