@@ -25,6 +25,7 @@
 import localforage from 'localforage';
 
 import {localforageKey, reactor} from './reactor';
+import {SIGNALS as signals} from '../nuclear/signals';
 import stores from './stores';
 
 
@@ -37,7 +38,11 @@ reactor.registerStores({
     searchQuery: stores.stores.SearchQuery,
     searchResults: stores.stores.SearchResults,
     collectionsList: stores.stores.CollectionsList,
+    serviceWorkerStatus: stores.stores.ServiceWorkerStatus,
 });
+
+// if the browser supports ServiceWorker, determine whether the app is already cached for offline
+signals.checkAppCached();
 
 // load any saved collections; we don't want to load anything else though
 localforage.getItem(localforageKey).then((state) => {
