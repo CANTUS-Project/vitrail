@@ -48,6 +48,7 @@ FILES_IN_ARCHIVE = [
     'browserconfig.xml',
     'index.html',
     'manifest.json',
+    'serviceworker.js',
     'img/android-chrome-144x144.png',
     'img/android-chrome-192x192.png',
     'img/android-chrome-36x36.png',
