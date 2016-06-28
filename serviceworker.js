@@ -22,8 +22,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ------------------------------------------------------------------------------------------------
 
-// This will be set by the Ansible playbook on deployment. Otherwise it defaults to my development
-// server's URL, for when I'm doing local development.
+// The Ansible playbook used for deployment will swap out the "<< SERVER URL HERE >>" string with
+// the actual URL of the server. At runtime, we check whether the string was replaced; if not, we'll
+// supply a default server URL. NOTE that we can't use the full "<< SERVER URL HERE >>" string
+// twice because the playbook would replace both instances, leading the default URL to be used every
+// time!
 var urlToAbbot =
 '<< SERVER URL HERE >>'
 ;
@@ -31,25 +34,6 @@ if (urlToAbbot.indexOf('SERVER URL HERE') >= 0) {
     urlToAbbot = 'https://abbot.adjectivenoun.ca:8888/';
 }
 
-
-self.addEventListener('install', function(event) {
-    event.waitUntil(
-        caches.open('vitrail').then(function(cache) {
-            return cache.addAll([
-                '/',
-                '/index.html',
-                '/manifest.json',
-                '/serviceworker.js',
-                '/css/bootstrap.min.css',
-                '/css/vitrail.css',
-                '/img/favicon.ico',
-                '/js/vitrail.js',
-            ]);
-        }).then(function() {
-            return self.skipWaiting();
-        })
-    );
-});
 
 self.addEventListener('fetch', function(event) {
     // never cache requests for Abbot
@@ -69,9 +53,4 @@ self.addEventListener('fetch', function(event) {
             })
         );
     }
-});
-
-self.addEventListener('activate', function(event) {
-    // allows the content thread script to know whether the ServiceWorker was activated
-    event.waitUntil(self.clients.claim());
 });
