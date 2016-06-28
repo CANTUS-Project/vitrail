@@ -34,6 +34,7 @@ import {ItemViewOverlay} from './react/itemview';
 import {OneboxSearch} from './react/onebox';
 import {TemplateSearch} from './react/template_search';
 import {DeskAndShelf, JustShelf, Workspace} from './react/workspace';
+import {OfflineManager} from './react/offline';
 
 
 // NOTE: for the ItemView URLs below, "rid" is the resource ID to display
@@ -55,6 +56,9 @@ ReactDOM.render(
                 <Route path="collection/:colid" component={DeskAndShelf}>
                     <Route path=":type/:rid" component={ItemViewOverlay}/>
                 </Route>
+            </Route>
+
+            <Route path="offline" component={OfflineManager}>
             </Route>
 
             <Route path="bookview" component={NotImplemented}/>
