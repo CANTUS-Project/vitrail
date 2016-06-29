@@ -59,6 +59,9 @@ const SW_CACHED_RESOURCES = [
     '/css/bootstrap.min.css',
     '/css/vitrail.css',
     '/img/favicon.ico',
+    '/fonts/glyphicons-halflings-regular.woff2',
+    '/fonts/glyphicons-halflings-regular.woff',
+    '/fonts/glyphicons-halflings-regular.ttf',
     '/js/vitrail.js',
 ];
 
