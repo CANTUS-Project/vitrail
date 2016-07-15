@@ -4,3 +4,6 @@
 [submodule "bootstrap"]
 	path = bootstrap
 	url = https://github.com/twbs/bootstrap.git
+[submodule "bootswatch"]
+	path = bootswatch
+	url = https://github.com/thomaspark/bootswatch.git
