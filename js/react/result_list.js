@@ -26,7 +26,11 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Col from 'react-bootstrap/lib/Col';
+import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import Form from 'react-bootstrap/lib/Form';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
@@ -34,6 +38,7 @@ import Pagination from 'react-bootstrap/lib/Pagination';
 import Panel from 'react-bootstrap/lib/Panel';
 import Radio from 'react-bootstrap/lib/Radio';
 import Table from 'react-bootstrap/lib/Table';
+import Well from 'react-bootstrap/lib/Well';
 
 import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
@@ -199,7 +204,7 @@ const ResultListItemView = React.createClass({
         const sortOrder = this.props.sortOrder.toJS();
 
         return (
-            <div className="row">
+            <div>
                 {sortOrder.map((rid) => {  /* eslint arrow-body-style: 0 */
                     return (
                         <ItemView
@@ -258,7 +263,7 @@ const ResultListTable = React.createClass({
         );
 
         return (
-            <Table hover responsive>
+            <Table className="result-list-table" striped hover responsive>
                 <thead>
                     <tr className="resultTableHeader">
                         {tableHeader}
@@ -308,28 +313,18 @@ const ResultListMultiplexer = React.createClass({
         };
     },
     render() {
-        let results = <p className="card-block">{'(No results to display).'}</p>;
-
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                results = <ResultListTable colid={this.props.colid}/>;
+                return <ResultListTable colid={this.props.colid}/>;
             }
             else {
-                results = (
-                    <ResultListItemView
-                        data={this.state.results}
-                        sortOrder={this.state.sortOrder}
-                    />
-                );
+                return <ResultListItemView data={this.state.results} sortOrder={this.state.sortOrder}/>;
             }
         }
-
-        return (
-            <Panel>
-                {results}
-            </Panel>
-        );
+        else {
+            return <p className="card-block">{'(No results to display).'}</p>;
+        }
     },
 });
 
@@ -391,18 +386,21 @@ const PerPageSelector = React.createClass({
         signals.submitSearchQuery();
     },
     render() {
-        // NOTE: the <div> down there only exists to help keep the <input> within col-sm-10
         return (
-            <form>
-                <FormControl
-                    type="number"
-                    name="perPage"
-                    id="perPageSelector"
-                    value={this.state.perPage}
-                    onChange={this.handleChange}
-                    label="Number of Results per Page"
-                />
-            </form>
+            <FormGroup>
+                <Col componentClass={ControlLabel} sm={3}>
+                    {`Number of Results per Page:`}
+                </Col>
+                <Col sm={9}>
+                    <FormControl
+                        type="number"
+                        name="perPage"
+                        id="perPageSelector"
+                        value={this.state.perPage}
+                        onChange={this.handleChange}
+                    />
+                </Col>
+            </FormGroup>
         );
     },
 });
@@ -431,14 +429,55 @@ const RenderAsSelector = React.createClass({
         }
 
         return (
-            <form>
-                <Radio checked={viewChecked} onChange={this.handleChange} id="renderAsView" value="ItemView">
-                    {`Render as Views`}
-                </Radio>
-                <Radio checked={tableChecked} onChange={this.handleChange} id="renderAsTable" value="table">
-                    {`Render as a Table`}
-                </Radio>
-            </form>
+            <FormGroup>
+                <Col componentClass={ControlLabel} sm={3}>
+                    {`Show Results in...`}
+                </Col>
+                <Col sm={9}>
+                    <Radio checked={tableChecked} onChange={this.handleChange} id="renderAsTable" value="table">
+                        {`a Table`}
+                    </Radio>
+                    <Radio checked={viewChecked} onChange={this.handleChange} id="renderAsView" value="ItemView">
+                        {`Views`}
+                    </Radio>
+                </Col>
+            </FormGroup>
+        );
+    },
+});
+
+
+/** Settings for the ResultList (per-page, render-as, etc.)
+ *
+ * State
+ * -----
+ * @param (bool) isExpanded - Whether the settings are all shown (if "true") or only the title is
+ *     shown (if "false," the default).
+ */
+const ResultListSettings = React.createClass({
+    getInitialState() {
+        return {isExpanded: false};
+    },
+    handleCollapse(event) {
+        // Toggle this.state.isExpanded
+        if (event.target.className === 'panel-title') {
+            this.setState({isExpanded: !this.state.isExpanded});
+        }
+    },
+    render() {
+        return (
+            <Panel
+                collapsible
+                expanded={this.state.isExpanded}
+                onClick={this.handleCollapse}
+                header="Display Settings"
+                className="result-list-settings"
+            >
+                <Form horizontal>
+                    <PerPageSelector/>
+                    <RenderAsSelector/>
+                </Form>
+            </Panel>
         );
     },
 });
@@ -537,36 +576,6 @@ const ErrorMessage = React.createClass({
 });
 
 
-/** Settings for the ResultList (per-page, render-as, etc.)
- *
- * State
- * -----
- * @param (bool) isExpanded - Whether the settings are all shown (if "true") or only the title is
- *     shown (if "false," the default).
- */
-const ResultListSettings = React.createClass({
-    getInitialState() {
-        return {isExpanded: false};
-    },
-    handleCollapse(event) {
-        // Toggle this.state.isExpanded
-        if (event.target.className === 'panel-title') {
-            this.setState({isExpanded: !this.state.isExpanded});
-        }
-    },
-    render() {
-        return (
-            <ListGroupItem>
-                <Panel collapsible expanded={this.state.isExpanded} onClick={this.handleCollapse} header="Display Settings">
-                    <PerPageSelector/>
-                    <RenderAsSelector/>
-                </Panel>
-            </ListGroupItem>
-        );
-    },
-});
-
-
 /**
  *
  * Props
@@ -584,7 +593,7 @@ const ResultList = React.createClass({
     },
     render() {
         let errorMessage;
-        if (null !== this.state.error) {
+        if (this.state.error) {
             errorMessage = (
                 <ErrorMessage
                     code={this.state.error.get('code')}
@@ -595,14 +604,12 @@ const ResultList = React.createClass({
         }
 
         return (
-            <Panel>
-                <ListGroup fill>
-                    {errorMessage}
-                    <ResultListSettings/>
-                    <ListGroupItem><ResultListMultiplexer colid={this.props.colid}/></ListGroupItem>
-                    <ListGroupItem><Paginator/></ListGroupItem>
-                </ListGroup>
-            </Panel>
+            <Well className="result-list">
+                {errorMessage}
+                <ResultListSettings/>
+                <ResultListMultiplexer colid={this.props.colid}/>
+                <Paginator/>
+            </Well>
         );
     },
 });

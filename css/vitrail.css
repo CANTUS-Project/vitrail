@@ -23,39 +23,6 @@
  *-------------------------------------------------------------------------------------------------
  */
 
-.vitrail-source-name {
-    /* Use this class when displaying the name of a Source in another resource type (e.g., the
-     * "Source" column for a list of Chant resources).
-     */
-    font-style: italic;
-}
-
-.itemview-overlay {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-    padding: 3rem;
-    background: rgba(0, 0, 0, 0.6);
-
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    align-items: center;
-    overflow-y: scroll;
-}
-
-.itemview-button-container button {
-    /* TODO: make this actually put the button on the right */
-    position: relative;
-    right: 0px;
-}
-
-.itemview {
-    background-color: #fff;
-    max-width: 50rem;
-}
 
 .td-align-right {
     text-align: right;
@@ -64,3 +31,7 @@
 .alert h2 {
     margin-top: 0px;
 }
+
+.result-list { padding-bottom: 13px; }
+.result-list .pagination { margin: 0; }
+.result-list-settings form > :last-child { margin-bottom: 0; }
