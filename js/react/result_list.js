@@ -26,12 +26,11 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
-import Button from 'react-bootstrap/lib/Button';
-import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Pagination from 'react-bootstrap/lib/Pagination';
 import Panel from 'react-bootstrap/lib/Panel';
 import Radio from 'react-bootstrap/lib/Radio';
 import Table from 'react-bootstrap/lib/Table';
@@ -351,55 +350,25 @@ const Paginator = React.createClass({
             totalPages: getters.searchResultsPages,
         };
     },
-    handleClick(button) {
-        // Determine which page-change button was clicked then emit the setPage() signal.
-        //
-
-        let newPage = this.state.page;
-
-        switch (button.target.value) {
-        case 'previous':
-            newPage -= 1;
-            break;
-        case 'next':
-            newPage += 1;
-            break;
-        case 'first':
-            newPage = 1;
-            break;
-        case 'last':
-            newPage = this.state.totalPages;
-            break;
-        default:
-            return;
-        }
-
-        if (newPage > 0 && newPage <= this.state.totalPages) {
-            signals.setPage(newPage);
+    handleClick(requestedPage) {
+        // If the user clicked a page other than the current page, emit the setPage() signal.
+        if (requestedPage !== this.state.page) {
+            signals.setPage(requestedPage);
             signals.submitSearchQuery();
         }
     },
     render() {
         return (
-            <ButtonGroup role="group" aria-label="paginator">
-                <Button name="pages" value="first" onClick={this.handleClick}>
-                    <Glyphicon glyph="chevron-left"/>
-                    <Glyphicon glyph="chevron-left"/>
-                </Button>
-                <Button name="pages" value="previous" onClick={this.handleClick}>
-                    <Glyphicon glyph="chevron-left"/>
-                </Button>
-                <Button>
-                    {`${this.state.page} of ${this.state.totalPages}`}
-                </Button>
-                <Button name="pages" value="next" onClick={this.handleClick}>
-                    <Glyphicon glyph="chevron-right"/>
-                </Button>
-                <Button name="pages" value="last" onClick={this.handleClick}>
-                    <Glyphicon glyph="chevron-right"/>
-                    <Glyphicon glyph="chevron-right"/>
-                </Button>
-            </ButtonGroup>
+            <Pagination
+                bsSize="medium"
+                items={Math.max(1, this.state.totalPages)}
+                activePage={Math.max(1, this.state.page)}
+                onSelect={this.handleClick}
+                prev={<Glyphicon glyph="chevron-left"/>}
+                next={<Glyphicon glyph="chevron-right"/>}
+                maxButtons={5}
+                boundaryLinks={true}
+            />
         );
     },
 });
