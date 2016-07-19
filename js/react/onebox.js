@@ -26,7 +26,11 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
+import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import Form from 'react-bootstrap/lib/Form';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Modal from 'react-bootstrap/lib/Modal';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
@@ -60,11 +64,18 @@ const searchFieldExamples = Immutable.OrderedMap({
  *
  * This component connects to the "SearchQuery" store by putting its contents in the "any" field.
  *
+ * Props
+ * -----
+ * @param (func) onSubmit - Used as the "onSubmit" handler for the <form>.
+ *
  * State
  * -----
  * @param (str) searchQuery - value of getters.searchQuery
  */
 const SearchBox = React.createClass({
+    propTypes: {
+        onSubmit: React.PropTypes.func.isRequired,
+    },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
         return {searchQuery: getters.searchQuery};
@@ -82,14 +93,20 @@ const SearchBox = React.createClass({
     },
     render() {
         return (
-            <FormControl
-                type="search"
-                id="searchQuery"
-                value={this.state.searchQuery.get('any')}
-                onChange={this.handleChange}
-                label="Search Query"
-                buttonAfter={<Button type="submit" value="Search">{`Search`}</Button>}
-            />
+            <Form onSubmit={this.props.onSubmit} horizontal>
+                <FormGroup>
+                    <Col componentClass={ControlLabel} sm={2}>{`Search Query:`}</Col>
+                    <Col sm={9}>
+                        <FormControl
+                            type="search"
+                            id="searchQuery"
+                            value={this.state.searchQuery.get('any')}
+                            onChange={this.handleChange}
+                            buttonAfter={<Button type="submit" value="Search">{`Search`}</Button>}
+                        />
+                    </Col>
+                </FormGroup>
+            </Form>
         );
     },
 });
@@ -150,9 +167,7 @@ const OneboxSearch = React.createClass({
                         </Button>
                     </small>
                 </PageHeader>
-                <form onSubmit={this.handleSubmit}>
-                    <SearchBox/>
-                </form>
+                <SearchBox onSubmit={this.handleSubmit}/>
                 <ResultList/>
                 {this.props.children}
             </div>

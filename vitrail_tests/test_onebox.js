@@ -29,6 +29,7 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 
 import Button from 'react-bootstrap/lib/Button';
+import Form from 'react-bootstrap/lib/Form';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import Modal from 'react-bootstrap/lib/Modal';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
@@ -52,14 +53,16 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: expectedQuery});
 
         // render the component
-        const actual = shallow(<onebox.SearchBox/>);
+        const actual = shallow(<onebox.SearchBox onSubmit={()=>{}}/>);
 
+        // for the top-level component returned
+        expect(actual.type()).toBe(Form);
         // for the search field iteself
-        expect(actual.type()).toBe(FormControl);
-        expect(actual.props().type).toBe('search');
-        expect(actual.props().value).toBe(expectedQuery);
+        const searchField = actual.find(FormControl);
+        expect(searchField).toHaveProp('type', 'search');
+        expect(searchField).toHaveProp('value', expectedQuery);
         // for the "Submit" button
-        const buttonAfter = actual.props().buttonAfter;
+        const buttonAfter = searchField.props().buttonAfter;  // this is a React node, not enzyme
         expect(buttonAfter.type).toBe(Button);
         expect(buttonAfter.props.type).toBe('submit');
         expect(buttonAfter.props.value).toBe('Search');
@@ -71,18 +74,18 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: firstQuery});
 
         // render the component
-        const actualSearchBox = mount(<onebox.SearchBox/>);
+        const actualSearchBox = mount(<onebox.SearchBox onSubmit={()=>{}}/>);
         const actual = actualSearchBox.find(FormControl);
 
         // make sure the first value is set
-        expect(actual.props().value).toBe(firstQuery);
+        expect(actual).toHaveProp('value', firstQuery);
 
         // set the second value to display in the search box
         const secondQuery = 'turbofan';
         signals.setSearchQuery({any: secondQuery});
 
         // make sure the second value is set
-        expect(actual.props().value).toBe(secondQuery);
+        expect(actual).toHaveProp('value', secondQuery);
     });
 
     it('updates the Store when the value is changed', () => {
@@ -91,7 +94,7 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: firstQuery});
 
         // render the component
-        const actualSearchBox = mount(<onebox.SearchBox/>);
+        const actualSearchBox = mount(<onebox.SearchBox onSubmit={()=>{}}/>);
         const actual = actualSearchBox.find(FormControl);
 
         // make sure the first value is set
@@ -112,27 +115,16 @@ describe('OneboxSearch', () => {
     beforeEach(() => { reactor.reset(); });
 
     it('renders properly', () => {
-        const actual = shallow(<onebox.OneboxSearch children={<div className="lol"/>}/>);
+        const children = <div className="lol"/>;
+        const actual = shallow(<onebox.OneboxSearch children={children}/>);
 
-        let child;
-        expect(actual.type()).toBe('div');
-        expect(actual.hasClass('container')).toBe(true);
-        //
-        child = actual.childAt(0);
-        expect(child.type()).toBe(Modal);
-        //
-        child = actual.childAt(1);
-        expect(child.type()).toBe(PageHeader);
-        //
-        child = actual.childAt(2);
-        expect(child.type()).toBe('form');
-        //
-        child = actual.childAt(3);
-        expect(child.type()).toBe(ResultList);
-        //
-        child = actual.childAt(4);
-        expect(child.type()).toBe('div');
-        expect(child.hasClass('lol')).toBe(true);
+        expect(actual).toHaveTagName('div');
+        expect(actual).toHaveClassName('container');
+        expect(actual.childAt(0).type()).toBe(Modal);  // "help"
+        expect(actual.childAt(1).type()).toBe(PageHeader);
+        expect(actual.childAt(2).type()).toBe(onebox.SearchBox);
+        expect(actual).toContainReact(<ResultList/>);
+        expect(actual).toContainReact(children);
     });
 
     it('resets the search query before mounting', () => {
@@ -145,16 +137,16 @@ describe('OneboxSearch', () => {
         const actual = mount(<onebox.OneboxSearch/>);
         const helpButton = actual.find(Button);
         const helpModal = actual.find(Modal);
-        expect(helpModal.props().show).toBe(false);  // pre-condition
+        expect(helpModal).toHaveProp('show', false);  // pre-condition
 
         // click the "?" button, it open the modal
         helpButton.simulate('click');
-        expect(helpModal.props().show).toBe(true);
+        expect(helpModal).toHaveProp('show', true);
 
         // click the help window's close button, it closes the modal
         const closeButton = helpButton.find(Button);
         closeButton.simulate('click');
-        expect(helpModal.props().show).toBe(false);
+        expect(helpModal).toHaveProp('show', false);
     });
 
     it('calls signals.submitSearchQuery() when the SearchBox is submitted', () => {
