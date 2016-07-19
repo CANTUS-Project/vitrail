@@ -47,3 +47,9 @@
 .result-list-item-view > .panel {
     break-inside: avoid;
 }
+
+.template-search-template > .panel-body { padding: 0; }
+.template-search-fields {
+    border: none;
+    margin-bottom: 0;
+}

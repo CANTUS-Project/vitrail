@@ -37,6 +37,7 @@ import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 import Panel from 'react-bootstrap/lib/Panel';
 import PanelGroup from 'react-bootstrap/lib/PanelGroup';
+import Well from 'react-bootstrap/lib/Well';
 
 import {getters} from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
@@ -52,29 +53,18 @@ describe('TemplateSearch', () => {
     it('renders properly', () => {
         const actual = shallow(<template_search.TemplateSearch/>);
         //
-        expect(actual.type()).toBe('div');
-        expect(actual.hasClass('container')).toBe(true);
+        expect(actual).toHaveTagName('div');
+        expect(actual).toHaveClassName('container');
         //
-        const header = actual.childAt(0);
-        expect(header.type()).toBe(PageHeader);
-        const group = actual.childAt(1);
-        expect(group.type()).toBe(PanelGroup);
-        // children of the PanelGroup
-        const template = group.childAt(0);
-        expect(template.type()).toBe(template_search.TemplateSearchTemplate);
-        const results = group.childAt(1);
-        expect(results.type()).toBe(ResultList);
+        expect(actual.childAt(0).type()).toBe(PageHeader);
+        expect(actual).toContainReact(<template_search.TemplateSearchTemplate/>);
+        expect(actual).toContainReact(<ResultList/>);
     });
 
     it('renders "props.children" properly', () => {
-        const actual = shallow(
-            <template_search.TemplateSearch>
-                <div className="bogus"/>
-            </template_search.TemplateSearch>
-        );
-
-        const theDiv = actual.childAt(2);
-        expect(theDiv.hasClass('bogus')).toBe(true);
+        const child = <div className="bogus"/>;
+        const actual = shallow(<template_search.TemplateSearch>{child}</template_search.TemplateSearch>);
+        expect(actual).toContainReact(child);
     });
 
     it('resets the search query before mounting', () => {
@@ -101,23 +91,15 @@ describe('TemplateSearchTemplate', () => {
 
     it('renders properly', () => {
         const actual = shallow(<template_search.TemplateSearchTemplate/>);
-        //
+
         expect(actual.type()).toBe(Panel);
+        expect(actual).toHaveClassName('template-search-template');
         //
-        const listGroup = actual.childAt(0);
-        expect(listGroup.type()).toBe(ListGroup);
-        // type selector
-        const listItem0 = listGroup.childAt(0);
-        expect(listItem0.type()).toBe(ListGroupItem);
-        expect(listItem0.childAt(0).type()).toBe(template_search.TemplateTypeSelector);
-        // template contents
-        const listItem1 = listGroup.childAt(1);
-        expect(listItem1.type()).toBe(ListGroupItem);
-        expect(listItem1.childAt(0).type()).toBe(template_search.TemplateSearchFields);
-        // submit button
-        const listItem2 = listGroup.childAt(2);
-        expect(listItem2.type()).toBe(ListGroupItem);
-        expect(listItem2.childAt(0).type()).toBe(Button);
+        expect(actual.prop('header').type).toBe(template_search.TemplateTypeSelector);
+        expect(actual.childAt(0).type()).toBe(template_search.TemplateSearchFields);
+        const submitButton = actual.prop('footer');
+        expect(submitButton.type).toBe(Button);
+        expect(submitButton.props.children).toBe('Search');
     });
 
     it('renders an unsupported resourceType error properly', () => {
@@ -153,8 +135,8 @@ describe('TemplateSearchTemplate', () => {
         signals.submitSearchQuery = jest.genMockFn();
 
         // click "Submit"
-        const submit = actual.find(Button).at(4);
-        expect(submit.prop('children')).toEqual('Search');  // check it's the right button
+        const submit = actual.find(Button).at(4);  // 4 buttons for resource types; fifth is "Submit"
+        expect(submit).toHaveProp('children', 'Search');  // check it's the right button
         submit.simulate('click');
 
         // check signals.submitSearchQuery() was called
@@ -169,19 +151,9 @@ describe('TemplateSearchFields', () => {
     it('renders properly', () => {
         const actual = shallow(<template_search.TemplateSearchFields fieldNames={[]}/>);
         //
-        expect(actual.prop('header')).toEqual(`Click or tap this header to collapse the template.`);
-        expect(actual.prop('expanded')).toBe(true);
+        expect(actual.type()).toBe(Well);
+        expect(actual).toHaveClassName('template-search-fields');
         expect(actual.childAt(0).type()).toBe(Form);
-    });
-
-    it('collapses when the collapsion area is clicked', () => {
-        const actual = mount(<template_search.TemplateSearchFields fieldNames={[]}/>);
-
-        const panelTitle = actual.find('h4');
-        panelTitle.simulate('click');
-
-        const panel = actual.find(Panel);
-        expect(panel.prop('expanded')).toBe(false);
     });
 
     it('renders the correct TemplateSearchField subcomponents', () => {
@@ -195,8 +167,8 @@ describe('TemplateSearchFields', () => {
 
         const fields = actual.find(template_search.TemplateSearchField);
         for (const i of [0, 1, 2, 3]) {
-            expect(fields.at(i).prop('field')).toEqual(fieldNames[i].field);
-            expect(fields.at(i).prop('displayName')).toEqual(fieldNames[i].displayName);
+            expect(fields.at(i)).toHaveProp('field', fieldNames[i].field);
+            expect(fields.at(i)).toHaveProp('displayName', fieldNames[i].displayName);
         }
     });
 });

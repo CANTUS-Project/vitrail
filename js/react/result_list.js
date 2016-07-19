@@ -355,7 +355,7 @@ const Paginator = React.createClass({
     render() {
         return (
             <Pagination
-                bsSize="medium"
+                bsSize="small"
                 items={Math.max(1, this.state.totalPages)}
                 activePage={Math.max(1, this.state.page)}
                 onSelect={this.handleClick}

@@ -36,6 +36,7 @@ import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Panel from 'react-bootstrap/lib/Panel';
 import PanelGroup from 'react-bootstrap/lib/PanelGroup';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
+import Well from 'react-bootstrap/lib/Well';
 
 import {AlertView} from './vitrail';
 import ResultList from './result_list';
@@ -91,21 +92,25 @@ const TemplateTypeSelector = React.createClass({
             <ButtonGroup role="group" aria-label="resource type selector">
                 <Button id="chantsTypeButton" active={buttonProps.chants.active}
                     aria-pressed={buttonProps.chants['aria-pressed']} onClick={this.handleClick}
+                    bsStyle="primary"
                 >
                     {`Chants`}
                 </Button>
                 <Button id="feastsTypeButton" active={buttonProps.feasts.active}
                     aria-pressed={buttonProps.feasts['aria-pressed']} onClick={this.handleClick}
+                    bsStyle="primary"
                 >
                     {`Feasts`}
                 </Button>
                 <Button id="indexersTypeButton" active={buttonProps.indexers.active}
                     aria-pressed={buttonProps.indexers['aria-pressed']} onClick={this.handleClick}
+                    bsStyle="primary"
                 >
                     {`Indexers`}
                 </Button>
                 <Button id="sourcesTypeButton" active={buttonProps.sources.active}
                     aria-pressed={buttonProps.sources['aria-pressed']} onClick={this.handleClick}
+                    bsStyle="primary"
                 >
                     {`Sources`}
                 </Button>
@@ -219,12 +224,7 @@ const TemplateSearchFields = React.createClass({
         headerText = `Click or tap this header to ${headerText} the template.`;
 
         return (
-            <Panel
-                header={headerText}
-                collapsible
-                expanded={!this.state.isCollapsed}
-                onClick={this.handleCollapse}
-            >
+            <Well className="template-search-fields">
                 <Form horizontal>
                     {this.props.fieldNames.map((field, index) =>
                         <TemplateSearchField
@@ -234,7 +234,7 @@ const TemplateSearchFields = React.createClass({
                         />
                     )}
                 </Form>
-            </Panel>
+            </Well>
         );
     },
 });
@@ -367,16 +367,12 @@ const TemplateSearchTemplate = React.createClass({
         }
 
         return (
-            <Panel>
-                <ListGroup fill>
-                    <ListGroupItem><TemplateTypeSelector/></ListGroupItem>
-                    <ListGroupItem>
-                        {content}
-                    </ListGroupItem>
-                    <ListGroupItem>
-                        <Button bsStyle="primary" onClick={this.handleSubmit}>{`Search`}</Button>
-                    </ListGroupItem>
-                </ListGroup>
+            <Panel
+                className="template-search-template"
+                header={<TemplateTypeSelector/>}
+                footer={<Button bsStyle="primary" onClick={this.handleSubmit}>{`Search`}</Button>}
+            >
+                {content}
             </Panel>
         );
     },
@@ -407,10 +403,8 @@ const TemplateSearch = React.createClass({
                     {`Template Search `}
                     <small><i>{`Describe what you want, we'll fill in the blanks.`}</i></small>
                 </PageHeader>
-                <PanelGroup>
-                    <TemplateSearchTemplate/>
-                    <ResultList/>
-                </PanelGroup>
+                <TemplateSearchTemplate/>
+                <ResultList/>
                 {this.props.children}
             </div>
         );
