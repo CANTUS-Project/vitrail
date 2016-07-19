@@ -28,6 +28,7 @@
         "enzyme": "2.3.0",
         "eslint": "^2.10.2",
         "eslint-plugin-react": "^5.1.1",
+        "jasmine-enzyme": "1.1.x",
         "jest-cli": "~12.1.0",
         "react-addons-test-utils": "15.1.0",
         "uglify-js": "^2.6.0",
@@ -42,10 +43,12 @@
     },
     "jest": {
         "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+        "setupTestFrameworkScriptFile": "<rootDir>/node_modules/jasmine-enzyme/lib/jest.js",
         "testFileExtensions": ["es6", "js"],
         "moduleFileExtensions": ["js", "json", "es6"],
         "unmockedModulePathPatterns": [
             "<rootDir>/node_modules/enzyme",
+            "<rootDir>/node_modules/jasmine-enzyme",
             "<rootDir>/node_modules/react",
             "<rootDir>/node_modules/react-bootstrap",
             "<rootDir>/node_modules/react-dom",
