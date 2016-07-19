@@ -23,6 +23,7 @@
  *-------------------------------------------------------------------------------------------------
  */
 
+.page-header { margin-top: 0; }
 
 .td-align-right {
     text-align: right;
@@ -35,3 +36,14 @@
 .result-list { padding-bottom: 13px; }
 .result-list .pagination { margin: 0; }
 .result-list-settings form > :last-child { margin-bottom: 0; }
+
+/* set up the multi-column layout when ResultList is showing in Views */
+.result-list-item-view {
+    margin-bottom: 19px;
+    -webkit-column-count: 3;
+       -moz-column-count: 3;
+            column-count: 3;
+}
+.result-list-item-view > .panel {
+    break-inside: avoid;
+}

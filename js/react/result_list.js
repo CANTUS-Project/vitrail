@@ -204,7 +204,7 @@ const ResultListItemView = React.createClass({
         const sortOrder = this.props.sortOrder.toJS();
 
         return (
-            <div>
+            <div className="result-list-item-view">
                 {sortOrder.map((rid) => {  /* eslint arrow-body-style: 0 */
                     return (
                         <ItemView

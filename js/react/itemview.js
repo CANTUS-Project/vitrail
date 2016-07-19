@@ -232,16 +232,10 @@ const ItemViewChant = React.createClass({
             finalis = <ListGroupItem>{`Finalis: ${data.get('finalis')}`}</ListGroupItem>;
         }
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-5';
-        }
-
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
                 <ListGroup>
                     {concordances}
                     {fullText}
@@ -293,16 +287,10 @@ const ItemViewFeast = React.createClass({
             feastCode = [<br key="1"/>, feastCode];
         }
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-4';
-        }
-
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
                 {description}
                 {feastCode}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
@@ -365,16 +353,10 @@ const ItemViewIndexer = React.createClass({
             cityAndCountry = <ListGroupItem>{cityAndCountry}</ListGroupItem>;
         }
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-4';
-        }
-
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
                 <ListGroup fill>
                     {institution}
                     {cityAndCountry}
@@ -408,15 +390,9 @@ const ItemViewGenre = React.createClass({
         const description = data.get('description', '');
         const massOrOffice = <div className="text-muted">{`(${data.get('mass_or_office', '')})`}</div>;
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-3';
-        }
-
         // Build the final structure
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className={className}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header}>
                 {description}
                 {massOrOffice}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
@@ -555,16 +531,10 @@ const ItemViewSource = React.createClass({
             );
         }
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-5';
-        }
-
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
                 <ListGroup>
                     <ListGroupItem>{data.get('title', '')}</ListGroupItem>
                     {status}
@@ -606,16 +576,10 @@ const ItemViewSimpleResource = React.createClass({
         const header = [data.get('name', ''), <Label key="1" bsStyle="info">{type}</Label>];
         const description = data.get('description', '');
 
-        // Choose the column size
-        let className;
-        if (this.props.size === 'compact') {
-            className = 'col-md-3';
-        }
-
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className={className}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
                 {description}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>
@@ -746,11 +710,10 @@ const ItemViewError = React.createClass({
  * used directly. The other components are deployed automatically by ItemView and ItemViewOverlay.
  *
  * ItemViewOverlay displays the data of a single resource in such a way that the rest of the
- * interface is inaccessible until the ItemViewOverlay is closed. The top-level rendered component
- * has className="itemview-overlay".
+ * interface is inaccessible until the ItemViewOverlay is closed.
  *
  * ItemView displays the data of a single resource so it may be used in a table, result list, or
- * other similar context. The top-level rendered component is a <div> with className="card itemview".
+ * other similar context. The top-level rendered component is a <div> with className="card".
  *
  * Data Source Selection
  * ---------------------
