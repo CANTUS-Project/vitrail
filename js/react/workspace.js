@@ -261,25 +261,29 @@ const Collection = React.createClass({
             </Popover>
         );
 
-        let renamer;
         if (this.state.showRenamer) {
-            renamer = (
-                <CollectionRename
-                    collection={this.props.collection}
-                    handleHide={this.handleShowRenamer}
-                    chooseName={this.submitRename}
-                />
+            // TODO: the extra <div> causes the space between the buttons to disappear; either way,
+            //       I need a better way to be doing this renaming!
+            return (
+                <div>
+                    <CollectionRename
+                        collection={this.props.collection}
+                        handleHide={this.handleShowRenamer}
+                        chooseName={this.submitRename}
+                    />
+                    <OverlayTrigger trigger="click" placement="left" overlay={overlay} rootClose>
+                        <Button block>{name}</Button>
+                    </OverlayTrigger>
+                </div>
             );
         }
-
-        return (
-            <ListGroupItem>
-                {renamer}
+        else {
+            return (
                 <OverlayTrigger trigger="click" placement="left" overlay={overlay} rootClose>
-                    <Button>{name}</Button>
+                    <Button block>{name}</Button>
                 </OverlayTrigger>
-            </ListGroupItem>
-        );
+            );
+        }
     },
 });
 
@@ -512,18 +516,19 @@ const Shelf = React.createClass({
                 {renamer}
                 {resetter}
                 <Panel header="Shelf">
-                    <ListGroup fill>
-                        {collections}
-                    </ListGroup>
-                    <Button bsStyle="success" block onClick={this.toggleAddingCollection}>
-                        <Glyphicon glyph="plus"/>{` New Collection`}
-                    </Button>
-                    <Button bsStyle="success" block onClick={this.saveShelf}>
-                        <Glyphicon glyph="save"/>{` Save Shelf`}
-                    </Button>
-                    <Button bsStyle="warning" block onClick={this.toggleShowResetter}>
-                        <Glyphicon glyph="trash"/>{` Clear Shelf`}
-                    </Button>
+                    {collections}
+                    <hr/>
+                    <ButtonGroup block vertical>
+                        <Button bsStyle="primary" onClick={this.toggleAddingCollection}>
+                            <Glyphicon glyph="plus"/>{` New Collection`}
+                        </Button>
+                        <Button bsStyle="primary" onClick={this.saveShelf}>
+                            <Glyphicon glyph="save"/>{` Save Shelf`}
+                        </Button>
+                        <Button bsStyle="primary" onClick={this.toggleShowResetter}>
+                            <Glyphicon glyph="trash"/>{` Clear Shelf`}
+                        </Button>
+                    </ButtonGroup>
                 </Panel>
                 {this.props.children}
             </Col>
@@ -565,10 +570,7 @@ const JustShelf = React.createClass({
                 <Col lg={10}>
                     <Panel header="Desk">
                         <p>
-                            {`Your desk is empty. Good job keeping everything clean!`}
-                        </p>
-                        <p>
-                            {`Choose a Collection from your Shelf to start working.`}
+                            {`Choose a Collection from the Shelf to see its contents on the Desk.`}
                         </p>
                     </Panel>
                 </Col>
@@ -636,9 +638,6 @@ const Workspace = React.createClass({
 
         return (
             <Grid id="vitrail-workspace" fluid>
-                <div className="alert alert-warning">
-                    <strong>{`The Workspace is a draft. It only sort of works.`}</strong>
-                </div>
                 {help}
                 <PageHeader>
                     {`Workspace\u2003`}
