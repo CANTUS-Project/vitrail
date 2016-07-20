@@ -84,7 +84,7 @@ const YesServiceWorker = React.createClass({
                 </p>
                 <p>
                     {`When you're offline, you can view any chants that you saved in the `}
-                    <Link to="/wokspace">{`Workspace`}</Link>{`. However, you can only search the
+                    <Link to="/workspace">{`Workspace`}</Link>{`. However, you can only search the
                     database when you're online.`}
                 </p>
                 <hr/>
@@ -157,7 +157,7 @@ const NoServiceWorker = React.createClass({
                 </p>
                 <p>
                     {`When you're offline, you can view any chants that you saved in the `}
-                    <Link to="/wokspace">{`Workspace`}</Link>{`. However, you can only search the
+                    <Link to="/workspace">{`Workspace`}</Link>{`. However, you can only search the
                     database when you're online.`}
                 </p>
                 <p>
