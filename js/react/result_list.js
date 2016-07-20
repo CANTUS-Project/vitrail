@@ -149,7 +149,7 @@ const ResultRow = React.createClass({
         }
     },
     render() {
-        const renderedColumns = this.props.columns.map((columnName) =>
+        let renderedColumns = this.props.columns.map((columnName) =>
             <ResultCell key={columnName} link={this.getColumnLink(columnName)}>
                 {this.cleanColumn(this.props.data.get(columnName))}
             </ResultCell>
@@ -158,7 +158,7 @@ const ResultRow = React.createClass({
         // add a button to the ItemViewOverlay, if relevant
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
             const url = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
-            renderedColumns.push(
+            renderedColumns = renderedColumns.push(
                 <ResultCell key="itemview">
                     <Link to={url} className="btn btn-default btn-sm">{`View`}</Link>
                 </ResultCell>
@@ -167,7 +167,7 @@ const ResultRow = React.createClass({
 
         // add the Collection add/remove buttons
         if (this.props.data.get('type') === 'chant') {
-            renderedColumns.push(
+            renderedColumns = renderedColumns.push(
                 <ResultCell key="collection-add">
                     <AddRemoveCollection rid={this.props.data.get('id')} colid={this.props.colid}/>
                 </ResultCell>
