@@ -252,11 +252,11 @@ const Collection = React.createClass({
         const overlay = (
             <Popover id={`coll-${colid}`} title={name}>
                 <ButtonGroup>
-                    <Link className="btn btn-default" to={`/workspace/collection/${colid}`}>
+                    <Link className="btn btn-primary" to={`/workspace/collection/${colid}`}>
                         {`Open`}
                     </Link>
-                    <Button onClick={this.handleShowRenamer}>{`Rename`}</Button>
-                    <Button onClick={this.handleDelete}>{`Delete`}</Button>
+                    <Button bsStyle="primary" onClick={this.handleShowRenamer}>{`Rename`}</Button>
+                    <Button bsStyle="primary" onClick={this.handleDelete}>{`Delete`}</Button>
                 </ButtonGroup>
             </Popover>
         );
@@ -284,42 +284,6 @@ const Collection = React.createClass({
                 </OverlayTrigger>
             );
         }
-    },
-});
-
-
-/** What pops up when you choose the "Advanced" button on the Desk.
- *
- * Props:
- * ------
- * @param (func) handleClose - This function can be called without arguments to close the DeskAdvanced.
- */
-const DeskAdvanced = React.createClass({
-    propTypes: {
-        collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-        handleClose: React.PropTypes.func.isRequired,
-    },
-    render() {
-        const title = `Advanced Settings: "${this.props.collection.get('name')}"`;
-        const message = `IDs in this collection: ${this.props.collection.get('members').join(', ')}.`;
-
-        return (
-            <Modal show onHide={this.props.handleClose}>
-                <Modal.Header>
-                    <Modal.Title>{title}</Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <ListGroup>
-                        <ListGroupItem>{message}</ListGroupItem>
-                    </ListGroup>
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <Button onClick={this.props.handleClose}>{`Close`}</Button>
-                </Modal.Footer>
-            </Modal>
-        );
     },
 });
 
@@ -358,12 +322,6 @@ const Desk = React.createClass({
             this.loadCollection(nextProps.colid, nextState);
         }
     },
-    getInitialState() {
-        return {showAdvanced: false};
-    },
-    toggleShowAdvanced() {
-        this.setState({showAdvanced: !this.state.showAdvanced});
-    },
     /** Load the data for the collection given by "colid."
      *
      * @param {str} colid - The collection ID to load.
@@ -386,32 +344,16 @@ const Desk = React.createClass({
         }
     },
     render() {
-        let advanced;
-        let openCollectionName;
-        // only render the collection's name, and the "Advanced" panel, we've loaded the collection
+        let header;
         if (this.state.collections.has(this.props.colid)) {
-            openCollectionName = this.state.collections.get(this.props.colid).get('name');
-            if (this.state.showAdvanced) {
-                advanced = (
-                    <DeskAdvanced
-                        handleClose={this.toggleShowAdvanced}
-                        collection={this.state.collections.get(this.props.colid)}
-                    />
-                );
-            }
+            header = `Desk (viewing collection "${this.state.collections.get(this.props.colid).get('name')}")`;
         }
-        const header = [
-            <span key="1">{`Desk (viewing "${openCollectionName}")`}</span>,
-            <Button key="2" onClick={this.toggleShowAdvanced}>{`Advanced`}</Button>,
-        ];
-        // TODO: if we have an invalid collection ID, also don't show the "Advanced" button
 
         return (
             <Col lg={10}>
                 <Panel header={header}>
                     <ResultList colid={this.props.colid}/>
                 </Panel>
-                {advanced}
             </Col>
         );
     },
@@ -594,23 +536,20 @@ const WorkspaceHelp = React.createClass({
 
                 <Modal.Body>
                     <p>
-                        {`In the Workspace, you can create private "Collections" of resources. Store them
-                        on the "Shelf" or view them on the "Desk."`}
+                        {`Use the Workspace to save "Collections" of chants to view offline. Your
+                        collections are held on the "Shelf." Click or tap a collection on the Shelf
+                        to open its chants on the "Desk."`}
                     </p>
                     <p>
-                        {`Collections help you compile resources, and keep track of search results or other
-                        groups of resources that you may want to view later.`}
+                        {`You can name your collections and use them to keep track of search results
+                        or any other group of chants you may want to view later. However, your
+                        collections are only stored in your browser, so nobody else can see them.`}
                     </p>
                     <p>
-                        {`Soon, you will be able to save collections, and all the resources in them,
-                        in your browser across restarts. That way, you can access the Cantus Database
-                        offline.`}
-                    </p>
-                    <p>
-                        {`You can name your collections, but remember that they are always private, they
-                        cannot be shared, and they are not backed up to a Cantus server. If you lose your
-                        collections, such as by resetting your browser cache, there is unfortunately no
-                        way to get them back.`}
+                        {`When you add chants to a collection, they're automatically saved in your
+                        browser. This means you can view the chants in your collections even if
+                        you're not connected to the internet. Refer to our `}
+                        <Link to="/offline">{`offline page `}</Link>{`for more information.`}
                     </p>
                 </Modal.Body>
 
