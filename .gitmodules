@@ -3,4 +3,4 @@
 	url = https://github.com/CANTUS-Project/cantus-js.git
 [submodule "bootswatch"]
 	path = bootswatch
-	url = git@github.com:CANTUS-Project/bootswatch.git
+	url = https://github.com/CANTUS-Project/bootswatch.git
