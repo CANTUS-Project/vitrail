@@ -140,7 +140,7 @@ const formatters = {
 
         // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
         let alreadyAdjusted = false;
-        if (!resultsAllSameType) {
+        if (resultsAllSameType) {
             // we'll show only the fields called "primary" in the ItemView
             if ('chant' === firstResType) {
                 alreadyAdjusted = true;
