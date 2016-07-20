@@ -130,3 +130,105 @@ describe('ServiceWorker-related getters', () => {
         expect(formatters.swInstalled(results)).toBe('sure');
     });
 });
+
+
+describe('resultsSortOrder()', () => {
+    it('works', () => {
+        const results = Immutable.fromJS({'results': {'sort_order': '1,2,3'}});
+        expect(formatters.resultsSortOrder(results)).toBe('1,2,3');
+    });
+});
+
+
+describe('searchResultsHeaders()', () => {
+    it('works', () => {
+        const results = Immutable.fromJS({'results': {'headers': 'X-Cantus-Whatever'}});
+        expect(formatters.searchResultsHeaders(results)).toBe('X-Cantus-Whatever');
+    });
+});
+
+
+describe('resultsFields(), resultsExtraFields(), and resultsAllFields()', () => {
+    it('the headers field is present', () => {
+        const results = Immutable.fromJS({'results': {'headers': {'fields': 'one,two'}}});
+        expect(formatters.resultsFields(results)).toEqual(Immutable.List(['one', 'two']));
+    });
+
+    it('the headers field is not present', () => {
+        const results = Immutable.fromJS({'results': {'headers': {'whatever': 'five'}}});
+        expect(formatters.resultsFields(results)).toEqual(Immutable.List());
+    });
+
+    it('the extra headers field is present', () => {
+        const results = Immutable.fromJS({'results': {'headers': {'extra_fields': 'one,two'}}});
+        expect(formatters.resultsExtraFields(results)).toEqual(Immutable.List(['one', 'two']));
+    });
+
+    it('the extra headers field is not present', () => {
+        const results = Immutable.fromJS({'results': {'headers': {'whatever': 'five'}}});
+        expect(formatters.resultsExtraFields(results)).toEqual(Immutable.List());
+    });
+
+    it('all fields', () => {
+        const results = Immutable.fromJS({'results': {'headers': {'fields': 'one,two', 'extra_fields': 'three,four'}}});
+        expect(formatters.resultsAllFields(results)).toEqual(Immutable.List(['one', 'two', 'three', 'four']));
+    });
+});
+
+
+describe('resultsAllSameType()', () => {
+    it('three resources, all same type', () => {
+        const results = Immutable.fromJS({
+            results: {
+                asdf: {type: 'chant'},
+                bsdf: {type: 'chant'},
+                csdf: {type: 'chant'},
+                sort_order: ['asdf', 'bsdf', 'csdf'],
+            }
+        });
+        expect(formatters.resultsAllSameType(results)).toBe(true);
+    });
+
+    it('three resources, all different types', () => {
+        const results = Immutable.fromJS({
+            results: {
+                asdf: {type: 'chant'},
+                bsdf: {type: 'dhant'},
+                csdf: {type: 'ehant'},
+                sort_order: ['asdf', 'bsdf', 'csdf'],
+            }
+        });
+        expect(formatters.resultsAllSameType(results)).toBe(false);
+    });
+
+    it('one resource', () => {
+        const results = Immutable.fromJS({
+            results: {
+                asdf: {type: 'chant'},
+                sort_order: ['asdf'],
+            }
+        });
+        expect(formatters.resultsAllSameType(results)).toBe(true);
+    });
+
+    it('three resources, only one is in sort_order', () => {
+        const results = Immutable.fromJS({
+            results: {
+                asdf: {type: 'chant'},
+                bsdf: {type: 'ciant'},
+                csdf: {type: 'cjant'},
+                sort_order: ['asdf'],
+            }
+        });
+        expect(formatters.resultsAllSameType(results)).toBe(true);
+    });
+
+    it('no resources in sort_order', () => {
+        const results = Immutable.fromJS({results: {sort_order: []}});
+        expect(formatters.resultsAllSameType(results)).toBe(true);
+    });
+
+    it('no resources', () => {
+        expect(formatters.resultsAllSameType(Immutable.Map())).toBe(true);
+    });
+});

@@ -70,7 +70,7 @@ const formatters = {
     },
 
     resultsFields(results) {
-        if (results.getIn(['results', 'headers', 'fields'])) {
+        if (results.hasIn(['results', 'headers', 'fields'])) {
             return Immutable.List(results.getIn(['results', 'headers', 'fields']).split(','));
         }
         else {
@@ -97,13 +97,18 @@ const formatters = {
     resultsAllSameType(results) {
         const sortOrder = results.getIn(['results', 'sort_order']);
         const data = results.get('results');
-        const firstResType = data.get(sortOrder.get(0)).get('type');
-        for (const id of sortOrder.values()) {
-            if (data.get(id).get('type') !== firstResType) {
-                return false;
+        if (sortOrder && sortOrder.size > 0) {
+            const firstResType = data.get(sortOrder.get(0)).get('type');
+            for (const id of sortOrder.values()) {
+                if (data.get(id).get('type') !== firstResType) {
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
+        else {
+            return true;
+        }
     },
 
     /** ResultListTable_columns: Determine the columns to display in the ResultListTable.
@@ -223,12 +228,12 @@ const getters = {
     // related to the query already completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
-    searchResultsHeaders: [['searchResults'], formatters.searchResultsHeaders],  // TODO: test
-    resultsSortOrder: [['searchResults'], formatters.resultsSortOrder],  // TODO: test
-    resultsFields: [['searchResults'], formatters.resultsFields],  // ImmutableJS.List of X-Cantus-Fields  // TODO: test
-    resultsExtraFields: [['searchResults'], formatters.resultsExtraFields],  // ImmutableJS.List of X-Cantus-Extra-Fields  // TODO: test
-    resultsAllFields: [['searchResults'], formatters.resultsAllFields],  // ImmutableJS.List of previous two combined  // TODO: test
-    resultsAllSameType: [['searchResults'], formatters.resultsAllSameType],  // boolean: whether all the results are the same resourceType  // TODO: test
+    searchResultsHeaders: [['searchResults'], formatters.searchResultsHeaders],
+    resultsSortOrder: [['searchResults'], formatters.resultsSortOrder],
+    resultsFields: [['searchResults'], formatters.resultsFields],  // ImmutableJS.List of X-Cantus-Fields
+    resultsExtraFields: [['searchResults'], formatters.resultsExtraFields],  // ImmutableJS.List of X-Cantus-Extra-Fields
+    resultsAllFields: [['searchResults'], formatters.resultsAllFields],  // ImmutableJS.List of previous two combined
+    resultsAllSameType: [['searchResults'], formatters.resultsAllSameType],  // boolean: whether all the results are the same resourceType
     ResultListTable_columns: [['searchResults'], formatters.ResultListTable_columns],  // TODO: test
     // current displayed page of results (not currently-requested page)
     searchResultsPage: [['searchResults'], formatters.searchResultsPage],
