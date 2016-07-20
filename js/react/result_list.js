@@ -54,7 +54,9 @@ import {AddRemoveCollection} from './workspace';
  * ------
  * @param (string) children - The cell's contents.
  * @param (boolean) header - Whether to render this cell as <th> (otherwise as <td>).
- * @param (string) link - A URL for the table contents.
+ * @param (string) link - A URL for the table contents. If this starts with "http" then it is used
+ *     as the @href attribute for an <a> element; otherwise, this is used as the @to attribute
+ *     for a react-router <Link> element.
  */
 const ResultCell = React.createClass({
     propTypes: {
@@ -76,7 +78,12 @@ const ResultCell = React.createClass({
         }
 
         if (this.props.link) {
-            post = <a href={this.props.link}>{data}</a>;
+            if (this.props.link.startsWith('http')) {
+                post = <a href={this.props.link}>{data}</a>;
+            }
+            else {
+                post = <Link to={this.props.link}>{data}</Link>;
+            }
         }
         else {
             post = data;
@@ -144,8 +151,8 @@ const ResultRow = React.createClass({
         if (columnName === 'name') {
             return this.props.resources.get('self');
         }
-        else {
-            return this.props.resources.get(columnName);
+        else if (this.props.resources.has(`${columnName}_id`)) {
+            return makeLinkToItemView(columnName, this.props.resources.get(`${columnName}_id`));
         }
     },
     render() {
