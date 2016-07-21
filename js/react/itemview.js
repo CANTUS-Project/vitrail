@@ -388,7 +388,15 @@ const ItemViewGenre = React.createClass({
 
         const header = [data.get('name', ''), <Badge key="1" pullRight>{`Genre`}</Badge>];
         const description = data.get('description', '');
-        const massOrOffice = <div className="text-muted">{`(${data.get('mass_or_office', '')})`}</div>;
+
+        let massOrOffice = data.get('mass_or_office', Immutable.List());
+        if (massOrOffice.size === 1) {
+            massOrOffice = massOrOffice.get(0);
+        }
+        else {
+            massOrOffice = 'Mass or Office';
+        }
+        massOrOffice = <div className="text-muted">{`(${massOrOffice})`}</div>;
 
         // Build the final structure
         return (
