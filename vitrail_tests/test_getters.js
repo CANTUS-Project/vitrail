@@ -232,3 +232,91 @@ describe('resultsAllSameType()', () => {
         expect(formatters.resultsAllSameType(Immutable.Map())).toBe(true);
     });
 });
+
+
+describe('ResultListTable_columns()', () => {
+    it('works with no results for input', () => {
+        const results = Immutable.fromJS(
+            {'results': { 'fields': ['what'], 'extra_fields': ['ever'], 'sort_order': []}}
+        );
+        const expected = Immutable.fromJS({names: [], display: []});
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+
+    it('properly detects when all records are chants', () => {
+        const results = Immutable.fromJS({'results': {
+            'headers': {'fields': 'what', 'extra_fields': 'ever'},
+            'sort_order': ['1', '2', '3'],
+            '1': {type: 'chant'},
+            '2': {type: 'chant'},
+            '3': {type: 'chant'},
+        }});
+        const expected = Immutable.fromJS({
+            names: ['incipit', 'genre', 'office', 'feast', 'position','siglum', 'folio', 'sequence',
+                    'mode', 'differentia'],
+            display: ['Incipit', 'Genre', 'Office', 'Feast', 'Position','Siglum', 'Folio', 'Sequence',
+                      'Mode', 'Differentia']
+        });
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+
+    it('properly detects when all records are sources', () => {
+        const results = Immutable.fromJS({'results': {
+            'headers': {'fields': 'what', 'extra_fields': 'ever'},
+            'sort_order': ['1', '2', '3'],
+            '1': {type: 'source'},
+            '2': {type: 'source'},
+            '3': {type: 'source'},
+        }});
+        const expected = Immutable.fromJS({
+            names: ['rism', 'title', 'date', 'provenance', 'summary'],
+            display: ['RISM', 'Title', 'Date', 'Provenance', 'Summary'],
+        });
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+
+    it('is not thrown off when only the first result is a chant', () => {
+        const results = Immutable.fromJS({'results': {
+            'headers': {'fields': 'what', 'extra_fields': 'ever'},
+            'sort_order': ['1', '2', '3'],
+            '1': {type: 'source'},
+            '2': {type: 'feast'},
+            '3': {type: 'genre'},
+        }});
+        const expected = Immutable.fromJS({
+            names: ['what', 'ever'],
+            display: ['What', 'Ever']
+        });
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+
+    it('is not thrown off when only the first result is a source', () => {
+        const results = Immutable.fromJS({'results': {
+            'headers': {'fields': 'what', 'extra_fields': 'branch_force'},
+            'sort_order': ['1', '2', '3'],
+            '1': {type: 'source'},
+            '2': {type: 'feast'},
+            '3': {type: 'genre'},
+        }});
+        const expected = Immutable.fromJS({
+            names: ['what', 'branch_force'],
+            display: ['What', 'Branch Force']
+        });
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+
+    it('deals with all resources of same type, but not Chant or Source', () => {
+        const results = Immutable.fromJS({'results': {
+            'headers': {'fields': 'fun,is', 'extra_fields': 'cao_concordances'},
+            'sort_order': ['1', '2', '3'],
+            '1': {type: 'feast'},
+            '2': {type: 'feast'},
+            '3': {type: 'feast'},
+        }});
+        const expected = Immutable.fromJS({
+            names: ['fun', 'is', 'cao_concordances'],
+            display: ['Fun', 'Is', 'CAO Concordances'],
+        });
+        expect(formatters.ResultListTable_columns(results)).toEqual(expected);
+    });
+});

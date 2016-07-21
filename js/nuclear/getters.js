@@ -133,7 +133,9 @@ const formatters = {
         const sortOrder = formatters.resultsSortOrder(results);
         const resultsAllSameType = formatters.resultsAllSameType(results)
 
-        let columns = formatters.resultsAllFields(results);
+        if (sortOrder.size === 0) {
+            return Immutable.Map({names: Immutable.List(), display: Immutable.List()});
+        }
 
         // Remove the "id" field and, if the resource types are all the same, remove "type" too.
         // First find out whether all the "types" are the same.
@@ -143,41 +145,22 @@ const formatters = {
             dontInclude.push('type');
         }
 
-        // If all the fields are "chant" or "source" then we'll use predetermined order of columns.
-        let alreadyAdjusted = false;
-        if (resultsAllSameType) {
+        // Determine which columns to show. If all the results are "chant" or "source" then we'll
+        // use a predetermined order of columns.
+        let columns;
+        if (resultsAllSameType && ('chant' === firstResType || 'source' === firstResType)) {
             // we'll show only the fields called "primary" in the ItemView
             if ('chant' === firstResType) {
-                alreadyAdjusted = true;
-                //
-                columns = [
-                    'incipit',
-                    'genre',
-                    'office',
-                    'feast',
-                    'position',
-                    'siglum',
-                    'folio',
-                    'sequence',
-                    'mode',
-                    'differentia',
-                ];
+                columns = ['incipit', 'genre', 'office', 'feast', 'position', 'siglum', 'folio',
+                           'sequence', 'mode', 'differentia'
+                          ];
             }
-            else if ('source' === firstResType) {
-                alreadyAdjusted = true;
-                //
-                columns = [
-                    'rism',
-                    'title',
-                    'date',
-                    'provenance',
-                    'summary',
-                ];
+            else {
+                columns = ['rism', 'title', 'date', 'provenance', 'summary'];
             }
         }
-
-        // Now remove the unncessary fields.
-        if (!alreadyAdjusted) {
+        else {
+            columns = formatters.resultsAllFields(results);
             columns = columns.reduce((prev, curr) => {
                 if (dontInclude.indexOf(curr) >= 0) {
                     return prev;
@@ -191,13 +174,17 @@ const formatters = {
         // and make the formatted display names
         const display = columns.map((columnName) => {
             // first we have to change field names from, e.g., "indexing_notes" to "Indexing notes"
+            if (columnName === 'rism') {
+                return 'RISM';
+            }
+            else if (columnName === 'cao_concordances') {
+                return 'CAO Concordances';
+            }
             const working = columnName.split('_');
             let polishedName = '';
             for (const i in working) {
-                let rawr = working[i][0];
-                rawr = rawr.toLocaleUpperCase();
-                polishedName += rawr;
-                polishedName += `${working[i].slice(1)} `;
+                const rawr = working[i][0].toLocaleUpperCase();
+                polishedName = `${polishedName}${rawr}${working[i].slice(1)} `;
             }
             polishedName = polishedName.slice(0, polishedName.length - 1);
             return polishedName;
@@ -234,7 +221,7 @@ const getters = {
     resultsExtraFields: [['searchResults'], formatters.resultsExtraFields],  // ImmutableJS.List of X-Cantus-Extra-Fields
     resultsAllFields: [['searchResults'], formatters.resultsAllFields],  // ImmutableJS.List of previous two combined
     resultsAllSameType: [['searchResults'], formatters.resultsAllSameType],  // boolean: whether all the results are the same resourceType
-    ResultListTable_columns: [['searchResults'], formatters.ResultListTable_columns],  // TODO: test
+    ResultListTable_columns: [['searchResults'], formatters.ResultListTable_columns],
     // current displayed page of results (not currently-requested page)
     searchResultsPage: [['searchResults'], formatters.searchResultsPage],
     // current displayed per-page of results (not currently-requested per-page)
