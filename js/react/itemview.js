@@ -26,9 +26,9 @@ import {Immutable} from 'nuclear-js';
 import React from 'react';
 import {Link} from 'react-router';
 
+import Badge from 'react-bootstrap/lib/Badge';
 import Button from 'react-bootstrap/lib/Button';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import Label from 'react-bootstrap/lib/Label';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Modal from 'react-bootstrap/lib/Modal';
@@ -122,7 +122,7 @@ const ItemViewChant = React.createClass({
 
 
         // primary fields -----------------------------------------------------
-        const header = [data.get('incipit', '?'), <Label key="1" bsStyle="info">{'Chant'}</Label>];
+        const header = [data.get('incipit', '?'), <Badge key="1" pullRight>{'Chant'}</Badge>];
 
         // genre, office, feast
         header.push(
@@ -235,7 +235,7 @@ const ItemViewChant = React.createClass({
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className="itemview">
                 <ListGroup>
                     {concordances}
                     {fullText}
@@ -274,7 +274,7 @@ const ItemViewFeast = React.createClass({
         // - feast code
 
         // Name and Feast Code
-        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{`Feast`}</Label>];
+        const header = [data.get('name', ''), <Badge key="1" pullRight>{`Feast`}</Badge>];
         if (data.get('date')) {
             header.push(<br key="2"/>);
             header.push(<span key="3" className="text-muted">{data.get('date')}</span>);
@@ -290,7 +290,7 @@ const ItemViewFeast = React.createClass({
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className="itemview">
                 {description}
                 {feastCode}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
@@ -329,7 +329,7 @@ const ItemViewIndexer = React.createClass({
         else {
             name = data.get('display_name', '');
         }
-        const header = [name, <Label key="1" bsStyle="info">{`Indexer`}</Label>];
+        const header = [name, <Badge key="1" pullRight>{`Indexer`}</Badge>];
 
         let institution;
         let cityAndCountry;
@@ -356,7 +356,7 @@ const ItemViewIndexer = React.createClass({
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className="itemview">
                 <ListGroup fill>
                     {institution}
                     {cityAndCountry}
@@ -386,13 +386,13 @@ const ItemViewGenre = React.createClass({
         // - description
         // - mass_or_office
 
-        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{`Genre`}</Label>];
+        const header = [data.get('name', ''), <Badge key="1" pullRight>{`Genre`}</Badge>];
         const description = data.get('description', '');
         const massOrOffice = <div className="text-muted">{`(${data.get('mass_or_office', '')})`}</div>;
 
         // Build the final structure
         return (
-            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header}>
+            <Panel collapsible defaultExpanded={this.props.size === 'full'} header={header} className="itemview">
                 {description}
                 {massOrOffice}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
@@ -441,7 +441,7 @@ const ItemViewSource = React.createClass({
         //
         // NB: \u00A0 is &nbsp; and \u2014 is an em dash
 
-        const header = [data.get('rism', ''), <Label key="1" bsStyle="info">{`Source`}</Label>];
+        const header = [data.get('rism', ''), <Badge key="1" pullRight>{`Source`}</Badge>];
         header.push(<div key="2">{`${data.get('title', '').slice(0, 40)}...`}</div>);
         if (data.get('provenance') && data.get('date')) {
             header.push(<div key="3">{`${data.get('provenance')}\u00A0(${data.get('date')})`}</div>);
@@ -534,7 +534,7 @@ const ItemViewSource = React.createClass({
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className="itemview">
                 <ListGroup>
                     <ListGroupItem>{data.get('title', '')}</ListGroupItem>
                     {status}
@@ -573,13 +573,13 @@ const ItemViewSimpleResource = React.createClass({
         // - description
 
         const type = data.get('type').slice(0, 1).toLocaleUpperCase() + data.get('type').slice(1);
-        const header = [data.get('name', ''), <Label key="1" bsStyle="info">{type}</Label>];
+        const header = [data.get('name', ''), <Badge key="1" pullRight>{type}</Badge>];
         const description = data.get('description', '');
 
         // Build the final structure
         const defaultExpanded = this.props.size === 'full';
         return (
-            <Panel collapsible defaultExpanded={defaultExpanded} header={header}>
+            <Panel collapsible defaultExpanded={defaultExpanded} header={header} className="itemview">
                 {description}
                 <DrupalButton drupalPath={data.get('drupal_path')}/>
             </Panel>

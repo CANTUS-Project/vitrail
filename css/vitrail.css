@@ -53,3 +53,7 @@
     border: none;
     margin-bottom: 0;
 }
+
+.itemview .panel-title {
+    line-height: 1.2em;
+}
