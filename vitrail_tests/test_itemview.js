@@ -389,4 +389,13 @@ describe('pathToParent()', () => {
         const actual = itemview.pathToParent(routes);
         expect(actual).toBe(expected);
     });
+
+    it('replaces remaining params', () => {
+        const routes = [{path: '/'}, {path: 'search'}, {path: 'results'}, {path: ':subset'},
+                        {path: 'whatever'}, {path: ':type/:rid'}];
+        const params = {rid: '123', type: '456', subset: 'fff'};
+        const expected = '/search/results/fff/whatever';
+        const actual = itemview.pathToParent(routes, params);
+        expect(actual).toBe(expected);
+    });
 });

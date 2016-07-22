@@ -873,20 +873,37 @@ const ItemView = React.createClass({
  * @param {Array} routes - An array of objects that have a "path" member, which is a string
  *        containing part of the URL of a resource. Note that this should be the "routes" prop
  *        given to an ItemViewOverlay component.
+ * @param {Object} params - An object with URL params given by react-router. If there are any URL
+ *        params in the parent URL, they will be substituted with the values from this "params"
+ *        object, if possible.
  * @returns {str} The URL to the "parent."
  *
- * **Example**
+ * **Example without Params**
  *
  * > let routes = [{path: '/'}, {path: 'search'}, {path: 'results'}, {path: ':type/:rid'}];
  * > console.log(pathToParent(routes));
  * '/search/results'
+ *
+ * **Example with Params**
+ *
+ * > let routes = [{path: '/'}, {path: 'results'}, {path: ':funValue'}, {path: ':type/:rid'}];
+ * > let params = {funValue: '9001', rid: '4', type: 'chant'};
+ * > console.log(pathToParent(routes));
+ * '/results/9001'
  */
-function pathToParent(routes) {
+function pathToParent(routes, params) {
     const routesLength = routes.length;
     if (routesLength > 2) {
         let post = '';
         for (let i = 1; i < routesLength - 1; i += 1) {
             post = `${post}/${routes[i].path}`;
+        }
+        if (params) {
+            for (const param in params) {
+                if (post.indexOf(`:${param}`) >= 0) {
+                    post = post.replace(`:${param}`, params[param]);
+                }
+            }
         }
         return post;
     }
@@ -914,6 +931,7 @@ function pathToParent(routes) {
 const ItemViewOverlay = React.createClass({
     propTypes: {
         params: React.PropTypes.shape({
+            colid: React.PropTypes.string,
             type: React.PropTypes.string.isRequired,
             rid: React.PropTypes.string.isRequired,
         }).isRequired,
@@ -933,7 +951,7 @@ const ItemViewOverlay = React.createClass({
         return (
             <Modal show>
                 <Modal.Header>
-                    <Link className="btn btn-danger" to={pathToParent(this.props.routes)}>
+                    <Link className="btn btn-danger" to={pathToParent(this.props.routes, this.props.params)}>
                         <Glyphicon glyph="remove-circle"/>
                     </Link>
                 </Modal.Header>
