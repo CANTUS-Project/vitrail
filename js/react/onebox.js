@@ -64,24 +64,21 @@ const searchFieldExamples = Immutable.OrderedMap({
  *
  * This component connects to the "SearchQuery" store by putting its contents in the "any" field.
  *
- * Props
- * -----
- * @param (func) onSubmit - Used as the "onSubmit" handler for the <form>.
- *
  * State
  * -----
  * @param (str) searchQuery - value of getters.searchQuery
  */
 const SearchBox = React.createClass({
-    propTypes: {
-        onSubmit: React.PropTypes.func.isRequired,
-    },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
         return {searchQuery: getters.searchQuery};
     },
     handleChange(event) {
         signals.setSearchQuery({any: event.target.value});
+    },
+    handleSubmit(submitEvent) {
+        submitEvent.preventDefault();  // stop the default GET form submission
+        signals.submitSearchQuery();
     },
     shouldComponentUpdate(nextProps, nextState) {
         // We should only update if *our* field changes value.
@@ -93,7 +90,7 @@ const SearchBox = React.createClass({
     },
     render() {
         return (
-            <Form onSubmit={this.props.onSubmit} horizontal>
+            <Form onSubmit={this.handleSubmit} horizontal>
                 <FormGroup>
                     <Col componentClass={ControlLabel} sm={2}>{`Search Query:`}</Col>
                     <Col sm={9}>
@@ -135,10 +132,6 @@ const OneboxSearch = React.createClass({
         signals.setSearchQuery('clear');
         signals.loadSearchResults('reset');
     },
-    handleSubmit(submitEvent) {
-        submitEvent.preventDefault();  // stop the default GET form submission
-        signals.submitSearchQuery();
-    },
     getInitialState() {
         return {showHelp: false};
     },
@@ -167,7 +160,7 @@ const OneboxSearch = React.createClass({
                         </Button>
                     </small>
                 </PageHeader>
-                <SearchBox onSubmit={this.handleSubmit}/>
+                <SearchBox/>
                 <ResultList/>
                 {this.props.children}
             </div>

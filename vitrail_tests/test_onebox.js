@@ -53,7 +53,7 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: expectedQuery});
 
         // render the component
-        const actual = shallow(<onebox.SearchBox onSubmit={()=>{}}/>);
+        const actual = shallow(<onebox.SearchBox/>);
 
         // for the top-level component returned
         expect(actual.type()).toBe(Form);
@@ -74,7 +74,7 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: firstQuery});
 
         // render the component
-        const actualSearchBox = mount(<onebox.SearchBox onSubmit={()=>{}}/>);
+        const actualSearchBox = mount(<onebox.SearchBox/>);
         const actual = actualSearchBox.find(FormControl);
 
         // make sure the first value is set
@@ -94,7 +94,7 @@ describe('SearchBox', () => {
         signals.setSearchQuery({any: firstQuery});
 
         // render the component
-        const actualSearchBox = mount(<onebox.SearchBox onSubmit={()=>{}}/>);
+        const actualSearchBox = mount(<onebox.SearchBox/>);
         const actual = actualSearchBox.find(FormControl);
 
         // make sure the first value is set
@@ -107,6 +107,18 @@ describe('SearchBox', () => {
         // make sure the second value is set in the Store
         const expected = Immutable.Map({type: 'all', any: secondQuery});
         expect(reactor.evaluate(getters.searchQuery)).toEqual(expected);
+    });
+
+    it('calls signals.submitSearchQuery() when the SearchBox is submitted', () => {
+        const actual = mount(<onebox.SearchBox/>);
+        const searchBox = actual.find(FormControl);
+        const origSubmit = signals.submitSearchQuery;
+        signals.submitSearchQuery = jest.genMockFn();
+
+        searchBox.simulate('submit');
+        expect(signals.submitSearchQuery).toBeCalled();
+
+        signals.submitSearchQuery = origSubmit;
     });
 });
 
@@ -147,17 +159,5 @@ describe('OneboxSearch', () => {
         const closeButton = helpButton.find(Button);
         closeButton.simulate('click');
         expect(helpModal).toHaveProp('show', false);
-    });
-
-    it('calls signals.submitSearchQuery() when the SearchBox is submitted', () => {
-        const actual = mount(<onebox.OneboxSearch/>);
-        const searchBox = actual.find(FormControl);
-        const origSubmit = signals.submitSearchQuery;
-        signals.submitSearchQuery = jest.genMockFn();
-
-        searchBox.simulate('submit');
-        expect(signals.submitSearchQuery).toBeCalled();
-
-        signals.submitSearchQuery = origSubmit;
     });
 });
