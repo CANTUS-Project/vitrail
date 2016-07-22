@@ -131,8 +131,10 @@ describe('TemplateSearchTemplate', () => {
 
     it('submits the search when "Submit" button clicked', () => {
         const actual = mount(<template_search.TemplateSearchTemplate/>);
-        const originalSubmit = signals.submitSearchQuery;
+        const origSubmit = signals.submitSearchQuery;
+        const origSetPage = signals.setPage;
         signals.submitSearchQuery = jest.genMockFn();
+        signals.setPage = jest.genMockFn();
 
         // click "Submit"
         const submit = actual.find(Button).at(4);  // 4 buttons for resource types; fifth is "Submit"
@@ -141,8 +143,10 @@ describe('TemplateSearchTemplate', () => {
 
         // check signals.submitSearchQuery() was called
         expect(signals.submitSearchQuery).toBeCalled();
+        expect(signals.setPage).toBeCalledWith(1);
 
-        signals.submitSearchQuery = originalSubmit;
+        signals.setPage = origSetPage;
+        signals.submitSearchQuery = origSubmit;
     });
 });
 
