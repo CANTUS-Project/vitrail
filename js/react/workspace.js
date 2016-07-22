@@ -50,6 +50,11 @@ import ResultList from './result_list';
 import signals from '../nuclear/signals';
 
 
+// for the "add to collection" and "remove from collection" buttons
+const addToCollTooltip = 'Save Chant in a Collection';
+const removeFromCollTooltip = 'Remove Chant from this Collection';
+
+
 /** Displays existing collections, asking the user which collection a resource should be added to.
  *
  * NuclearJS State
@@ -132,9 +137,9 @@ const AddRemoveCollection = React.createClass({
         let removeButton;
         if (this.props.colid) {
             removeButton = (
-                <Button onClick={this.handleRemove} bsSize="small">
+                <Button onClick={this.handleRemove} bsSize="small" title={removeFromCollTooltip}>
                     <Glyphicon glyph="minus"/>
-                    <span className="sr-only">{`Remove from Collection`}</span>
+                    <span className="sr-only">{removeFromCollTooltip}</span>
                 </Button>
             );
         }
@@ -147,9 +152,9 @@ const AddRemoveCollection = React.createClass({
         return (
             <ButtonGroup>
                 {addToCollection}
-                <Button onClick={this.openAddToCollection} bsSize="small">
-                    <Glyphicon glyph="plus"/>
-                    <span className="sr-only">{`Add to a Collection`}</span>
+                <Button onClick={this.openAddToCollection} bsSize="small" title={addToCollTooltip}>
+                    <Glyphicon glyph="save"/>
+                    <span className="sr-only">{addToCollTooltip}</span>
                 </Button>
                 {removeButton}
             </ButtonGroup>
