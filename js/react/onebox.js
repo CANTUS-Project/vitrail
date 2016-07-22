@@ -78,6 +78,7 @@ const SearchBox = React.createClass({
     },
     handleSubmit(submitEvent) {
         submitEvent.preventDefault();  // stop the default GET form submission
+        signals.setPage(1);
         signals.submitSearchQuery();
     },
     shouldComponentUpdate(nextProps, nextState) {

@@ -113,11 +113,15 @@ describe('SearchBox', () => {
         const actual = mount(<onebox.SearchBox/>);
         const searchBox = actual.find(FormControl);
         const origSubmit = signals.submitSearchQuery;
+        const origSetPage = signals.setPage;
+        signals.setPage = jest.genMockFn();
         signals.submitSearchQuery = jest.genMockFn();
 
         searchBox.simulate('submit');
         expect(signals.submitSearchQuery).toBeCalled();
+        expect(signals.setPage).toBeCalledWith(1);
 
+        signals.setPage = origSetPage;
         signals.submitSearchQuery = origSubmit;
     });
 });
