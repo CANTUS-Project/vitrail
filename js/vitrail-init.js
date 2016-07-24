@@ -66,3 +66,8 @@ ReactDOM.render(
     </Router>,
     document.getElementById('vitrail-goes-here')
 );
+
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('serviceworker.js');
+}

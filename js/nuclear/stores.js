@@ -429,6 +429,7 @@ const STORES = {
         },
     }),
 
+    // TODO: finish rewriting this Store so it basically fakes whether the app is "installed"
     ServiceWorkerStatus: Store({
         // Record information about how Vitrail is using ServiceWorker functionality.
         //

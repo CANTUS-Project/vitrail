@@ -1,0 +1,20 @@
+{
+    "verbose": "true",
+    "ignoreUrlParametersMatching": ["/^_k/"],
+    "staticFileGlobs": [
+        "index.html",
+        "js/vitrail.js",
+        "css/vitrail.css",
+        "css/bootstrap.min.css",
+        "browserconfig.xml",
+        "index.html",
+        "manifest.json",
+        "serviceworker.js"
+    ],
+    "runtimeCaching": [
+        {"urlPattern": "/\\/img\\/.*/", "handler": "cacheFirst"},
+        {"urlPattern": "/\\/fonts\\/.*/", "handler": "cacheFirst"},
+        {"urlPattern": "/^https:\\/\\/fonts\\.googleapis\\.com\\/.*/", "handler": "cacheFirst"}
+    ],
+    "swFile": "serviceworker.js"
+}

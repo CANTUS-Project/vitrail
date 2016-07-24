@@ -44,28 +44,6 @@ if (urlToCantusServer.indexOf('SERVER URL HERE') >= 0) {
 const CANTUS = new cantusjs.Cantus(urlToCantusServer);
 
 
-// path to Vitrail's ServiceWorker script
-const SW_PATH = '/serviceworker.js';
-
-// the cache name used by the ServiceWorker
-const SW_CACHE_NAME = 'vitrail';
-
-// the resources that will be cached by the ServiceWorker
-const SW_CACHED_RESOURCES = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/serviceworker.js',
-    '/css/bootstrap.min.css',
-    '/css/vitrail.css',
-    '/img/favicon.ico',
-    '/fonts/glyphicons-halflings-regular.woff2',
-    '/fonts/glyphicons-halflings-regular.woff',
-    '/fonts/glyphicons-halflings-regular.ttf',
-    '/js/vitrail.js',
-];
-
-
 const SIGNAL_NAMES = {
     LOAD_IN_ITEMVIEW: 'LOAD_IN_ITEMVIEW',
     SET_SEARCH_RESULT_FORMAT: 'SET_SEARCH_RESULT_FORMAT',
@@ -368,96 +346,15 @@ const SIGNALS = {
         });
     },
 
-    /** Install the ServiceWorker and cache the Cantus Database web app for offline use.
-     *
-     * NOTE: I have no idea how to test this... it depends to heavily on the browser API
-     */
+    // TODO: finish removing these now-obsolete ServiceWorker-related functions
     swInstall() {
-        if (reactor.evaluate(getters.swSupported)) {
-            navigator.serviceWorker.register(SW_PATH);
-            caches.open(SW_CACHE_NAME).then((cache) => {
-                try {
-                    cache.addAll(SW_CACHED_RESOURCES).then(() => {
-                        reactor.dispatch(SIGNAL_NAMES.SW_INSTALLED);
-                    });
-                }
-                catch (err) {
-                    // TODO: addAll() throws TypeError, which should be reported
-                }
-            });
-        }
+        console.log('swInstall()');
     },
-
-    /** Uninstall the ServiceWorker and remove the Cantus Database web app from the browser cache.
-     *
-     * NOTE: I have no idea how to test this... it depends to heavily on the browser API
-     */
     swUninstall() {
-        if (reactor.evaluate(getters.swSupported)) {
-            caches.open(SW_CACHE_NAME).then((cache) => {
-                cache.keys().then((keys) => {
-                    let deletions = [];
-                    keys.forEach((request) => {
-                        deletions.push(cache.delete(request));
-                    })
-                    // determine whether all the deletions were successful
-                    Promise.all(deletions).then((resolved) => {
-                        const allWorked = resolved.reduce((prev, curr) => {
-                            if (prev === false || curr === false ) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        return allWorked;
-                    }).then((allWorked) => {
-                        if (allWorked) {
-                            // unregister the ServiceWorker too
-                            navigator.serviceWorker.getRegistration(SW_PATH).then((reg) => {
-                                reg.unregister().then((unregistered) => {
-                                    if (unregistered) {
-                                        reactor.dispatch(SIGNAL_NAMES.SW_UNINSTALLED);
-                                    }
-                                });
-                            });
-                        }
-                    });
-                });
-            })
-        }
+        console.log('swUninstall()');
     },
-
-    /** Determine whether Vitrail is cached by the ServiceWorker.
-     *
-     * This function uses the SW_CACHE_NAME and SW_CACHED_RESOURCES constants from the "signals" module
-     * to determine whether all of the intended resources are held in the right cache.
-     *
-     * NOTE: I have no idea how to test this... it depends to heavily on the browser API
-     */
     checkAppCached() {
-        if (reactor.evaluate(getters.swSupported)) {
-            caches.open(SW_CACHE_NAME).then((cache) => {
-                cache.keys().then((keys) => {
-                    const originLength = window.location.origin.length;
-                    const cached = keys.map((request) => request.url.slice(originLength));
-                    const allCached = SW_CACHED_RESOURCES.reduce((prev, curr) => {
-                        if (prev) {
-                            return (cached.indexOf(curr) >= 0);
-                        }
-                        return false;
-                    }, true);
-
-                    if (allCached) {
-                        reactor.dispatch(SIGNAL_NAMES.SW_INSTALLED);
-                    }
-                    else {
-                        reactor.dispatch(SIGNAL_NAMES.SW_UNINSTALLED);
-                    }
-                });
-            });
-        }
-        else {
-            reactor.dispatch(SIGNAL_NAMES.SW_UNINSTALLED);
-        }
+        console.log('checkAppCached()');
     },
 };
 

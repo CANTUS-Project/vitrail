@@ -32,6 +32,8 @@ import tarfile
 
 BROWSERIFY = 'node_modules/.bin/browserify'
 UGLIFY = 'node_modules/.bin/uglifyjs'
+SW_PRECACHE = 'node_modules/.bin/sw-precache'
+SW_PRECACHE_CONFIG = 'sw-precache-config.json'
 VITRAIL_SRC = 'js/vitrail-init.js'
 VITRAIL_MID = 'js/vitrail-compiled.js'
 VITRAIL_OUT = 'js/vitrail.js'
@@ -94,7 +96,12 @@ print('Minifying with Uglify')
 subprocess.check_call([UGLIFY, VITRAIL_MID, '-o', VITRAIL_OUT])
 
 
-# 3.) copy everything we need into a build directory
+# 3.) Generate a ServiceWorker script
+print('Generating ServiceWorker script')
+subprocess.check_call([SW_PRECACHE, '--config', SW_PRECACHE_CONFIG])
+
+
+# 4.) copy everything we need into a build directory
 print('Creating archive')
 arch_path = pathlib.Path(ARCHIVE)
 if arch_path.exists():
