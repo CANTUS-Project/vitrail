@@ -294,12 +294,19 @@ const VitrailNavbar = React.createClass({
     render() {
         return (
             <Navbar>
-                <Navbar.Header><Navbar.Brand><a href="/">{`Cantus Database`}</a></Navbar.Brand></Navbar.Header>
-                <Nav>
-                    {this.props.navbarItems.map((item, index) =>
-                        <NavbarItem key={index} name={item.name} link={item.link}/>
-                    )}
-                </Nav>
+                <Navbar.Header>
+                    <Navbar.Brand>
+                        <a href="/">{`Cantus Database`}</a>
+                    </Navbar.Brand>
+                    <Navbar.Toggle/>
+                </Navbar.Header>
+                <Navbar.Collapse>
+                    <Nav>
+                        {this.props.navbarItems.map((item, index) =>
+                            <NavbarItem key={index} name={item.name} link={item.link}/>
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
             </Navbar>
         );
     },
