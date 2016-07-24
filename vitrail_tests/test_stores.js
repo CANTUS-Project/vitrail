@@ -70,43 +70,6 @@ describe('isWholeNumber()', function() {
 });
 
 
-describe('checkSWSupported()', () => {
-    let o_cachesInWindow, o_swInNav;
-    beforeAll(() => {
-        o_cachesInWindow = stores._cachesInWindow;
-        o_swInNav = stores._swInNav;
-    });
-    afterAll(() => {
-        stores._cachesInWindow = o_cachesInWindow;
-        stores._swInNav = o_swInNav;
-    });
-
-    it('returns true when everything is supported', () => {
-        stores._cachesInWindow = jest.fn(() => true);
-        stores._swInNav = jest.fn(() => true);
-        const actual = stores.checkSWSupported()
-    });
-
-    it('returns false when only Cache API is supported', () => {
-        stores._cachesInWindow = jest.fn(() => false);
-        stores._swInNav = jest.fn(() => true);
-        const actual = stores.checkSWSupported()
-    });
-
-    it('returns false when only ServiceWorker API is supported', () => {
-        stores._cachesInWindow = jest.fn(() => true);
-        stores._swInNav = jest.fn(() => false);
-        const actual = stores.checkSWSupported()
-    });
-
-    it('returns false when nothing is supported', () => {
-        stores._cachesInWindow = jest.fn(() => false);
-        stores._swInNav = jest.fn(() => false);
-        const actual = stores.checkSWSupported()
-    });
-});
-
-
 describe('SETTERS.setSearchResultsFormat()', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
@@ -369,7 +332,7 @@ describe('setCurrentItemView()', () => {
 });
 
 
-describe('swInstalled() and swUnintsalled() setters', () => {
+describe('ServiceWorker and "installation" related functions', () => {
     afterAll(() => reactor.reset());
 
     it('swInstalled() works', () => {

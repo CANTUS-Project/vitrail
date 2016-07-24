@@ -41,9 +41,6 @@ reactor.registerStores({
     serviceWorkerStatus: stores.stores.ServiceWorkerStatus,
 });
 
-// if the browser supports ServiceWorker, determine whether the app is already cached for offline
-signals.checkAppCached();
-
 // load any saved collections; we don't want to load anything else though
 localforage.getItem(localforageKey).then((state) => {
     if (state) {

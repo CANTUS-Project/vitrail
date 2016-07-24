@@ -24,11 +24,12 @@
 
 import {Immutable, Store, toImmutable} from 'nuclear-js';
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
+import localforage from 'localforage';
 
 import {getters} from './getters';
 import {log} from '../util/log';
 import {reactor} from './reactor';
-import {SIGNAL_NAMES} from './signals';
+import {LOCALFORAGE_INSTALLED_KEY, SIGNALS, SIGNAL_NAMES} from './signals';
 
 
 function isWholeNumber(num) {
@@ -44,17 +45,6 @@ function isWholeNumber(num) {
 
     return outcome;
 }
-
-
-/** Determine whether the ServiceWorker features Vitrail uses are supported.
- *
- * Currently this checks for the "serviceWorker" object and "caches" object.
- */
-function checkSWSupported() {
-    return _swInNav() && _cachesInWindow();
-}
-function _swInNav() { return 'serviceWorker' in navigator; }
-function _cachesInWindow() { return 'caches' in window; }
 
 
 const SETTERS = {
@@ -323,11 +313,11 @@ const SETTERS = {
     },
 
     /** Record that the ServiceWorker was installed. */
-    swInstalled(previous, next) {  // TODO: untested
+    swInstalled(previous, next) {
         return previous.set('installed', true);
     },
     /** Record that the ServiceWorker was uninstalled. */
-    swUninstalled(previous, next) {  // TODO: untested
+    swUninstalled(previous, next) {
         return previous.set('installed', false);
     },
 };
@@ -429,7 +419,6 @@ const STORES = {
         },
     }),
 
-    // TODO: finish rewriting this Store so it basically fakes whether the app is "installed"
     ServiceWorkerStatus: Store({
         // Record information about how Vitrail is using ServiceWorker functionality.
         //
@@ -438,13 +427,31 @@ const STORES = {
         // Map({
         //     // whether this browser supports the ServiceWorker and Cache APIs
         //     supported: true,
-        //     // whether the Vitrail ServiceWorker script is installed and assets are cached
+        //     // whether the Vitrail ServiceWorker script is installed and the user has chosen to
+        //     // "Install" but not chosen to "Uninstall"
         //     installed: true,
         // })
-        //
+
+        // this is the cache key used by this Store
+        localForageKey: 'vitrail_is_installed',
         getInitialState() {
-            const supported = checkSWSupported();
-            const installed = false;  // determined and set by the asynchronous function just below
+            const supported = 'serviceWorker' in navigator && 'caches' in window;
+            const installed = false;
+
+            // determine whether the user previously chose to "Install"
+            if (supported) {
+                const controller = navigator.serviceWorker.controller;
+                if (controller && controller.state === 'activated') {
+                    localforage.getItem(LOCALFORAGE_INSTALLED_KEY).then(installed => {
+                        if (installed) {
+                            SIGNALS.swInstall();
+                        }
+                        else {
+                            SIGNALS.swUninnstall();
+                        }
+                    });
+                }
+            }
 
             return Immutable.Map({supported, installed});
         },
@@ -456,7 +463,6 @@ const STORES = {
 };
 
 
-const theModule = {stores: STORES, setters: SETTERS, isWholeNumber: isWholeNumber,
-    checkSWSupported: checkSWSupported, _swInNav: _swInNav, _cachesInWindow: _cachesInWindow};
+const theModule = {stores: STORES, setters: SETTERS, isWholeNumber};
 export {theModule};
 export default theModule;

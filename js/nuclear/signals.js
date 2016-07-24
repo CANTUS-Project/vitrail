@@ -29,6 +29,9 @@ import {getters} from './getters';
 import {log} from '../util/log';
 import {localforageKey, reactor} from './reactor';
 
+// this is the key where stored whether the user "installed" Vitrail
+const LOCALFORAGE_INSTALLED_KEY = 'vitrail_is_installed';
+
 
 // The Ansible playbook used for deployment will swap out the "<< SERVER URL HERE >>" string with
 // the actual URL of the server. At runtime, we check whether the string was replaced; if not, we'll
@@ -346,18 +349,23 @@ const SIGNALS = {
         });
     },
 
-    // TODO: finish removing these now-obsolete ServiceWorker-related functions
-    swInstall() {
-        console.log('swInstall()');
+    /** Call this signal when the user chooses to "Install" Vitral. */
+    swInstall() {  // TODO: test
+        const controller = navigator.serviceWorker.controller;
+        if (controller && controller.state === 'activated') {
+            localforage.setItem(LOCALFORAGE_INSTALLED_KEY, true).then(() => {
+                reactor.dispatch(SIGNAL_NAMES.SW_INSTALLED);
+            });
+        }
     },
-    swUninstall() {
-        console.log('swUninstall()');
-    },
-    checkAppCached() {
-        console.log('checkAppCached()');
+    /** Call this signal when the user chooses to "Uninstall" Vitrail. */
+    swUninstall() {  // TODO: test
+        return localforage.setItem(LOCALFORAGE_INSTALLED_KEY, false).then(() => {
+            reactor.dispatch(SIGNAL_NAMES.SW_UNINSTALLED);
+        });
     },
 };
 
 
-export {SIGNAL_NAMES, SIGNALS};
+export {SIGNAL_NAMES, SIGNALS, LOCALFORAGE_INSTALLED_KEY};
 export default SIGNALS;

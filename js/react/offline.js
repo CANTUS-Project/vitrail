@@ -110,13 +110,14 @@ const InstallOrUninstall = React.createClass({
         return {swInstalled: getters.swInstalled};
     },
     handleButtonClick() {
+        // NB: we use setTimeout() so that it looks like it takes a moment to (un)install Vitrail!
         if (this.state.swInstalled) {
-            signals.swUninstall();
             this.setState({emitted: 'uninstall'});
+            window.setTimeout(() => { signals.swUninstall(); }, 1000);
         }
         else {
-            signals.swInstall();
             this.setState({emitted: 'install'});
+            window.setTimeout(() => { signals.swInstall(); }, 1000);
         }
     },
     render() {
