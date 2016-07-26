@@ -292,15 +292,15 @@ describe('loadInItemView()', () => {
 describe('Collection management signals', () => {
     beforeEach(() => { reactor.reset(); });
 
-    describe('addNewCollection()', () =>{
+    describe('newCollection()', () =>{
         it('works', () => {
             const name = 'Tester Bester';
 
-            signals.addNewCollection(name);
+            signals.newCollection(name);
 
-            const collections = reactor.evaluate(getters.collectionsList);
-            expect(collections.size).toBe(1);
-            const newColl = collections.first();
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.get('collections').size).toBe(1);
+            const newColl = theStore.get('collections').first();
             expect(newColl.get('name')).toBe(name);
             expect(newColl.get('members').size).toBe(0);
         });
@@ -310,13 +310,13 @@ describe('Collection management signals', () => {
         it('works', () => {
             // setup: make a collection
             const name = 'Tester Bester';
-            signals.addNewCollection(name);
+            signals.newCollection(name);
             const newName = 'Broccoli is a "gateway vegetable."';
 
-            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
             signals.renameCollection(colid, newName);
 
-            const collection = reactor.evaluate(getters.collectionsList).first();
+            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
             expect(collection.get('name')).toBe(newName);
         });
     });
@@ -325,47 +325,86 @@ describe('Collection management signals', () => {
         it('works', () => {
             // setup: make a collection
             const name = 'Tester Bester';
-            signals.addNewCollection(name);
+            signals.newCollection(name);
+            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
 
-            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
             signals.deleteCollection(colid);
 
-            const collections = reactor.evaluate(getters.collectionsList);
-            expect(collections.size).toBe(0);
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.get('collections').size).toBe(0);
         });
     });
 
-    describe('addResourceIDToCollection()', () =>{
+    describe('addToCollection()', () =>{
         it('works', () => {
             // setup: make a collection
             const rid = '123';
-            signals.addNewCollection('whatever');
-            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
 
-            signals.addResourceIDToCollection(colid, rid);
+            signals.addToCollection(colid, rid);
 
-            const collection = reactor.evaluate(getters.collectionsList).get(colid);
+            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
             expect(collection.get('members').first()).toBe(rid);
         });
     });
 
-    describe('removeResourceIDFromCollection()', () =>{
+    describe('removeFromCollection()', () =>{
         it('works', () => {
             // setup: make a collection and put a resource in it
             const rid = '123';
-            signals.addNewCollection('whatever');
-            const colid = reactor.evaluate(getters.collectionsList).first().get('colid');
-            signals.addResourceIDToCollection(colid, rid);
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
+            signals.addToCollection(colid, rid);
 
-            signals.removeResourceIDFromCollection(colid, rid);
+            signals.removeFromCollection(colid, rid);
 
-            const collection = reactor.evaluate(getters.collectionsList).get(colid);
+            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
             expect(collection.get('members').size).toBe(0);
+        });
+    });
+
+    describe('addToCache()', () => {
+        it('works with one thing to add', () => {
+            const response = {
+                '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
+                'sort_order': ['123'],
+            };
+            signals.addToCache(response);
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.hasIn(['cache', '123'])).toBeTruthy();
+        });
+
+        it('works with three things to add', () => {
+            const response = {
+                '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
+                '456': {'type': 'chant', 'id': '456', 'incipit': 'Gloria in excelsis...'},
+                '789': {'type': 'chant', 'id': '789', 'incipit': 'Deus meus keus seus...'},
+                'sort_order': ['123', '456', '789'],
+            };
+            signals.addToCache(response);
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.hasIn(['cache', '123'])).toBeTruthy();
+            expect(theStore.hasIn(['cache', '456'])).toBeTruthy();
+            expect(theStore.hasIn(['cache', '789'])).toBeTruthy();
+        });
+
+        it('works with nothing to add', () => {
+            const response = {'sort_order': []};
+            signals.addToCache(response);
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.get('cache').size).toBe(0);
+        });
+
+        it('works when CantusJS reports an error', () => {
+            const response = {code: '90001', response: "It's over nine thousand!"};
+            signals.addToCache(response);
+            const theStore = reactor.evaluate(getters.collectionsList);
+            expect(theStore.get('cache').size).toBe(0);
         });
     });
 
     // TODO: still to test...
     // - clearShelf()
     // - saveCollections()
-    // - loadFromCache()
 });

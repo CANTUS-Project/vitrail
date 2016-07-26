@@ -47,6 +47,31 @@ function isWholeNumber(num) {
 }
 
 
+/** Helper function for SETTERS.deleteCollection().
+ *
+ * @param (ImmutableJS.Map) colls - The state of the "CollectionsList" Store.
+ * @param (str) deleting - The collection ID being deleted.
+ * @param (str) cached - The resource ID being considered for deletion.
+ *
+ * Determine whether the "cached" resource is part of a collection other than the one being deleted.
+ * If so, returns true, otherwise false.
+ */
+function _shouldDeleteFromCache(colls, deleting, cached) {
+    // shortcut: only one collection and it's being removed, definitely can delete
+    if (colls.get('collections').size === 1 && colls.hasIn(['collections', deleting])) {
+        return true;
+    }
+
+    for (const collection of colls.get('collections').values()) {
+        if (collection.get('colid') !== deleting && collection.get('members').includes(cached)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 const SETTERS = {
     setSearchResultsFormat(previous, next) {
         // Set the format of search results to "table" or "ItemView". Other arguments won't change
@@ -204,67 +229,28 @@ const SETTERS = {
         return toImmutable(next);
     },
 
-    /** Add a resource ID to a List of the members in a Collection.
+    /** Make a new collection.
      *
-     * @param (object) next - An object with "colid" and "rid" members, both strings, indicating the
-     *     collection ID to be amended and the resource ID to append, respectively.
+     * @param (str) next - The name for the new collection.
      */
-    addResourceIDToCollection(previous, next) {
-        // TODO: untested
-        if (typeof next.colid !== 'string' || typeof next.rid !== 'string') {
-            log.warn('Invariant violation: addResourceIDToCollection() received non-string args');
-        }
-        else if (!previous.get('collections').has(next.colid)) {
-            log.warn('addResourceIDToCollection() received nonexistent collection ID');
-        }
-        else if (previous.getIn(['collections', next.colid, 'members']).indexOf(next.rid) < 0) {
-            // TODO: figure out how to do this elegantly with ImmutableJS
-            previous = previous.toJS();
-            previous['collections'][next.colid]['members'].push(next.rid);
-            previous = toImmutable(previous);
-        }
-        return previous;
-    },
-
-    /** Remove a resource ID from a List of the members in a Collection.
-     *
-     * @param (object) next - An object with "colid" and "rid" members, both strings, indicating the
-     *     collection ID to be amended and the resource ID to remove, respectively.
-     */
-    removeResourceIDFromCollection(previous, next) {
-        // TODO: untested
-        if (typeof next.colid !== 'string' || typeof next.rid !== 'string') {
-            log.warn('Invariant violation: removeResourceIDFromCollection() received non-string args');
-        }
-        else if (!previous.get('collections').has(next.colid)) {
-            log.warn('removeResourceIDFromCollection() received nonexistent collection ID');
-        }
-        else if (previous.getIn(['collections', next.colid, 'members']).indexOf(next.rid) >= 0) {
-            previous = previous.toJS();
-            const index = previous['collections'][next.colid]['members'].indexOf(next.rid);
-            previous['collections'][next.colid]['members'].splice(index, 1);
-            previous = toImmutable(previous);
-        }
-        return previous;
-    },
-
-    /** Delete a collection.
-     *
-     * @param (str) next - The ID of the collection to delete.
-     */
-    deleteCollection(previous, next) {
-        // TODO: untested
-        if (typeof next !== 'string') {
-            log.warn('Invariant violation: deleteCollection() received non-string arg');
-        }
-        else if (!previous.get('collections').has(next)) {
-            log.warn('deleteCollection() receive a nonexistent collection ID');
+    newCollection(previous, next) {
+        if (next && typeof next === 'string') {
+            const collId = Date.now().toString();
+            if (previous.hasIn(['collections', collId])) {
+                log.warn('newCollection(): cannot add collection because of ID collision; try again');
+            }
+            else {
+                return previous.setIn(
+                    ['collections', collId],
+                    toImmutable({colid: collId, name: next, members: []})
+                );
+            }
         }
         else {
-            return previous.update('collections', () => {
-                return previous.get('collections').delete(next);
-            });
+            log.warn('Stores.newCollection() received incorrect arguments.');
         }
+
+        return previous;
     },
 
     /** Rename a collection.
@@ -273,42 +259,121 @@ const SETTERS = {
      * @param (str) next.name - New name for the collection.
      */
     renameCollection(previous, next) {
-        // TODO: untested
-        if (typeof next.colid !== 'string' || typeof next.name !== 'string') {
-            log.warn('Invariant violation: renameCollection() received non-string args');
-        }
-        else if (!previous.get('collections').has(next.colid)) {
-            log.warn('renameCollection() received nonexistent collection ID');
+        if (next && next.colid && next.name && typeof next.colid === 'string' && typeof next.name === 'string') {
+            if (previous.hasIn(['collections', next.colid])) {
+                return previous.setIn(['collections', next.colid, 'name'], next.name);
+            }
+            else {
+                log.warn('Stores.renameCollection() received nonexistent collection ID');
+            }
         }
         else {
-            previous = previous.toJS();
-            previous['collections'][next.colid]['name'] = next.name;
-            previous = toImmutable(previous);
+            log.warn('Stores.renameCollection() received incorrect arguments.');
         }
+
         return previous;
     },
 
-    /** Make a new collection.
+    /** Delete a collection.
      *
-     * @param (str) next - The name for the new collection.
+     * @param (str) next - The ID of the collection to delete.
      */
-    addNewCollection(previous, next) {
-        // TODO: untested
-        if (typeof next !== 'string') {
-            log.warn('Invariant violation: addNewCollection() received a non-string arg.');
-        }
-        else {
-            const id = Date.now().toString();
-            if (previous.hasIn(['collections', id])) {
-                // NOTE: this seems impossible... if Date.now() works as advertized...
-                log.error('addNewCollection(): cannot add collection because of ID collision; try again');
+    deleteCollection(previous, next) {
+        if (next && typeof next === 'string') {
+            if (previous.hasIn(['collections', next])) {
+                let post = previous;
+                for (const rid of previous.getIn(['collections', next, 'members'])) {
+                    if (_shouldDeleteFromCache(previous, next, rid)) {
+                        post = post.deleteIn(['cache', rid]);
+                    }
+                }
+                return post.deleteIn(['collections', next]);
             }
             else {
-                previous = previous.toJS();
-                previous['collections'][id] = {colid: id, name: next, members: []};
-                previous = toImmutable(previous);
+                log.warn('Stores.deleteCollection() received a nonexistent collection ID');
             }
         }
+        else {
+            log.warn('Stores.deleteCollection() received incorrect arguments.');
+        }
+
+        return previous;
+    },
+
+    /** Add a resource ID to a List of the members in a Collection.
+     *
+     * @param (str) next.colid - ID of the collection to add a resource to.
+     * @param (str) next.rid - Resource ID to add to the collection.
+     *
+     * NOTE: This function does not add anything to the "cache." You must do that separately.
+     */
+    addToCollection(previous, next) {
+        if (next && next.colid && next.rid && typeof next.colid === 'string' && typeof next.rid === 'string') {
+            if (previous.hasIn(['collections', next.colid])) {
+                if (!previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+                    return previous.updateIn(['collections', next.colid, 'members'], members =>
+                        members.push(next.rid)
+                    );
+                }
+                else {
+                    log.debug('Stores.removeFromCollection() resource was already in collection');
+                }
+            }
+            else {
+                log.warn('Stores.removeFromCollection() received nonexistent collection ID');
+            }
+        }
+        else {
+            log.warn('Stores.removeFromCollection() received incorrect arguments.');
+        }
+
+        return previous;
+    },
+
+    /** Remove a resource ID from a List of the members in a Collection.
+     *
+     * @param (str) next.colid - ID of the collection to remove a resource from.
+     * @param (str) next.rid - Resource ID to remove from the collection.
+     */
+    removeFromCollection(previous, next) {
+        if (next && next.colid && next.rid && typeof next.colid === 'string' && typeof next.rid === 'string') {
+            if (previous.hasIn(['collections', next.colid])) {
+                if (previous.getIn(['collections', next.colid, 'members']).includes(next.rid)) {
+                    let post = previous.updateIn(['collections', next.colid, 'members'], members =>
+                        members.filter(eachRid => eachRid !== next.rid)
+                    );
+                    if (_shouldDeleteFromCache(previous, next.colid, next.rid)) {
+                        post = post.deleteIn(['cache', next.rid]);
+                    }
+                    return post;
+                }
+                else {
+                    log.warn('Stores.removeFromCollection() received nonexistent resource ID');
+                }
+            }
+            else {
+                log.warn('Stores.removeFromCollection() received nonexistent collection ID');
+            }
+        }
+        else {
+            log.warn('Stores.removeFromCollection() received incorrect arguments.');
+        }
+
+        return previous;
+    },
+
+    /** Add a resource to the CollectionsList cache.
+     *
+     * @param (object) next - The resource to add to the cache. Must contain an "id" field.
+     */
+    addToCache(previous, next) {
+        if (next && next.id && typeof next.id === 'string') {
+            return previous.setIn(['cache', next.id], Immutable.fromJS(next));
+        }
+        else {
+            log.warn('Stores.addToCache() received incorrect arguments.');
+        }
+
         return previous;
     },
 
@@ -385,37 +450,39 @@ const STORES = {
     CollectionsList: Store({
         // A list of the user's "collections."
         //
-        // It's an ImmutableJS.Map of ImmutableJS.Map objects. It looks like this:
+        // It's an ImmutableJS data structure that holds Collections and the cached chants that are
+        // part of those Collections.
         //
-        // Map({
-        //    // whether to show the "add to which collection?" Modal
-        //    'showAddToCollection': false,
-        //    // a resource ID we're currently asking about adding to a collection
-        //    'candidate': undefined,
-        //    // Map of collection ID to other Maps
-        //    'collections': Map({
-        //       '123': Map({
-        //          'colid': '123',
-        //          'name': 'Some Important Collection',
-        //          'members': List(['34', '88', '29', '48'])
-        //       })
-        // })
+        // {
+        //   collections: {
+        //     coll_one: {
+        //       colid: 'coll_one',
+        //       name: 'Some Important Chants',
+        //       members: ['34', '88'],
+        //     },
+        //     coll_two: {
+        //       colid: 'coll_two',
+        //       name: 'Some Boring Chants',
+        //       members: ['29', '48'],
+        //     },
+        //   cache: {
+        //     29: {id: '29', type: 'chant', ... },
+        //     34: {id: '34', type: 'chant', ... },
+        //     48: {id: '48', type: 'chant', ... },
+        //     88: {id: '88', type: 'chant', ... },
+        //   }
+        // }
         //
         getInitialState() {
-            return (
-                Immutable.Map({
-                    'showAddToCollection': false,
-                    'candidate': undefined,
-                    'collections': Immutable.Map(),
-                })
-            );
+            return Immutable.Map({collections: Immutable.Map(), cache: Immutable.Map()});
         },
         initialize() {
-            this.on(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, SETTERS.addResourceIDToCollection);
-            this.on(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, SETTERS.removeResourceIDFromCollection);
+            this.on(SIGNAL_NAMES.ADD_TO_COLLECTION, SETTERS.addToCollection);
+            this.on(SIGNAL_NAMES.REMOVE_FROM_COLLECTION, SETTERS.removeFromCollection);
             this.on(SIGNAL_NAMES.DELETE_COLLECTION, SETTERS.deleteCollection);
             this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
-            this.on(SIGNAL_NAMES.ADD_COLLECTION, SETTERS.addNewCollection);
+            this.on(SIGNAL_NAMES.NEW_COLLECTION, SETTERS.newCollection);
+            this.on(SIGNAL_NAMES.ADD_TO_CACHE, SETTERS.addToCache);
         },
     }),
 
@@ -463,6 +530,6 @@ const STORES = {
 };
 
 
-const theModule = {stores: STORES, setters: SETTERS, isWholeNumber};
+const theModule = {stores: STORES, setters: SETTERS, isWholeNumber, _shouldDeleteFromCache};
 export {theModule};
 export default theModule;

@@ -36,6 +36,10 @@ import signals from '../js/nuclear/signals';
 import stores from '../js/nuclear/stores';
 
 
+const setters = stores.setters;
+const _shouldDeleteFromCache = stores._shouldDeleteFromCache;
+
+
 describe('isWholeNumber()', function() {
 
     it('false with undefined input', function() {
@@ -345,5 +349,278 @@ describe('ServiceWorker and "installation" related functions', () => {
         const previous = Immutable.Map({supported: 5, installed: 6});
         const actual = stores.setters.swUninstalled(previous);
         expect(actual).toEqual(Immutable.Map({supported: 5, installed: false}));
+    });
+});
+
+
+describe('The CollectionsList Store', () => {
+    describe('newCollection() handler', () => {
+        it('adds a new collection', () => {
+            const previous = Immutable.Map({collections: Immutable.Map(), cache: Immutable.Map()});
+            const actual = setters.newCollection(previous, 'whatever');
+
+            expect(actual.get('collections').size).toBe(1);
+            const coll = actual.get('collections').first();
+            expect(coll.has('colid')).toBeTruthy();
+            expect(typeof coll.get('colid') === 'string').toBeTruthy();
+            expect(coll.get('name')).toBe('whatever');
+            expect(coll.get('members')).toEqual(Immutable.List());
+        });
+
+        it('does not add a collection when the name is not given', () => {
+            const previous = Immutable.Map({collections: Immutable.Map(), cache: Immutable.Map()});
+            const actual = setters.newCollection(previous);
+            expect(actual.get('collections').size).toBe(0);
+        });
+
+        it('does not add a collection when the name is not a string', () => {
+            const previous = Immutable.Map({collections: Immutable.Map(), cache: Immutable.Map()});
+            const actual = setters.newCollection(previous, 14);
+            expect(actual.get('collections').size).toBe(0);
+        });
+    });
+
+    describe('renameCollection() handler', () => {
+        it('renames a collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {},
+                collections: {416: {name: 'The Cheronnow Collection'}},
+            });
+            const next = {colid: '416', name: 'Broccoli Invasion'};
+            const actual = setters.renameCollection(previous, next);
+            expect(actual.getIn(['collections', '416', 'name'])).toBe('Broccoli Invasion');
+        });
+
+        it('does not rename when the name is not a string', () => {
+            const previous = Immutable.fromJS({
+                cache: {},
+                collections: {416: {name: 'The Cheronnow Collection'}},
+            });
+            const next = {colid: '416', name: 416};
+            const actual = setters.renameCollection(previous, next);
+            expect(actual.getIn(['collections', '416', 'name'])).toBe('The Cheronnow Collection');
+        });
+
+        it('does not rename when the collection ID is wrong', () => {
+            const previous = Immutable.fromJS({
+                cache: {},
+                collections: {416: {name: 'The Cheronnow Collection'}},
+            });
+            const next = {colid: '905', name: 'Broccoli Invasion'};
+            const actual = setters.renameCollection(previous, next);
+            expect(actual.getIn(['collections', '416', 'name'])).toBe('The Cheronnow Collection');
+        });
+    });
+
+    describe('_shouldDeleteFromCache() helper for deleteCollection()', () => {
+        it('returns true when there is only one collection', () => {
+            const colls = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const deleting = '416';
+            const cached = '1';
+
+            expect(_shouldDeleteFromCache(colls, deleting, cached)).toBe(true);
+        });
+
+        it('returns true when "cached" is not in another resource', () => {
+            const colls = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {
+                    416: {colid: '416', name: '我是Ted', members: ['1', '2']},
+                    905: {colid: '905', name: 'Slim Shady', members: ['2']}
+                },
+            });
+            const deleting = '416';
+            const cached = '1';
+
+            expect(_shouldDeleteFromCache(colls, deleting, cached)).toBe(true);
+        });
+
+        it('returns false when "cached" is in another resource', () => {
+            const colls = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {
+                    416: {colid: '416', name: '我是Ted', members: ['1', '2']},
+                    905: {colid: '905', name: 'Slim Shady', members: ['2']}
+                },
+            });
+            const deleting = '416';
+            const cached = '2';
+
+            expect(_shouldDeleteFromCache(colls, deleting, cached)).toBe(false);
+        });
+    });
+
+    describe('deleteCollection() handler', () => {
+        it('deletes the collection and cached resources', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.deleteCollection(previous, '416');
+            expect(actual.hasIn(['collections', '416'])).toBeFalsy();
+            expect(actual.hasIn(['cache', '1'])).toBeFalsy();
+            expect(actual.hasIn(['cache', '2'])).toBeFalsy();
+        });
+
+        it('does not delete cached resources needed by another collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {
+                    416: {colid: '416', name: '我是Ted', members: ['1', '2']},
+                    905: {colid: '905', name: 'Slim Shady', members: ['2']}
+                },
+            });
+            const actual = setters.deleteCollection(previous, '416');
+            expect(actual.hasIn(['collections', '416'])).toBeFalsy();
+            expect(actual.hasIn(['cache', '1'])).toBeFalsy();
+            expect(actual.hasIn(['cache', '2'])).toBeTruthy();
+        });
+
+        it('does not delete when the Collection ID does not exist', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.deleteCollection(previous, '90000000');
+            expect(actual.hasIn(['collections', '416'])).toBeTruthy();
+            expect(actual.hasIn(['cache', '1'])).toBeTruthy();
+            expect(actual.hasIn(['cache', '2'])).toBeTruthy();
+        });
+
+        it('does not delete when the Collection ID is not provided', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.deleteCollection(previous);
+            expect(actual.hasIn(['collections', '416'])).toBeTruthy();
+            expect(actual.hasIn(['cache', '1'])).toBeTruthy();
+            expect(actual.hasIn(['cache', '2'])).toBeTruthy();
+        });
+    });
+
+    describe('addToCollection() handler', () => {
+        it('adds the ID to the collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCollection(previous, {colid: '416', rid: '3'});
+            expect(actual.getIn(['collections', '416', 'members']).includes('3')).toBeTruthy();
+        });
+
+        it('does not add the ID when it is already in the collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCollection(previous, {colid: '416', rid: '2'});
+            expect(actual.getIn(['collections', '416', 'members']).size).toEqual(2);
+        });
+
+        it('does not add the ID when the collection ID does not exist', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCollection(previous, {colid: '333333', rid: '3'});
+            expect(actual.getIn(['collections']).size).toEqual(1);
+            expect(actual.getIn(['collections', '416', 'members']).size).toEqual(2);
+        });
+
+        it('does not add an ID when the ID is not given', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCollection(previous);
+            expect(actual.getIn(['collections']).size).toEqual(1);
+            expect(actual.getIn(['collections', '416', 'members']).size).toEqual(2);
+        });
+    });
+
+    describe('removeFromCollection() handler', () => {
+        it('removes the resource and the cached copy', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.removeFromCollection(previous, {colid: '416', rid: '1'});
+            expect(actual.getIn(['collections', '416', 'members']).includes('1')).toBeFalsy();
+            expect(actual.hasIn(['cache', '1'])).toBeFalsy();
+        });
+
+        it('does not delete the cached copy when the resource ID is in another collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {
+                    416: {colid: '416', name: '我是Ted', members: ['1', '2']},
+                    905: {colid: '905', name: 'Slim Shady', members: ['2']}
+                },
+            });
+            const actual = setters.removeFromCollection(previous, {colid: '416', rid: '2'});
+            expect(actual.getIn(['collections', '416', 'members']).includes('2')).toBeFalsy();
+            expect(actual.hasIn(['cache', '2'])).toBeTruthy();
+        });
+
+        it('does not delete when the collection ID does not exist', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.removeFromCollection(previous, {colid: '905', rid: '1'});
+            expect(actual).toEqual(previous);
+        });
+
+        it('does not delete when the resource ID does not exist', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.removeFromCollection(previous, {colid: '416', rid: '42'});
+            expect(actual).toEqual(previous);
+        });
+
+        it('does not delete when the resource and collection IDs are not given', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.removeFromCollection(previous);
+            expect(actual).toEqual(previous);
+        });
+    });
+
+    describe('addToCache() handler', () => {
+        it('adds the resource to the collection', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCache(previous, {id: '2', type: 'fruit'});
+            expect(actual.hasIn(['cache', '2'])).toBeTruthy();
+            expect(actual.getIn(['cache', '2', 'type'])).toBe('fruit');
+        });
+
+        it('does not add the resource when its ID is missing', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCache(previous, {fruit: 'papaya'});
+            expect(actual).toEqual(previous);
+        });
+
+        it('does not add anything when the resource is not given', () => {
+            const previous = Immutable.fromJS({
+                cache: {1: {field: 'value'}, 2: {field: 'value'}},
+                collections: {416: {colid: '416', name: '我是Ted', members: ['1', '2']}},
+            });
+            const actual = setters.addToCache(previous);
+            expect(actual).toEqual(previous);
+        });
     });
 });

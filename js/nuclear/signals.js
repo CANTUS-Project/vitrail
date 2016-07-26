@@ -58,13 +58,12 @@ const SIGNAL_NAMES = {
     SET_RENDER_AS: 'SET_RENDER_AS',
     SET_ITEMVIEW_OVERLAY_SIZE: 'SET_ITEMVIEW_OVERLAY_SIZE',
     // for Collections
-    ADD_RID_TO_COLLECTION: 'ADD_RID_TO_COLLECTION',
-    REMOVE_RID_FROM_COLLECTION: 'REMOVE_RID_FROM_COLLECTION',
-    TOGGLE_ADD_TO_COLLECTION: 'TOGGLE_ADD_TO_COLLECTION',
-    ASK_WHICH_COLLECTION: 'ASK_WHICH_COLLECTION',
-    DELETE_COLLECTION: 'DELETE_COLLECTION',
+    NEW_COLLECTION: 'NEW_COLLECTION',
     RENAME_COLLECTION: 'RENAME_COLLECTION',
-    ADD_COLLECTION: 'ADD_COLLECTION',
+    DELETE_COLLECTION: 'DELETE_COLLECTION',
+    ADD_TO_COLLECTION: 'ADD_TO_COLLECTION',
+    REMOVE_FROM_COLLECTION: 'REMOVE_FROM_COLLECTION',
+    ADD_TO_CACHE: 'ADD_TO_CACHE',  // TODO: write the signal for this
     // for ServiceWorker
     SW_INSTALLED: 'SW_INSTALLED',
     SW_UNINSTALLED: 'SW_UNINSTALLED',
@@ -220,7 +219,7 @@ const SIGNALS = {
      * This function first tries to load the resources from the browser cache using localforage. If
      * resoruces are missing, they are loaded from the server.
      */
-    loadFromCache(rids) {  // TODO: untested
+    loadFromCache(rids) {  // TODO: rewrite so it can deal with everything stored in the Reactor
         const results = rids.toArray();
         const resultsLength = results.length;
 
@@ -279,8 +278,8 @@ const SIGNALS = {
      *
      * @param (str) name - The name of the new collection.
      */
-    addNewCollection(name) {
-        reactor.dispatch(SIGNAL_NAMES.ADD_COLLECTION, name);
+    newCollection(name) {
+        reactor.dispatch(SIGNAL_NAMES.NEW_COLLECTION, name);
     },
 
     /** Rename a collection.
@@ -307,8 +306,8 @@ const SIGNALS = {
      *
      * NOTE: this signal also clears the resource in "ask_which_collection."
      */
-    addResourceIDToCollection(colid, rid) {
-        reactor.dispatch(SIGNAL_NAMES.ADD_RID_TO_COLLECTION, {colid: colid, rid: rid});
+    addToCollection(colid, rid) {
+        reactor.dispatch(SIGNAL_NAMES.ADD_TO_COLLECTION, {colid: colid, rid: rid});
     },
 
     /** Remove resource with ID "rid" from the collection with ID "colid."
@@ -316,37 +315,30 @@ const SIGNALS = {
      * @param (str) colid - The collection ID to amend.
      * @param (str) rid - The resource ID to remove.
      */
-    removeResourceIDFromCollection(colid, rid) {
-        reactor.dispatch(SIGNAL_NAMES.REMOVE_RID_FROM_COLLECTION, {colid: colid, rid: rid});
+    removeFromCollection(colid, rid) {
+        reactor.dispatch(SIGNAL_NAMES.REMOVE_FROM_COLLECTION, {colid: colid, rid: rid});
+    },
+
+    /** Add a resource to the CollectionsList Store.
+     * NOTE: call this function as the then() of a call to CantusJS
+     * NOTE: if the response includes multiple resources, they will all be added to the cache
+     */
+    addToCache(response) {
+        if (response.code) {
+            log.error(`Failed to add resource to cache. Cantus server responds: ${response.response}`);
+        }
+        else {
+            for (const rid of response.sort_order) {
+                reactor.dispatch(SIGNAL_NAMES.ADD_TO_CACHE, response[rid]);
+            }
+            // TODO: call another function to update localForage
+        }
     },
 
     /** Clear all data in "localforage" and all cached chants. */
-    clearShelf() {  // TODO: untested
-        reactor.reset();
-        localforage.clear();
-        // TODO: clear cached chants-and-stuff, once those are cached
-    },
-
-    /** Save extant collections with localforage. */
-    saveCollections() {  // TODO: untested
-        localforage.setItem(localforageKey, reactor.serialize()).then(() => {
-            // make sure all the resources in all the collections are cached
-            const collections = reactor.evaluate(getters.collectionsList);
-
-            collections.forEach(collection => {
-                CANTUS.search({'any': `+id:(${collection.get('members').join(' OR ')})`}).then(resp => {
-                    if (resp.code) {
-                        // TODO: panic over error
-                        log.warn(`response was ${resp.cod}`);
-                    }
-                    else {
-                        for (const rid of resp.sort_order) {
-                            localforage.setItem(rid, resp[rid]);
-                        }
-                    }
-                });
-            });
-        });
+    clearShelf() {
+        console.log('clearShelf()');
+        // TODO: rewrite so it only clears the "collections" and cached chants ... and add tests
     },
 
     /** Call this signal when the user chooses to "Install" Vitral. */
