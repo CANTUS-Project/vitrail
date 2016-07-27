@@ -320,3 +320,16 @@ describe('ResultListTable_columns()', () => {
         expect(formatters.ResultListTable_columns(results)).toEqual(expected);
     });
 });
+
+
+describe('CollectionsList getters', () => {
+    it('collections() getter', () => {
+        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache'});
+        expect(formatters.collections(collectionsList)).toBe('collections');
+    });
+
+    it('collectionsCache() getter', () => {
+        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache'});
+        expect(formatters.collectionsCache(collectionsList)).toBe('cache');
+    });
+});

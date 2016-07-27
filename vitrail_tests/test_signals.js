@@ -298,9 +298,9 @@ describe('Collection management signals', () => {
 
             signals.newCollection(name);
 
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.get('collections').size).toBe(1);
-            const newColl = theStore.get('collections').first();
+            const theStore = reactor.evaluate(getters.collections);
+            expect(theStore.size).toBe(1);
+            const newColl = theStore.first();
             expect(newColl.get('name')).toBe(name);
             expect(newColl.get('members').size).toBe(0);
         });
@@ -313,10 +313,10 @@ describe('Collection management signals', () => {
             signals.newCollection(name);
             const newName = 'Broccoli is a "gateway vegetable."';
 
-            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
             signals.renameCollection(colid, newName);
 
-            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
+            const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('name')).toBe(newName);
         });
     });
@@ -326,12 +326,12 @@ describe('Collection management signals', () => {
             // setup: make a collection
             const name = 'Tester Bester';
             signals.newCollection(name);
-            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
 
             signals.deleteCollection(colid);
 
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.get('collections').size).toBe(0);
+            const theStore = reactor.evaluate(getters.collections);
+            expect(theStore.size).toBe(0);
         });
     });
 
@@ -340,11 +340,11 @@ describe('Collection management signals', () => {
             // setup: make a collection
             const rid = '123';
             signals.newCollection('whatever');
-            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
 
             signals.addToCollection(colid, rid);
 
-            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
+            const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('members').first()).toBe(rid);
         });
     });
@@ -354,12 +354,12 @@ describe('Collection management signals', () => {
             // setup: make a collection and put a resource in it
             const rid = '123';
             signals.newCollection('whatever');
-            const colid = reactor.evaluate(getters.collectionsList).get('collections').first().get('colid');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
             signals.addToCollection(colid, rid);
 
             signals.removeFromCollection(colid, rid);
 
-            const collection = reactor.evaluate(getters.collectionsList).getIn(['collections', colid]);
+            const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('members').size).toBe(0);
         });
     });
@@ -371,8 +371,8 @@ describe('Collection management signals', () => {
                 'sort_order': ['123'],
             };
             signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.hasIn(['cache', '123'])).toBeTruthy();
+            const theStore = reactor.evaluate(getters.collectionsCache);
+            expect(theStore.has('123')).toBeTruthy();
         });
 
         it('works with three things to add', () => {
@@ -383,24 +383,24 @@ describe('Collection management signals', () => {
                 'sort_order': ['123', '456', '789'],
             };
             signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.hasIn(['cache', '123'])).toBeTruthy();
-            expect(theStore.hasIn(['cache', '456'])).toBeTruthy();
-            expect(theStore.hasIn(['cache', '789'])).toBeTruthy();
+            const theStore = reactor.evaluate(getters.collectionsCache);
+            expect(theStore.has('123')).toBeTruthy();
+            expect(theStore.has('456')).toBeTruthy();
+            expect(theStore.has('789')).toBeTruthy();
         });
 
         it('works with nothing to add', () => {
             const response = {'sort_order': []};
             signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.get('cache').size).toBe(0);
+            const theStore = reactor.evaluate(getters.collections);
+            expect(theStore.size).toBe(0);
         });
 
         it('works when CantusJS reports an error', () => {
             const response = {code: '90001', response: "It's over nine thousand!"};
             signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsList);
-            expect(theStore.get('cache').size).toBe(0);
+            const theStore = reactor.evaluate(getters.collectionsCache);
+            expect(theStore.size).toBe(0);
         });
     });
 

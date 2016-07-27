@@ -206,6 +206,13 @@ const formatters = {
     swInstalled(status) {
         return status.get('installed');
     },
+
+    collections(collectionsList) {
+        return collectionsList.get('collections');
+    },
+    collectionsCache(collectionsList) {
+        return collectionsList.get('cache');
+    },
 };
 
 
@@ -234,7 +241,8 @@ const getters = {
     searchPage: ['searchPage'],
     searchPerPage: ['searchPerPage'],
     // for Collections in the Workspace
-    collectionsList: [['collectionsList'], (results) => results.get('collections')],
+    collections: [['collectionsList'], formatters.collections],
+    collectionsCache: [['collectionsList'], formatters.collectionsCache],
     // for ServiceWorker
     swSupported: [['serviceWorkerStatus'], formatters.swSupported],
     swInstalled: [['serviceWorkerStatus'], formatters.swInstalled],
