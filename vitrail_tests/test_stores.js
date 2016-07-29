@@ -132,16 +132,6 @@ describe('SETTERS.setPage()', () => {
         expect(actual).toBe(expected);
     });
 
-    it(`returns "previous" when "next" is greater than the number of pages`, () => {
-        // 10 pages
-        signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));
-        let previous = 3;
-        let next = 400;
-        let actual = stores.setters.setPage(previous, next);
-        expect(actual).toBe(previous);
-        expect(log.warn).toBeCalled();
-    });
-
     it(`returns "previous" when "next" is not a number`, () => {
         // 10 pages
         signals.loadSearchResults(Immutable.fromJS({headers: {total_results: 100, per_page: 10}}));

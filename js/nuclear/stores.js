@@ -91,13 +91,7 @@ const SETTERS = {
         // Set the current page in the current search results.
         next = parseInt(next, 10);
         if (isWholeNumber(next)) {
-            const numOfPages = reactor.evaluate(getters.searchResultsPages);
-            if (next <= numOfPages || 1 === next) {
-                return next;
-            } else {
-                log.warn(`Can't set page to ${next}: only ${numOfPages} exist.`);
-                return previous;
-            }
+            return next;
         } else {
             log.warn(`setPage() must be given a whole number, not ${next}`);
             return previous;
