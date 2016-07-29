@@ -66,13 +66,13 @@ const AddToCollection = React.createClass({
         rid: React.PropTypes.string,
         close: React.PropTypes.func.isRequired,
     },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        return { collections: getters.collectionsList };
+        return {collections: getters.collections};
     },
     handleClick(event) {
         const startOfSlice = 4;  // after the "col-" part
-        signals.addResourceIDToCollection(event.target.id.slice(startOfSlice), this.props.rid);
+        signals.addToCollection(event.target.id.slice(startOfSlice), this.props.rid);
         this.handleHide();
     },
     handleHide() {
@@ -105,27 +105,30 @@ const AddToCollection = React.createClass({
  * Props
  * -----
  * @param (string) rid - The resource ID to add or remove.
- * @param (string) colid - The collection ID this resource is in, if applicable.
  *
  * State
  * -----
  * @param {bool} showAddToCollection - Whether to render the AddToCollection subcomponent.
+ * @param (bool) showingCollection - From the "showingCollection" getter.
  *
- * Note that a "remove" button will only be produced if the "colid" prop is given. Otherwise, we
- * don't know from which collection to remove the resource.
+ * Note that a "remove" button will only be produced if "state.showingCollection" is not false.
+ * Otherwise, we don't know from which collection to remove the resource.
  *
  * The "add" button is always shown because you might want a resource to be in many collections.
  */
 const AddRemoveCollection = React.createClass({
     propTypes: {
-        colid: React.PropTypes.string,
         rid: React.PropTypes.string.isRequired,
+    },
+    mixins: [reactor.ReactMixin],
+    getDataBindings() {
+        return {showingCollection: getters.showingCollection};
     },
     getInitialState() {
         return {showAddToCollection: false};
     },
     handleRemove() {
-        signals.removeResourceIDFromCollection(this.props.colid, this.props.rid);
+        signals.removeFromCollection(this.state.showingCollection, this.props.rid);
     },
     openAddToCollection() {
         this.setState({showAddToCollection: true});
@@ -135,7 +138,7 @@ const AddRemoveCollection = React.createClass({
     },
     render() {
         let removeButton;
-        if (this.props.colid) {
+        if (this.state.showingCollection) {
             removeButton = (
                 <Button onClick={this.handleRemove} bsSize="small" title={removeFromCollTooltip}>
                     <Glyphicon glyph="minus"/>
@@ -292,72 +295,31 @@ const Collection = React.createClass({
     },
 });
 
-
 /** The main workspace, where users can view a collection.
- *
- * Props:
- * ------
- * @param (str) colid - The collection ID to display.
  *
  * State:
  * ------
  * @param (ImmutableJS.Map) collections - From NuclearJS, all of this user's Collections.
+ * @param (bool) showingCollection - From the "showingCollection" getter.
  */
 const Desk = React.createClass({
-    propTypes: {
-        colid: React.PropTypes.string.isRequired,
-    },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
-        return {collections: getters.collectionsList};
-    },
-    componentWillMount() {
-        signals.loadSearchResults('reset');
-        this.loadCollection(this.props.colid);
-    },
-    componentWillUpdate(nextProps, nextState) {
-        // When the props.colid is changing, or *our* collection changes, we need to ask
-        // loadCollection() to help us update.
-        const currentMembers = this.state.collections.getIn([this.props.colid, 'members']);
-        if (nextProps.colid !== this.props.colid) {
-            this.loadCollection(nextProps.colid);
-        }
-        else if (!nextState.collections.getIn([this.props.colid, 'members']).equals(currentMembers)) {
-            this.loadCollection(nextProps.colid, nextState);
-        }
-    },
-    /** Load the data for the collection given by "colid."
-     *
-     * @param {str} colid - The collection ID to load.
-     * @param {ImmutableJS.Map} nextState - If updating the collection to a value not yet in
-     *     "this.state" then this argument should be "nextState."
-     * @returns {undefined}
-     */
-    loadCollection(colid, nextState) {
-        let state = this.state;
-        if (nextState) {
-            state = nextState;
-        }
-
-        if (state.collections.has(colid)) {
-            signals.loadFromCache(state.collections.getIn([colid, 'members']));
-        }
-        else {
-            signals.loadSearchResults('reset');
-            log.error(`The collection ID (${colid}) does not exist.`);
-        }
+        return {
+            collections: getters.collections,
+            showingCollection: getters.showingCollection
+        };
     },
     render() {
         let header;
-        if (this.state.collections.has(this.props.colid)) {
-            header = `Desk (viewing collection "${this.state.collections.get(this.props.colid).get('name')}")`;
+        if (this.state.collections.has(this.state.showingCollection)) {
+            header = `Desk (viewing collection "${this.state.collections.get(this.state.showingCollection).get('name')}")`;
         }
 
         return (
             <Col lg={10}>
                 <Panel header={header}>
-                    <ResultList colid={this.props.colid}/>
+                    <ResultList/>
                 </Panel>
             </Col>
         );
@@ -418,10 +380,9 @@ const Shelf = React.createClass({
     propTypes: {
         children: React.PropTypes.element,
     },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
-        return {collections: getters.collectionsList};
+        return {collections: getters.collections};
     },
     getInitialState() {
         return {addingNewCollection: false, showResetter: false};
@@ -433,10 +394,7 @@ const Shelf = React.createClass({
         this.setState({showResetter: !this.state.showResetter});
     },
     addCollection(newName) {
-        signals.addNewCollection(newName);
-    },
-    saveShelf() {
-        signals.saveCollections();
+        signals.newCollection(newName);
     },
     render() {
         const collections = this.state.collections.map((value) =>
@@ -469,9 +427,6 @@ const Shelf = React.createClass({
                         <Button bsStyle="primary" onClick={this.toggleAddingCollection}>
                             <Glyphicon glyph="plus"/>{` New Collection`}
                         </Button>
-                        <Button bsStyle="primary" onClick={this.saveShelf}>
-                            <Glyphicon glyph="save"/>{` Save Shelf`}
-                        </Button>
                         <Button bsStyle="primary" onClick={this.toggleShowResetter}>
                             <Glyphicon glyph="trash"/>{` Clear Shelf`}
                         </Button>
@@ -486,11 +441,12 @@ const Shelf = React.createClass({
 
 /**
  *
+ * NOTE: this component is responsible for setting the current collection ID
+ *
  * Props:
  * ------
  * @param (str) params.colid - From NuclearJS, the collection ID to display.
  */
- // TODO: the ItemViewOverlay doesn't work very well here... the way it goes up a level puts ":colid" in the URL!!!
 const DeskAndShelf = React.createClass({
     propTypes: {
         children: React.PropTypes.element,
@@ -498,10 +454,32 @@ const DeskAndShelf = React.createClass({
             colid: React.PropTypes.string.isRequired,
         }).isRequired,
     },
+    componentWillMount() {
+        this.loadCollection(this.props.params.colid);
+    },
+    componentWillUpdate(nextProps) {
+        if (this.props.params.colid !== nextProps.params.colid) {
+            loadCollection(colid);
+        }
+    },
+    componentWillUnmount() {
+        signals.setShowingCollection(false);
+    },
+    /** Load the data for the collection given by "colid."
+     *
+     * @param {str} colid - The collection ID to load.
+     */
+    loadCollection(colid) {
+        if (colid) {
+            signals.setShowingCollection(colid);
+            signals.setPage(1);
+            signals.loadCollection(colid);
+        }
+    },
     render() {
         return (
             <div>
-                <Desk colid={this.props.params.colid}/>
+                <Desk/>
                 <Shelf/>
                 {this.props.children}
             </div>
