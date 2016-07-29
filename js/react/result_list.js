@@ -109,7 +109,8 @@ const ResultCell = React.createClass({
  * If a column name appears in both "data" and "resources," the rendered table cell will have a
  * hyperlink to the URL given in "resources."
  *
- * @param (string) colid - The collection ID being displayed, if applicable.
+ * Props
+ * -----
  * @param (array of string) columns - Names of the fields in "data" that should be rendered in this
  *     row. They will be rendered from left to right, in the order of this prop.
  * @param (ImmutableJS.Map) data - Map with data for a resource.
@@ -117,7 +118,6 @@ const ResultCell = React.createClass({
  */
 const ResultRow = React.createClass({
     propTypes: {
-        colid: React.PropTypes.string,
         // the column names to render, or the fields in "data" to render as columns
         columns: React.PropTypes.instanceOf(Immutable.List).isRequired,
         // the object to render into columns
@@ -176,7 +176,7 @@ const ResultRow = React.createClass({
         if (this.props.data.get('type') === 'chant') {
             renderedColumns = renderedColumns.push(
                 <ResultCell key="collection-add">
-                    <AddRemoveCollection rid={this.props.data.get('id')} colid={this.props.colid}/>
+                    <AddRemoveCollection rid={this.props.data.get('id')}/>
                 </ResultCell>
             );
         }
@@ -231,14 +231,13 @@ const ResultListItemView = React.createClass({
 
 /** ResultList subcomponent that produces a table.
  *
- * Props:
+ * State:
  * ------
- * @param (string) colid - The collection ID being displayed, if applicable.
+ * @param () columns - ?
+ * @param () data - ?
+ * @param () sortOrder - ?
  */
 const ResultListTable = React.createClass({
-    propTypes: {
-        colid: React.PropTypes.string,
-    },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
         return {
@@ -279,10 +278,9 @@ const ResultListTable = React.createClass({
                 <tbody>
                     {this.state.sortOrder.map((id) =>
                         <ResultRow key={id}
-                            colid={this.props.colid}
                             columns={this.state.columns.get('names')}
                             data={this.state.data.get(id)}
-                            resources={this.state.data.get('resources').get(id)}
+                            resources={this.state.data.getIn(['resources', id])}
                         />
                     ,
                         this)
@@ -296,9 +294,11 @@ const ResultListTable = React.createClass({
 
 /** ResultListMultiplexer: container that decides whether to show ResultListTable or ResultListItemView.
  *
- * Props:
+ * State:
  * ------
- * @param (string) colid - The collection ID being displayed, if applicable.
+ * @param () searchResultsFormat - ?
+ * @param () sortOrder - ?
+ * @param () results - ?
  */
 const ResultListMultiplexer = React.createClass({
     //
@@ -307,9 +307,6 @@ const ResultListMultiplexer = React.createClass({
     // - results
     //
 
-    propTypes: {
-        colid: React.PropTypes.string,
-    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -323,7 +320,7 @@ const ResultListMultiplexer = React.createClass({
         // skip the content creation if it's just the initial data (i.e., nothing useful)
         if (this.state.results) {
             if ('table' === this.state.searchResultsFormat) {
-                return <ResultListTable colid={this.props.colid}/>;
+                return <ResultListTable/>;
             }
             else {
                 return <ResultListItemView data={this.state.results} sortOrder={this.state.sortOrder}/>;
@@ -381,11 +378,11 @@ const Paginator = React.createClass({
  * State (provided by NuclearJS):
  * ------------------------------
  * @param (int) perPage - The number of search results to display on every page.
+ * @param (bool) showingCollection - From the "showingCollection" getter.
  */
 const PerPageSelector = React.createClass({
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
         return {perPage: getters.searchResultsPerPage};
     },
     handleChange(event) {
@@ -583,16 +580,13 @@ const ErrorMessage = React.createClass({
 });
 
 
-/**
+/** TODO
  *
- * Props
- * -----
- * @param (string) colid - The collection ID being displayed, if relevant.
+ * State:
+ * ------
+ * @param () error - ?
  */
 const ResultList = React.createClass({
-    propTypes: {
-        colid: React.PropTypes.string,
-    },
     mixins: [reactor.ReactMixin],  // connection to NuclearJS
     getDataBindings() {
         // connection to NuclearJS
@@ -614,7 +608,7 @@ const ResultList = React.createClass({
             <Well className="result-list">
                 {errorMessage}
                 <ResultListSettings/>
-                <ResultListMultiplexer colid={this.props.colid}/>
+                <ResultListMultiplexer/>
                 <Paginator/>
             </Well>
         );
