@@ -336,6 +336,10 @@ describe('Collection management signals', () => {
     });
 
     describe('addToCollection()', () =>{
+        const requestForCache = signals.requestForCache;
+        beforeEach(() => { signals.requestForCache = jest.genMockFn(); });
+        afterAll(() => { signals.requestForCache = requestForCache; });
+
         it('works', () => {
             // setup: make a collection
             const rid = '123';
@@ -346,6 +350,37 @@ describe('Collection management signals', () => {
 
             const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('members').first()).toBe(rid);
+            expect(signals.requestForCache).toBeCalledWith(rid);
+        });
+
+        it('does not pass things along when the "rid" is missing', () => {
+            // setup: make a collection
+            const rid = undefined;
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+
+            signals.addToCollection(colid, rid);
+
+            const collection = reactor.evaluate(getters.collections).get(colid);
+            expect(collection.get('members').size).toBe(0);
+            expect(signals.requestForCache).not.toBeCalled();
+        });
+    });
+
+    describe('requestForCache()', () => {
+        it('works', () => {
+            // make a mock Promise to return from get(), then set it to be returned
+            const mockSearch = cantusjs.Cantus.prototype.search;
+            mockSearch.mockClear();
+            const mockPromise = {then: jest.genMockFn()};
+            mockSearch.mockReturnValueOnce(mockPromise);
+            const rid = '400';
+            const expAjaxSettings = {id: rid};
+
+            signals.requestForCache(rid);
+
+            expect(mockSearch).toBeCalledWith(expAjaxSettings);
+            expect(mockPromise.then).toBeCalledWith(signals.addToCache);
         });
     });
 
@@ -404,7 +439,110 @@ describe('Collection management signals', () => {
         });
     });
 
-    // TODO: still to test...
-    // - clearShelf()
-    // - saveCollections()
+    describe('loadCollection()', function() {
+        beforeAll(() => { this.loadSearchResults = signals.loadSearchResults; });
+        afterAll(() => { signals.loadSearchResults = this.loadSearchResults; });
+        beforeEach(() => { signals.loadSearchResults = jest.genMockFn(); });
+
+        it('does not crash when the collection ID does not exist', () => {
+            const actual = signals.loadCollection('123');
+            expect(actual).toBe(undefined);
+            expect(signals.loadSearchResults).not.toBeCalled();
+        });
+
+        it('processes three resources', () => {
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+            signals.addToCollection(colid, '123');
+            signals.addToCollection(colid, '789');
+            signals.addToCollection(colid, '456');
+            signals.addToCache({
+                sort_order: ['123', '456', '789'],  // different from the order added to collection
+                123: {type: 'chant', id: '123'},
+                456: {type: 'chant', id: '456'},
+                789: {type: 'chant', id: '789'},
+            });
+
+            const actual = signals.loadCollection(colid);
+
+            expect(actual.get('sort_order').equals(Immutable.List(['123', '789', '456']))).toBeTruthy();
+            expect(actual.has('123')).toBeTruthy();
+            expect(actual.has('789')).toBeTruthy();
+            expect(actual.has('456')).toBeTruthy();
+            expect(actual.getIn(['headers', 'total_results'])).toBe(3);
+            expect(actual.getIn(['headers', 'page'])).toBe(1);
+            expect(actual.getIn(['headers', 'per_page'])).toBe(10);
+        });
+
+        it('returns what is available when a resource is not in the cache', () => {
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+            signals.addToCollection(colid, '123');
+            signals.addToCollection(colid, '789');
+            signals.addToCache({
+                sort_order: ['123', '789'],
+                123: {type: 'chant', id: '123'},
+                // missing: 789
+            });
+
+            const actual = signals.loadCollection(colid);
+
+            expect(actual.get('sort_order').equals(Immutable.List(['123']))).toBeTruthy();
+            expect(actual.has('123')).toBeTruthy();
+            expect(actual.has('789')).toBeFalsy();  // missing!
+            expect(actual.getIn(['headers', 'total_results'])).toBe(2);
+        });
+
+        it('handles showing the first page', () => {
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+            signals.addToCollection(colid, '123');
+            signals.addToCollection(colid, '789');
+            signals.addToCollection(colid, '456');
+            signals.addToCache({
+                sort_order: ['123', '456', '789'],
+                123: {type: 'chant', id: '123'},
+                456: {type: 'chant', id: '456'},
+                789: {type: 'chant', id: '789'},
+            });
+            signals.setPerPage(2);
+            signals.setPage(1);
+
+            const actual = signals.loadCollection(colid);
+
+            expect(actual.get('sort_order').equals(Immutable.List(['123', '789']))).toBeTruthy();
+            expect(actual.has('123')).toBeTruthy();
+            expect(actual.has('789')).toBeTruthy();
+            expect(actual.has('456')).toBeFalsy();  // on the 2nd page
+            expect(actual.getIn(['headers', 'total_results'])).toBe(3);
+            expect(actual.getIn(['headers', 'page'])).toBe(1);
+            expect(actual.getIn(['headers', 'per_page'])).toBe(2);
+        });
+
+        it('handles showing the second page', () => {
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+            signals.addToCollection(colid, '123');
+            signals.addToCollection(colid, '789');
+            signals.addToCollection(colid, '456');
+            signals.addToCache({
+                sort_order: ['123', '456', '789'],
+                123: {type: 'chant', id: '123'},
+                456: {type: 'chant', id: '456'},
+                789: {type: 'chant', id: '789'},
+            });
+            signals.setPerPage(2);
+            signals.setPage(2);
+
+            const actual = signals.loadCollection(colid);
+
+            expect(actual.get('sort_order').equals(Immutable.List(['456']))).toBeTruthy();
+            expect(actual.has('123')).toBeFalsy();  // on the 1st page
+            expect(actual.has('789')).toBeFalsy();  // on the 1st page
+            expect(actual.has('456')).toBeTruthy();
+            expect(actual.getIn(['headers', 'total_results'])).toBe(3);
+            expect(actual.getIn(['headers', 'page'])).toBe(2);
+            expect(actual.getIn(['headers', 'per_page'])).toBe(2);
+        });
+    });
 });

@@ -24,6 +24,7 @@
 
 import {cantusModule as cantusjs} from '../cantusjs/cantus.src';
 import localforage from 'localforage';
+import {Immutable} from 'nuclear-js';
 
 import {getters} from './getters';
 import {log} from '../util/log';
@@ -212,66 +213,51 @@ const SIGNALS = {
         }
     },
 
-    /** Given a list of resource IDs, load them into the results.
+    /** Load a "collection" into the SearchResults Store.
      *
-     * @param (ImmutableJS.List) rids - A list of resource IDs to load for the collection.
+     * @param (str) colid - The ID of the "collection" to load.
      *
-     * This function first tries to load the resources from the browser cache using localforage. If
-     * resoruces are missing, they are loaded from the server.
+     * This function loads its chants from the CollectionsList cache.
      */
-    loadFromCache(rids) {  // TODO: rewrite so it can deal with everything stored in the Reactor
-        const results = rids.toArray();
-        const resultsLength = results.length;
+    loadCollection(colid) {
+        const collections = reactor.evaluate(getters.collections);
+        const cache = reactor.evaluate(getters.collectionsCache);
+        const page = reactor.evaluate(getters.searchPage);
+        const perPage = reactor.evaluate(getters.searchPerPage);
 
-        // first, try recovering all the results from the localforage cache
-        for (let i = 0; i < resultsLength; i += 1) {
-            results[i] = localforage.getItem(results[i]);
+        if (!collections.has(colid)) {
+            log.warn('signals.loadCollection() given a nonexistent collection ID');
+            return;
         }
 
-        // wait for all the Promises to resolve, then...
-        Promise.all(results).then(results => {
-            // check if any of the results are missing
-            for (let i = 0; i < resultsLength; i += 1) {
-                if (results[i] === null) {
-                    results[i] = CANTUS.search({any: `+id:${rids.get(i)}`});
-                }
+        const collection = collections.get(colid);
+        const pageSliceStart = perPage * (page - 1);
+        const pageSliceEnd = pageSliceStart + perPage;
+        const onThisPage = collection.get('members').slice(pageSliceStart, pageSliceEnd);
+        let post = Immutable.fromJS({sort_order: [], resources: {}});
+
+        for (const rid of onThisPage.values()) {
+            if (cache.has(rid)) {
+                post = post.set(rid, cache.get(rid));
+                post = post.updateIn(['sort_order'], order => order.push(rid));
+                post = post.setIn(['resources', rid], Immutable.Map());  // "resources" is required, even if empty
             }
-            Promise.all(results).then(results => {
-                // assemble the results into a CantusJS-like structure, then send them to the Reactor
+            else {
+                // TODO: fallback to the server if resource isn't in cache?
+                log.warn(`Resource missing in collections cache; ID is ${rid}`);
+            }
+        }
 
-                // post-processing on resources we got just now
-                for (let i = 0; i < resultsLength; i += 1) {
-                    if (results[i].sort_order) {
-                        results[i] = results[i][results[i].sort_order[0]];
-                        localforage.setItem(results[i].id, results[i]);  // TODO: catch()
-                    }
-                }
-
-                // We have to fake a lot of CantusJS stuff to make this work.
-                // We also have to set things weirdly so that the key of an Object isn't accidentally
-                // set to "rid" instead of the value of the rid variable.
-                const post = {sort_order: rids, resources: {}};
-
-                for (let i = 0; i < resultsLength; i += 1) {
-                    const id = results[i].id;
-                    post[id] = results[i];
-                    post.resources[id] = {};
-                }
-
-                post['headers'] = {page: '1', per_page: resultsLength, fields: '', extraFields: '',
-                    total_results: resultsLength};
-
-                SIGNALS.loadSearchResults(post);
-            }).catch(err => {
-                // TODO: write better error handling
-                log.error('Error in the inner loop of loadFromCache() (see the Console)');
-                throw err;
-            });
-        }).catch(err => {
-            // TODO: write better error handling
-            log.error('There was some problem in loadFromCache() (see the Console)');
-            throw err;
+        // we also have to fake HTTP response headers
+        const headers = Immutable.Map({
+            total_results: collection.get('members').size,
+            page: page,
+            per_page: perPage,
         });
+        post = post.set('headers', headers);
+
+        SIGNALS.loadSearchResults(post);
+        return post;  // for testing
     },
 
     /** Make a new collection.
@@ -303,11 +289,15 @@ const SIGNALS = {
      *
      * @param (str) colid - The collection ID to amend.
      * @param (str) rid - The resource ID to append.
-     *
-     * NOTE: this signal also clears the resource in "ask_which_collection."
      */
     addToCollection(colid, rid) {
-        reactor.dispatch(SIGNAL_NAMES.ADD_TO_COLLECTION, {colid: colid, rid: rid});
+        if (rid && typeof rid === 'string') {
+            reactor.dispatch(SIGNAL_NAMES.ADD_TO_COLLECTION, {colid: colid, rid: rid});
+            SIGNALS.requestForCache(rid);
+        }
+        else {
+            log.warn('signals.addToCollection() received invalid resource ID');
+        }
     },
 
     /** Remove resource with ID "rid" from the collection with ID "colid."
@@ -317,6 +307,14 @@ const SIGNALS = {
      */
     removeFromCollection(colid, rid) {
         reactor.dispatch(SIGNAL_NAMES.REMOVE_FROM_COLLECTION, {colid: colid, rid: rid});
+    },
+
+    /** Ask the Cantus server for a resource, then add it to the CollectionsList cache.
+     *
+     * @param (str) rid - The resource ID to request.
+     */
+    requestForCache(rid) {
+        CANTUS.search({id: rid}).then(SIGNALS.addToCache);
     },
 
     /** Add a resource to the CollectionsList Store.
