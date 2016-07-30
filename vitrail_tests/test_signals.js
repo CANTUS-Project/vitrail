@@ -629,5 +629,18 @@ describe('Collection management signals', () => {
             expect(localforage.getItem).toBeCalledWith(LOCALFORAGE_CACHE_KEY);
             expect(reactor.evaluate(getters.collectionsCache).equals(expected)).toBeTruthy();
         });
+
+        it('clearShelf()', () => {
+            // setup a Promise-alike to be returned by localForage
+            localforage.setItem.mockReturnValue({then: (func) => { func(); }});
+            reactor.dispatch(SIGNAL_NAMES.REPLACE_COLLECTIONS, Immutable.Map({one: 'two'}));
+            reactor.dispatch(SIGNAL_NAMES.REPLACE_CACHE, Immutable.Map({three: 'one'}));
+
+            signals.clearShelf();
+
+            expect(reactor.evaluate(getters.collections).toJS()).toEqual({});
+            expect(reactor.evaluate(getters.collectionsCache).toJS()).toEqual({});
+            expect(localforage.setItem.mock.calls.length).toBe(2);
+        });
     });
 });

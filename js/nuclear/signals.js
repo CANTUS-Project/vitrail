@@ -348,12 +348,12 @@ const SIGNALS = {
 
     /** Save the "collections" data from the CollectionsList in localForage. */
     saveCollections() {
-        localforage.setItem(LOCALFORAGE_COLLECTIONS_KEY, reactor.evaluate(getters.collections).toJS());
+        return localforage.setItem(LOCALFORAGE_COLLECTIONS_KEY, reactor.evaluate(getters.collections).toJS());
     },
 
     /** Save the "cache" data from the CollectionsList in localForage. */
     saveCollectionCache() {
-        localforage.setItem(LOCALFORAGE_CACHE_KEY, reactor.evaluate(getters.collectionsCache).toJS());
+        return localforage.setItem(LOCALFORAGE_CACHE_KEY, reactor.evaluate(getters.collectionsCache).toJS());
     },
 
     /** Load the "collections" data from localForage for the CollectionsList.
@@ -382,10 +382,11 @@ const SIGNALS = {
         });
     },
 
-    /** Clear all data in "localforage" and all cached chants. */
+    /** Clear all the collections and cached resources. */
     clearShelf() {
-        console.log('clearShelf()');
-        // TODO: rewrite so it only clears the "collections" and cached chants ... and add tests
+        reactor.dispatch(SIGNAL_NAMES.REPLACE_COLLECTIONS, Immutable.Map());
+        reactor.dispatch(SIGNAL_NAMES.REPLACE_CACHE, Immutable.Map());
+        SIGNALS.saveCollections().then(() => { SIGNALS.saveCollectionCache(); });
     },
 
     /** Set whether we're currently expecting the interface to show a Collection.
