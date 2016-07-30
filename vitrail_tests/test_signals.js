@@ -25,6 +25,7 @@
 import init from '../js/nuclear/init';
 
 // mocked
+import localforage from 'localforage';
 import {log} from '../js/util/log';
 
 // unmocked
@@ -35,7 +36,7 @@ import cantusjs from '../js/cantusjs/cantus.src';
 
 import getters from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
-import {SIGNALS as signals} from '../js/nuclear/signals';
+import {LOCALFORAGE_COLLECTIONS_KEY, LOCALFORAGE_CACHE_KEY, SIGNAL_NAMES, SIGNALS as signals} from '../js/nuclear/signals';
 
 
 describe('setSearchResultsFormat()', () => {
@@ -165,6 +166,21 @@ describe('submitSearchQuery()', () => {
             signals.loadSearchResults(results);
             expect(reactor.evaluate(getters.searchResults).get('res')).toBe('ults');
         });
+    });
+
+    it('calls loadCollection() properly', () => {
+        const origLoadCollection = signals.loadCollection;
+        signals.loadCollection = jest.genMockFn();
+        signals.setShowingCollection('123');
+        const mockSearch = cantusjs.Cantus.prototype.search;
+        const mockGet = cantusjs.Cantus.prototype.get;
+
+        signals.submitSearchQuery();
+
+        expect(signals.loadCollection).toBeCalledWith('123');
+        expect(mockSearch).not.toBeCalled();
+        expect(mockGet).not.toBeCalled();
+        signals.loadCollection = origLoadCollection;
     });
 
     it('calls CANTUS.search() properly', () => {
@@ -335,10 +351,19 @@ describe('Collection management signals', () => {
         });
     });
 
-    describe('addToCollection()', () =>{
-        const requestForCache = signals.requestForCache;
-        beforeEach(() => { signals.requestForCache = jest.genMockFn(); });
-        afterAll(() => { signals.requestForCache = requestForCache; });
+    describe('addToCollection()', function() {
+        beforeAll(() => {
+            this.requestForCache = signals.requestForCache;
+            this.saveCollections = signals.saveCollections;
+        });
+        beforeEach(() => {
+            signals.requestForCache = jest.genMockFn();
+            signals.saveCollections = jest.genMockFn();
+        });
+        afterAll(() => {
+            signals.requestForCache = this.requestForCache;
+            signals.saveCollections = this.saveCollections;
+        });
 
         it('works', () => {
             // setup: make a collection
@@ -351,6 +376,7 @@ describe('Collection management signals', () => {
             const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('members').first()).toBe(rid);
             expect(signals.requestForCache).toBeCalledWith(rid);
+            expect(signals.saveCollections).toBeCalled();
         });
 
         it('does not pass things along when the "rid" is missing', () => {
@@ -364,6 +390,7 @@ describe('Collection management signals', () => {
             const collection = reactor.evaluate(getters.collections).get(colid);
             expect(collection.get('members').size).toBe(0);
             expect(signals.requestForCache).not.toBeCalled();
+            expect(signals.saveCollections).not.toBeCalled();
         });
     });
 
@@ -401,6 +428,8 @@ describe('Collection management signals', () => {
 
     describe('addToCache()', () => {
         it('works with one thing to add', () => {
+            const saveCollectionCache = signals.saveCollectionCache;
+            signals.saveCollectionCache = jest.genMockFn();
             const response = {
                 '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
                 'sort_order': ['123'],
@@ -408,6 +437,8 @@ describe('Collection management signals', () => {
             signals.addToCache(response);
             const theStore = reactor.evaluate(getters.collectionsCache);
             expect(theStore.has('123')).toBeTruthy();
+            expect(signals.saveCollectionCache).toBeCalled();
+            signals.saveCollectionCache = saveCollectionCache;
         });
 
         it('works with three things to add', () => {
@@ -556,6 +587,47 @@ describe('Collection management signals', () => {
 
             signals.setShowingCollection(colid);
             expect(reactor.evaluate(getters.showingCollection)).toBe(colid);
+        });
+    });
+
+    describe('functions that use localForage', () => {
+        beforeEach(() => {
+            localforage.getItem.mockClear();
+            localforage.setItem.mockClear();
+        });
+
+        it('saveCollections()', () => {
+            reactor.dispatch(SIGNAL_NAMES.REPLACE_COLLECTIONS, Immutable.Map({one: 'two'}));
+            signals.saveCollections();
+            expect(localforage.setItem).toBeCalledWith(LOCALFORAGE_COLLECTIONS_KEY, {one: 'two'});
+        });
+
+        it('saveCollectionCache()', () => {
+            reactor.dispatch(SIGNAL_NAMES.REPLACE_CACHE, Immutable.Map({three: 'one'}));
+            signals.saveCollectionCache();
+            expect(localforage.setItem).toBeCalledWith(LOCALFORAGE_CACHE_KEY, {three: 'one'});
+        });
+
+        it('loadCollections()', () => {
+            // setup a Promise-alike to be returned by localForage
+            localforage.getItem.mockReturnValue({then: (func) => { func({bark: 'woof'}); }});
+            const expected = Immutable.Map({bark: 'woof'});
+
+            signals.loadCollections();
+
+            expect(localforage.getItem).toBeCalledWith(LOCALFORAGE_COLLECTIONS_KEY);
+            expect(reactor.evaluate(getters.collections).equals(expected)).toBeTruthy();
+        });
+
+        it('loadCache()', () => {
+            // setup a Promise-alike to be returned by localForage
+            localforage.getItem.mockReturnValue({then: (func) => { func({bark: 'woof'}); }});
+            const expected = Immutable.Map({bark: 'woof'});
+
+            signals.loadCache();
+
+            expect(localforage.getItem).toBeCalledWith(LOCALFORAGE_CACHE_KEY);
+            expect(reactor.evaluate(getters.collectionsCache).equals(expected)).toBeTruthy();
         });
     });
 });

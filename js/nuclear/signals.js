@@ -32,6 +32,10 @@ import {localforageKey, reactor} from './reactor';
 
 // this is the key where stored whether the user "installed" Vitrail
 const LOCALFORAGE_INSTALLED_KEY = 'vitrail_is_installed';
+// where stored the "collections" of the CollectionsList Store
+const LOCALFORAGE_COLLECTIONS_KEY = 'collections_v1';
+// where stored the "cache" of the CollectionsList Store
+const LOCALFORAGE_CACHE_KEY = 'cache_v1';
 
 
 // The Ansible playbook used for deployment will swap out the "<< SERVER URL HERE >>" string with
@@ -64,6 +68,9 @@ const SIGNAL_NAMES = {
     DELETE_COLLECTION: 'DELETE_COLLECTION',
     ADD_TO_COLLECTION: 'ADD_TO_COLLECTION',
     REMOVE_FROM_COLLECTION: 'REMOVE_FROM_COLLECTION',
+    ADD_TO_CACHE: 'ADD_TO_CACHE',
+    REPLACE_COLLECTIONS: 'REPLACE_COLLECTIONS',  // when loading from localForage
+    REPLACE_CACHE: 'REPLACE_CACHE',  // when loading from localForage
     SET_SHOWING_COLLECTION: 'SET_SHOWING_COLLECTION',
     // for ServiceWorker
     SW_INSTALLED: 'SW_INSTALLED',
@@ -299,6 +306,7 @@ const SIGNALS = {
         if (rid && typeof rid === 'string') {
             reactor.dispatch(SIGNAL_NAMES.ADD_TO_COLLECTION, {colid: colid, rid: rid});
             SIGNALS.requestForCache(rid);
+            SIGNALS.saveCollections();
         }
         else {
             log.warn('signals.addToCollection() received invalid resource ID');
@@ -334,8 +342,44 @@ const SIGNALS = {
             for (const rid of response.sort_order) {
                 reactor.dispatch(SIGNAL_NAMES.ADD_TO_CACHE, response[rid]);
             }
-            // TODO: call another function to update localForage
+            SIGNALS.saveCollectionCache();
         }
+    },
+
+    /** Save the "collections" data from the CollectionsList in localForage. */
+    saveCollections() {
+        localforage.setItem(LOCALFORAGE_COLLECTIONS_KEY, reactor.evaluate(getters.collections).toJS());
+    },
+
+    /** Save the "cache" data from the CollectionsList in localForage. */
+    saveCollectionCache() {
+        localforage.setItem(LOCALFORAGE_CACHE_KEY, reactor.evaluate(getters.collectionsCache).toJS());
+    },
+
+    /** Load the "collections" data from localForage for the CollectionsList.
+     *
+     * NOTE: this function returns the localForage Promise so you can attach other tasks that
+     *       require the "collections" data to be loaded.
+     */
+    loadCollections() {
+        return localforage.getItem(LOCALFORAGE_COLLECTIONS_KEY).then((collections) => {
+            if (collections) {
+                reactor.dispatch(SIGNAL_NAMES.REPLACE_COLLECTIONS, Immutable.fromJS(collections));
+            }
+        });
+    },
+
+    /** Load the "cache" data from localForage for the CollectionsList.
+     *
+     * NOTE: this function returns the localForage Promise so you can attach other tasks that
+     *       required the "cache" data to be loaded.
+     */
+    loadCache() {
+        return localforage.getItem(LOCALFORAGE_CACHE_KEY).then((cache) => {
+            if (cache) {
+                reactor.dispatch(SIGNAL_NAMES.REPLACE_CACHE, Immutable.fromJS(cache));
+            }
+        });
     },
 
     /** Clear all data in "localforage" and all cached chants. */
@@ -371,5 +415,5 @@ const SIGNALS = {
 };
 
 
-export {SIGNAL_NAMES, SIGNALS, LOCALFORAGE_INSTALLED_KEY};
+export {SIGNAL_NAMES, SIGNALS, LOCALFORAGE_INSTALLED_KEY, LOCALFORAGE_COLLECTIONS_KEY, LOCALFORAGE_CACHE_KEY};
 export default SIGNALS;

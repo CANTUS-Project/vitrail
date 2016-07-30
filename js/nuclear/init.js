@@ -41,12 +41,8 @@ reactor.registerStores({
     serviceWorkerStatus: stores.stores.ServiceWorkerStatus,
 });
 
-// load any saved collections; we don't want to load anything else though
-localforage.getItem(localforageKey).then((state) => {
-    if (state) {
-        reactor.loadState({collectionsList: state.collectionsList});
-    }
-});
+// load any saved collections
+signals.loadCollections().then(() => { signals.loadCache(); });
 
 
 const init = 'init';

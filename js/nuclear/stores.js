@@ -371,6 +371,36 @@ const SETTERS = {
         return previous;
     },
 
+    /** Replace the "collections" with data from elsewhere.
+     *
+     * @param (ImmutableJS.Map) next - To set as the "collections" member.
+     */
+    replaceCollections(previous, next) {
+        if (Immutable.Map.isMap(next)) {
+            return previous.set('collections', next);
+        }
+        else {
+            log.warn('Store.replaceCollections() received incorrect arguments.');
+        }
+
+        return previous;
+    },
+
+    /** Replace the "cache" with data from elsewhere.
+     *
+     * @param (ImmutableJS.Map) next - To set as the "cache" member.
+     */
+    replaceCache(previous, next) {
+        if (Immutable.Map.isMap(next)) {
+            return previous.set('cache', next);
+        }
+        else {
+            log.warn('Store.replaceCache() received incorrect arguments.');
+        }
+
+        return previous;
+    },
+
     /** Set the "showing" member to "next," if it's either false or a string that is hopefully
      *  a collection ID.
      */
@@ -496,6 +526,8 @@ const STORES = {
             this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
             this.on(SIGNAL_NAMES.NEW_COLLECTION, SETTERS.newCollection);
             this.on(SIGNAL_NAMES.ADD_TO_CACHE, SETTERS.addToCache);
+            this.on(SIGNAL_NAMES.REPLACE_COLLECTIONS, SETTERS.replaceCollections);
+            this.on(SIGNAL_NAMES.REPLACE_CACHE, SETTERS.replaceCache);
             this.on(SIGNAL_NAMES.SET_SHOWING_COLLECTION, SETTERS.setShowingCollection);
         },
     }),

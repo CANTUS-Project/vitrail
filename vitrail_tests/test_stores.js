@@ -638,4 +638,32 @@ describe('The CollectionsList Store', () => {
             expect(theStore.get('showing')).toBe('tree');
         });
     });
+
+    describe('replaceCollections() handler', () => {
+        it('works when given an ImmutableJS Map', () => {
+            const next = Immutable.Map({yeah: 'whatever'});
+            const actual = setters.replaceCollections(Immutable.Map(), next);
+            expect(actual.getIn(['collections', 'yeah'])).toBe('whatever');
+        });
+
+        it('does not replace when given another value', () => {
+            const next = 'four';
+            const actual = setters.replaceCollections(Immutable.Map(), next);
+            expect(actual.has('collections')).toBeFalsy();
+        });
+    });
+
+    describe('replaceCache() handler', () => {
+        it('works when given an ImmutableJS Map', () => {
+            const next = Immutable.Map({yeah: 'whatever'});
+            const actual = setters.replaceCache(Immutable.Map(), next);
+            expect(actual.getIn(['cache', 'yeah'])).toBe('whatever');
+        });
+
+        it('does not replace when given another value', () => {
+            const next = 'four';
+            const actual = setters.replaceCache(Immutable.Map(), next);
+            expect(actual.has('cache')).toBeFalsy();
+        });
+    });
 });
