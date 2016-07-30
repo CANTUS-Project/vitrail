@@ -64,7 +64,7 @@ const SIGNAL_NAMES = {
     DELETE_COLLECTION: 'DELETE_COLLECTION',
     ADD_TO_COLLECTION: 'ADD_TO_COLLECTION',
     REMOVE_FROM_COLLECTION: 'REMOVE_FROM_COLLECTION',
-    ADD_TO_CACHE: 'ADD_TO_CACHE',  // TODO: write the signal for this
+    SET_SHOWING_COLLECTION: 'SET_SHOWING_COLLECTION',
     // for ServiceWorker
     SW_INSTALLED: 'SW_INSTALLED',
     SW_UNINSTALLED: 'SW_UNINSTALLED',
@@ -188,10 +188,15 @@ const SIGNALS = {
      * query settings.
      *
      * When the request completes or fails, the "loadSearchResults" signal function is called.
+     *
+     * NOTE: If this function is called while the CollectionsList Store believes it is showing a
+     *       collection, this signal calls the loadCollection() signal.
      */
     submitSearchQuery() {
-        // Submit a search query to the Cantus server with the settings currently in NuclearJS.
-        //
+        const showingCollection = reactor.evaluate(getters.showingCollection);
+        if (showingCollection) {
+            return SIGNALS.loadCollection(showingCollection);
+        }
 
         // default, unchanging things
         const ajaxSettings = reactor.evaluate(getters.searchQuery).toObject();
@@ -337,6 +342,15 @@ const SIGNALS = {
     clearShelf() {
         console.log('clearShelf()');
         // TODO: rewrite so it only clears the "collections" and cached chants ... and add tests
+    },
+
+    /** Set whether we're currently expecting the interface to show a Collection.
+     *
+     * @param (bool or str) show - Either false (if the interface will show search results) or the
+     *     collection ID that will be shown.
+     */
+    setShowingCollection(show) {
+        reactor.dispatch(SIGNAL_NAMES.SET_SHOWING_COLLECTION, show);
     },
 
     /** Call this signal when the user chooses to "Install" Vitral. */

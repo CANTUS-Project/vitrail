@@ -324,12 +324,17 @@ describe('ResultListTable_columns()', () => {
 
 describe('CollectionsList getters', () => {
     it('collections() getter', () => {
-        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache'});
+        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache', showing: 'showing'});
         expect(formatters.collections(collectionsList)).toBe('collections');
     });
 
     it('collectionsCache() getter', () => {
-        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache'});
+        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache', showing: 'showing'});
         expect(formatters.collectionsCache(collectionsList)).toBe('cache');
+    });
+
+    it('showingCollection() getter', () => {
+        const collectionsList = Immutable.Map({collections: 'collections', cache: 'cache', showing: 'showing'});
+        expect(formatters.showingCollection(collectionsList)).toBe('showing');
     });
 });

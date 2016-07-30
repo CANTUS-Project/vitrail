@@ -613,4 +613,29 @@ describe('The CollectionsList Store', () => {
             expect(actual).toEqual(previous);
         });
     });
+
+    describe('setShowingCollection() handler', () => {
+        it('works when given a valid value', () => {
+            let theStore = Immutable.Map({showing: 'tree'});
+
+            theStore = setters.setShowingCollection(theStore, 'some collection ID');
+            expect(theStore.get('showing')).toBe('some collection ID');
+
+            theStore = setters.setShowingCollection(theStore, false);
+            expect(theStore.get('showing')).toBe(false);
+        });
+
+        it('does not set to an invalid value', () => {
+            let theStore = Immutable.Map({showing: 'tree'});
+
+            theStore = setters.setShowingCollection(theStore, {showing: 'collections!'});
+            expect(theStore.get('showing')).toBe('tree');
+
+            theStore = setters.setShowingCollection(theStore, 42);
+            expect(theStore.get('showing')).toBe('tree');
+
+            theStore = setters.setShowingCollection(theStore);
+            expect(theStore.get('showing')).toBe('tree');
+        });
+    });
 });

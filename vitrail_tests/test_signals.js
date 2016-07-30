@@ -545,4 +545,17 @@ describe('Collection management signals', () => {
             expect(actual.getIn(['headers', 'per_page'])).toBe(2);
         });
     });
+
+    describe('setShowingCollection()', () => {
+        it('works', () => {
+            // precondition
+            expect(reactor.evaluate(getters.showingCollection)).toBe(false);
+            // make a collection so we can show it
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+
+            signals.setShowingCollection(colid);
+            expect(reactor.evaluate(getters.showingCollection)).toBe(colid);
+        });
+    });
 });

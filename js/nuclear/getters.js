@@ -213,6 +213,9 @@ const formatters = {
     collectionsCache(collectionsList) {
         return collectionsList.get('cache');
     },
+    showingCollection(collectionsList) {
+        return collectionsList.get('showing');
+    },
 };
 
 
@@ -243,6 +246,7 @@ const getters = {
     // for Collections in the Workspace
     collections: [['collectionsList'], formatters.collections],
     collectionsCache: [['collectionsList'], formatters.collectionsCache],
+    showingCollection: [['collectionsList'], formatters.showingCollection],
     // for ServiceWorker
     swSupported: [['serviceWorkerStatus'], formatters.swSupported],
     swInstalled: [['serviceWorkerStatus'], formatters.swInstalled],

@@ -371,6 +371,19 @@ const SETTERS = {
         return previous;
     },
 
+    /** Set the "showing" member to "next," if it's either false or a string that is hopefully
+     *  a collection ID.
+     */
+    setShowingCollection(previous, next) {
+        if (next === false || typeof next === 'string') {
+            return previous.set('showing', next);
+        }
+        else {
+            log.warn('Stores.setShowingCollection() received incorrect arguments.');
+            return previous;
+        }
+    },
+
     /** Record that the ServiceWorker was installed. */
     swInstalled(previous, next) {
         return previous.set('installed', true);
@@ -444,8 +457,9 @@ const STORES = {
     CollectionsList: Store({
         // A list of the user's "collections."
         //
-        // It's an ImmutableJS data structure that holds Collections and the cached chants that are
-        // part of those Collections.
+        // It's an ImmutableJS data structure that holds Collections, the cached chants that are
+        // part of those Collections, and "showing" which is either false or holds the collection
+        // ID currently being displayed.
         //
         // {
         //   collections: {
@@ -465,10 +479,15 @@ const STORES = {
         //     48: {id: '48', type: 'chant', ... },
         //     88: {id: '88', type: 'chant', ... },
         //   }
+        //   showing: 'coll_two',
         // }
         //
         getInitialState() {
-            return Immutable.Map({collections: Immutable.Map(), cache: Immutable.Map()});
+            return Immutable.Map({
+                collections: Immutable.Map(),
+                cache: Immutable.Map(),
+                showing: false
+            });
         },
         initialize() {
             this.on(SIGNAL_NAMES.ADD_TO_COLLECTION, SETTERS.addToCollection);
@@ -477,6 +496,7 @@ const STORES = {
             this.on(SIGNAL_NAMES.RENAME_COLLECTION, SETTERS.renameCollection);
             this.on(SIGNAL_NAMES.NEW_COLLECTION, SETTERS.newCollection);
             this.on(SIGNAL_NAMES.ADD_TO_CACHE, SETTERS.addToCache);
+            this.on(SIGNAL_NAMES.SET_SHOWING_COLLECTION, SETTERS.setShowingCollection);
         },
     }),
 
