@@ -445,7 +445,7 @@ const Shelf = React.createClass({
  *
  * Props:
  * ------
- * @param (str) params.colid - From NuclearJS, the collection ID to display.
+ * @param (str) params.colid - From react-router, the collection ID to display.
  */
 const DeskAndShelf = React.createClass({
     propTypes: {
@@ -459,7 +459,7 @@ const DeskAndShelf = React.createClass({
     },
     componentWillUpdate(nextProps) {
         if (this.props.params.colid !== nextProps.params.colid) {
-            loadCollection(colid);
+            this.loadCollection(nextProps.params.colid);
         }
     },
     componentWillUnmount() {

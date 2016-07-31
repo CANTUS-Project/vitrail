@@ -485,12 +485,25 @@ describe('Collection management signals', () => {
     });
 
     describe('loadCollection()', function() {
+        beforeAll(() => { this.loadNow = signals._loadCollectionNow; });
+        afterAll(() => { signals._loadCollectionNow = this.loadNow; });
+        beforeEach(() => { signals._loadCollectionNow = jest.genMockFn(); });
+
+        it('loads immediately when the collection ID is available', () => {
+            signals.newCollection('whatever');
+            const colid = reactor.evaluate(getters.collections).first().get('colid');
+            signals.loadCollection(colid);
+            expect(signals._loadCollectionNow).toBeCalled();
+        });
+    });
+
+    describe('_loadCollectionNow()', function() {
         beforeAll(() => { this.loadSearchResults = signals.loadSearchResults; });
         afterAll(() => { signals.loadSearchResults = this.loadSearchResults; });
         beforeEach(() => { signals.loadSearchResults = jest.genMockFn(); });
 
         it('does not crash when the collection ID does not exist', () => {
-            const actual = signals.loadCollection('123');
+            const actual = signals._loadCollectionNow('123');
             expect(actual).toBe(undefined);
             expect(signals.loadSearchResults).not.toBeCalled();
         });
@@ -508,7 +521,7 @@ describe('Collection management signals', () => {
                 789: {type: 'chant', id: '789'},
             });
 
-            const actual = signals.loadCollection(colid);
+            const actual = signals._loadCollectionNow(colid);
 
             expect(actual.get('sort_order').equals(Immutable.List(['123', '789', '456']))).toBeTruthy();
             expect(actual.has('123')).toBeTruthy();
@@ -530,7 +543,7 @@ describe('Collection management signals', () => {
                 // missing: 789
             });
 
-            const actual = signals.loadCollection(colid);
+            const actual = signals._loadCollectionNow(colid);
 
             expect(actual.get('sort_order').equals(Immutable.List(['123']))).toBeTruthy();
             expect(actual.has('123')).toBeTruthy();
@@ -553,7 +566,7 @@ describe('Collection management signals', () => {
             signals.setPerPage(2);
             signals.setPage(1);
 
-            const actual = signals.loadCollection(colid);
+            const actual = signals._loadCollectionNow(colid);
 
             expect(actual.get('sort_order').equals(Immutable.List(['123', '789']))).toBeTruthy();
             expect(actual.has('123')).toBeTruthy();
@@ -579,7 +592,7 @@ describe('Collection management signals', () => {
             signals.setPerPage(2);
             signals.setPage(2);
 
-            const actual = signals.loadCollection(colid);
+            const actual = signals._loadCollectionNow(colid);
 
             expect(actual.get('sort_order').equals(Immutable.List(['456']))).toBeTruthy();
             expect(actual.has('123')).toBeFalsy();  // on the 1st page

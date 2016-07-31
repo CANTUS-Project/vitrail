@@ -37,6 +37,11 @@ const LOCALFORAGE_COLLECTIONS_KEY = 'collections_v1';
 // where stored the "cache" of the CollectionsList Store
 const LOCALFORAGE_CACHE_KEY = 'cache_v1';
 
+// following are used to allow a grace period where we're trying to load a collection but localForage
+// may not have finished loading everything into NuclearJS yet
+const LOADING_MAX_TRIES = 5;
+const LOADING_WAIT_TIME = 250;
+
 
 // The Ansible playbook used for deployment will swap out the "<< SERVER URL HERE >>" string with
 // the actual URL of the server. At runtime, we check whether the string was replaced; if not, we'll
@@ -228,17 +233,46 @@ const SIGNALS = {
     /** Load a "collection" into the SearchResults Store.
      *
      * @param (str) colid - The ID of the "collection" to load.
+     * @param tries - Used internally; do not provide an argument for this.
      *
-     * This function loads its chants from the CollectionsList cache.
+     * This function loads from the CollectionsList cache.
+     *
+     * NOTE: Use this function to load a collection whenever possible. Unlike _loadCollectionNow(),
+     *       this function deals with the situation where localForage hasn't loaded the collections
+     *       yet, and it tries to wait a moment for localForage.
      */
-    loadCollection(colid) {
+    loadCollection(colid, tries) {
+        const collections = reactor.evaluate(getters.collections);
+        if (collections.has(colid)) {
+            SIGNALS._loadCollectionNow(colid);
+        }
+        else {
+            // NOTE: I don't know how to add this branch to the test suite
+            tries = (typeof tries === 'number') ? (tries + 1) : 1;
+            if (tries > LOADING_MAX_TRIES) {
+                log.warn('Cannot show collection: no collection has that ID');
+            }
+            else {
+                window.setTimeout(() => { SIGNALS.loadCollection(colid, tries); }, LOADING_WAIT_TIME);
+            }
+        }
+    },
+
+    /** Immediately load a "collection" into the SearchResults Store.
+     *
+     * @param (str) colid - The ID of the "collection" to load.
+     *
+     * NOTE: Use loadCollection() whenever possible, which accounts for the possibility that
+     *       localForage hasn't loaded the collections yet
+     */
+    _loadCollectionNow(colid) {
         const collections = reactor.evaluate(getters.collections);
         const cache = reactor.evaluate(getters.collectionsCache);
         const page = reactor.evaluate(getters.searchPage);
         const perPage = reactor.evaluate(getters.searchPerPage);
 
         if (!collections.has(colid)) {
-            log.warn('signals.loadCollection() given a nonexistent collection ID');
+            log.warn('signals._loadCollectionNow() given a nonexistent collection ID');
             return;
         }
 
