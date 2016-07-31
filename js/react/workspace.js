@@ -30,6 +30,7 @@ import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import Form from 'react-bootstrap/lib/Form';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
@@ -212,10 +213,12 @@ const CollectionRename = React.createClass({
                     {header}
                 </Modal.Header>
                 <Modal.Body>
-                    <FormGroup controlId="formControlsTextarea">
-                        <ControlLabel>{`New name for the collection`}</ControlLabel>
-                        <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
-                    </FormGroup>
+                    <Form onSubmit={this.handleRename}>
+                        <FormGroup controlId="formControlsTextarea">
+                            <ControlLabel>{`New name for the collection`}</ControlLabel>
+                            <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
+                        </FormGroup>
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button bsStyle="danger" onClick={this.props.handleHide}>{`Cancel`}</Button>
