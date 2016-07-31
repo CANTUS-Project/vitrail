@@ -309,6 +309,13 @@ describe('itemViewOverlaySize()', () => {
 describe('setCurrentItemView()', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
+    it('works when the argument is a Map', () => {
+        const previous = 'fuzz';
+        const next = Immutable.fromJS({'123': {id: '123', type: 'chant'}, sort_order: ['123']});
+        const actual = stores.setters.setCurrentItemView(previous, next);
+        expect(actual).toBe(next);
+    });
+
     it('works when the argument is an object', () => {
         const previous = 'fuzz';
         const next = {'123': {id: '123', type: 'chant'}, sort_order: ['123']};

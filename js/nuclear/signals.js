@@ -88,25 +88,31 @@ const SIGNALS = {
      *
      * @param {str} type - The resource type to load.
      * @param {str} id - The resource ID to load.
-     * @returns {undefined}
+     *
+     * NOTE: if the resource is in the CollectionsList cache, it will be loaded from there.
      */
     loadInItemView(type, id) {
-        if (undefined === type || undefined === id) {
-            log.warn('SIGNALS.loadInItemView() requires "type" and "id" arguments');
-            return;
+        if (typeof type === 'string' && typeof id === 'string') {
+            const cache = reactor.evaluate(getters.collectionsCache);
+            if (cache.has(id)) {
+                let loadMe = Immutable.Map({sort_order: Immutable.List([id]), resources: Immutable.Map()});
+                loadMe = loadMe.set(id, cache.get(id));
+                loadMe = loadMe.setIn(['resources', id], Immutable.Map());
+                reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadMe);
+            }
+            else {
+                const settings = {type: type, id: id};
+                CANTUS.get(settings)
+                .then((response) => reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response))
+                .catch((response) => {
+                    reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
+                    log.warn(response);
+                });
+            }
         }
-        if ((typeof type !== 'string') || (typeof id !== 'string')) {
-            log.warn('SIGNALS.loadInItemView() arguments must both be strings');
-            return;
+        else {
+            log.warn('SIGNALS.loadInItemView() received incorrect arguments');
         }
-
-        const settings = {type: type, id: id};
-        CANTUS.get(settings)
-        .then((response) => reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response))
-        .catch((response) => {
-            reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, {});
-            log.warn(response);
-        });
     },
 
     /** Set the "size" prop of the ItemViewOverlay component.

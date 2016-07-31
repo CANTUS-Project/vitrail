@@ -765,23 +765,17 @@ const ItemView = React.createClass({
     getDefaultProps() {
         return {size: 'full'};
     },
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
-        // Not sure when this is called in relation to componentWillMount().
-        if ('nuclearjs' === this.whatShouldWeDisplay()) {
-            return {theItem: getters.currentItemView};
-        }
+        return {theItem: getters.currentItemView};
     },
     componentDidMount() {
-        // Ask the NuclearJS reactor to load our data.
-        // TODO: will it work if we do this in componentWillMount() ?
-        if ('nuclearjs' === this.whatShouldWeDisplay()) {
+        // for some reason we have to use componentDidMount() for this, not componentWillMount()
+        if (this.whatShouldWeDisplay() === 'nuclearjs') {
             SIGNALS.loadInItemView(this.props.type, this.props.rid);
         }
     },
     componentWillReceiveProps(nextProps) {
-        // Ask the NuclearJS reactor to load our data.
         if (nextProps.type !== this.props.type || nextProps.ris !== this.props.rid) {
             SIGNALS.loadInItemView(nextProps.type, nextProps.rid);
         }
@@ -808,7 +802,7 @@ const ItemView = React.createClass({
         let answer = false;
         const whatToDisplay = this.whatShouldWeDisplay();
 
-        if ('nuclearjs' === whatToDisplay) {
+        if (whatToDisplay === 'nuclearjs') {
             if (this.state && this.state.theItem && this.state.theItem.size > 0) {
                 answer = true;
             }
@@ -816,7 +810,7 @@ const ItemView = React.createClass({
                 answer = false;
             }
         }
-        else if ('props' === whatToDisplay) {
+        else if (whatToDisplay === 'props') {
             answer = true;
         }
         else {
@@ -833,7 +827,7 @@ const ItemView = React.createClass({
             // "item" will contain only fields for this item
             // "resources" will contain only URLs for this item
             let item, resources;
-            if ('nuclearjs' === dataFormat) {
+            if (dataFormat === 'nuclearjs') {
                 const itemID = this.state.theItem.get('sort_order').get(0);
                 item = this.state.theItem.get(itemID);
                 resources = this.state.theItem.get('resources').get(itemID);

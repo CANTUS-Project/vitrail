@@ -302,6 +302,20 @@ describe('loadInItemView()', () => {
         expect(mockPromise.then.mock.calls.length === 1).toBe(true);
         expect(mockThen.catch.mock.calls.length === 1).toBe(true);
     });
+
+    it(`loads from the CollectionsList cache when possible`, () => {
+        signals.addToCache({123: {type: 'chant', id: '123'}, sort_order: ['123']});
+        signals.loadInItemView('chant', '123');
+        const expected = Immutable.fromJS({
+            123: {type: 'chant', id: '123'},
+            resources: {123: {}},
+            sort_order: ['123'],
+        });
+
+        const actual = reactor.evaluate(getters.currentItemView);
+
+        expect(actual.equals(expected)).toBeTruthy();
+    });
 });
 
 

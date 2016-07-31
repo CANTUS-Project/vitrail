@@ -216,11 +216,16 @@ const SETTERS = {
      * @param (ImmutableJS.Map) next - The resource to display in an ItemView.
      */
     setCurrentItemView(previous, next) {
-        if (typeof next !== 'object') {
-            log.warn('Invariant violation: setCurrentItemView() requires an Object');
+        if (Immutable.Map.isMap(next)) {
+            return next;
+        }
+        else if (typeof next === 'object') {
+            return toImmutable(next);
+        }
+        else {
+            log.warn('Stores.setCurrentItemView() received incorrect arguments.');
             return previous;
         }
-        return toImmutable(next);
     },
 
     /** Make a new collection.
@@ -429,6 +434,8 @@ const STORES = {
     CurrentItemView: Store({
         // The resource currently displayed in an ItemView.
         //
+        // This actually takes the same form as a response from the Cantus server. The first
+        // resource ID in "sort_order" is taken as the resource to show.
 
         getInitialState() {
             return toImmutable({});
