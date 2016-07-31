@@ -24,7 +24,7 @@
 
 import {Immutable} from 'nuclear-js';
 import React from 'react';
-import {Link} from 'react-router';
+import {Link, withRouter} from 'react-router';
 
 import Button from 'react-bootstrap/lib/Button';
 import ButtonGroup from 'react-bootstrap/lib/ButtonGroup';
@@ -35,17 +35,15 @@ import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
-import ListGroup from 'react-bootstrap/lib/ListGroup';
-import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
 import Modal from 'react-bootstrap/lib/Modal';
-import OverlayTrigger from 'react-bootstrap/lib/OverlayTrigger';
+import MenuItem from 'react-bootstrap/lib/MenuItem';
+import Nav from 'react-bootstrap/lib/Nav';
+import NavDropdown from 'react-bootstrap/lib/NavDropdown';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 import Panel from 'react-bootstrap/lib/Panel';
-import Popover from 'react-bootstrap/lib/Popover';
 import Row from 'react-bootstrap/lib/Row';
 
 import getters from '../nuclear/getters';
-import log from '../util/log';
 import reactor from '../nuclear/reactor';
 import ResultList from './result_list';
 import signals from '../nuclear/signals';
@@ -64,8 +62,8 @@ const removeFromCollTooltip = 'Remove Chant from this Collection';
  */
 const AddToCollection = React.createClass({
     propTypes: {
-        rid: React.PropTypes.string,
         close: React.PropTypes.func.isRequired,
+        rid: React.PropTypes.string,
     },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
@@ -240,9 +238,10 @@ const CollectionRename = React.createClass({
  * ------
  * @param (bool) showRenamer - Whether to show the <CollectionRename> component.
  */
-const Collection = React.createClass({
+const Collection = withRouter(React.createClass({
     propTypes: {
         collection: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+        router: React.PropTypes.object.isRequired,
     },
     getInitialState() {
         return {showRenamer: false};
@@ -258,45 +257,29 @@ const Collection = React.createClass({
     },
     render() {
         const colid = this.props.collection.get('colid');
-        const name = this.props.collection.get('name');
+        const linkToCollection = this.props.router.createHref(`/workspace/collection/${colid}`);
 
-        const overlay = (
-            <Popover id={`coll-${colid}`} title={name}>
-                <ButtonGroup>
-                    <Link className="btn btn-primary" to={`/workspace/collection/${colid}`}>
-                        {`Open`}
-                    </Link>
-                    <Button bsStyle="primary" onClick={this.handleShowRenamer}>{`Rename`}</Button>
-                    <Button bsStyle="primary" onClick={this.handleDelete}>{`Delete`}</Button>
-                </ButtonGroup>
-            </Popover>
-        );
-
+        let renamer;
         if (this.state.showRenamer) {
-            // TODO: the extra <div> causes the space between the buttons to disappear; either way,
-            //       I need a better way to be doing this renaming!
-            return (
-                <div>
-                    <CollectionRename
-                        collection={this.props.collection}
-                        handleHide={this.handleShowRenamer}
-                        chooseName={this.submitRename}
-                    />
-                    <OverlayTrigger trigger="click" placement="left" overlay={overlay} rootClose>
-                        <Button block>{name}</Button>
-                    </OverlayTrigger>
-                </div>
+            renamer = (
+                <CollectionRename
+                    collection={this.props.collection}
+                    handleHide={this.handleShowRenamer}
+                    chooseName={this.submitRename}
+                />
             );
         }
-        else {
-            return (
-                <OverlayTrigger trigger="click" placement="left" overlay={overlay} rootClose>
-                    <Button block>{name}</Button>
-                </OverlayTrigger>
-            );
-        }
+
+        return (
+            <NavDropdown title={this.props.collection.get('name')} id={`coll-${colid}`}>
+                <MenuItem href={linkToCollection}>{`Open`}</MenuItem>
+                <MenuItem onClick={this.handleShowRenamer}>{`Rename`}</MenuItem>
+                <MenuItem onClick={this.handleDelete}>{`Delete`}</MenuItem>
+                {renamer}
+            </NavDropdown>
+        );
     },
-});
+}));
 
 /** The main workspace, where users can view a collection.
  *
@@ -310,7 +293,7 @@ const Desk = React.createClass({
     getDataBindings() {
         return {
             collections: getters.collections,
-            showingCollection: getters.showingCollection
+            showingCollection: getters.showingCollection,
         };
     },
     render() {
@@ -400,9 +383,13 @@ const Shelf = React.createClass({
         signals.newCollection(newName);
     },
     render() {
-        const collections = this.state.collections.map((value) =>
-            <Collection key={value.get('colid')} collection={value}/>
-        ).toArray();
+        const collections = (
+            <Nav stacked>
+                {this.state.collections.map((value) =>
+                    <Collection key={value.get('colid')} collection={value}/>
+                ).toArray()}
+            </Nav>
+        );
 
         let renamer;
         if (this.state.addingNewCollection) {
