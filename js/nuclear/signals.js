@@ -278,6 +278,7 @@ const SIGNALS = {
      */
     newCollection(name) {
         reactor.dispatch(SIGNAL_NAMES.NEW_COLLECTION, name);
+        SIGNALS.saveCollections().then(() => { SIGNALS.saveCollectionCache(); });
     },
 
     /** Rename a collection.
@@ -287,6 +288,7 @@ const SIGNALS = {
      */
     renameCollection(colid, name) {
         reactor.dispatch(SIGNAL_NAMES.RENAME_COLLECTION, {colid: colid, name: name});
+        SIGNALS.saveCollections();
     },
 
     /** Delete a collection.
@@ -295,6 +297,7 @@ const SIGNALS = {
      */
     deleteCollection(colid) {
         reactor.dispatch(SIGNAL_NAMES.DELETE_COLLECTION, colid);
+        SIGNALS.saveCollections().then(() => { SIGNALS.saveCollectionCache(); });
     },
 
     /** Add resource with ID "rid" to the collection with ID "colid."
@@ -320,6 +323,7 @@ const SIGNALS = {
      */
     removeFromCollection(colid, rid) {
         reactor.dispatch(SIGNAL_NAMES.REMOVE_FROM_COLLECTION, {colid: colid, rid: rid});
+        SIGNALS.saveCollections().then(() => { SIGNALS.saveCollectionCache(); });
     },
 
     /** Ask the Cantus server for a resource, then add it to the CollectionsList cache.

@@ -308,89 +308,162 @@ describe('loadInItemView()', () => {
 describe('Collection management signals', () => {
     beforeEach(() => { reactor.reset(); });
 
-    describe('newCollection()', () =>{
-        it('works', () => {
-            const name = 'Tester Bester';
-
-            signals.newCollection(name);
-
-            const theStore = reactor.evaluate(getters.collections);
-            expect(theStore.size).toBe(1);
-            const newColl = theStore.first();
-            expect(newColl.get('name')).toBe(name);
-            expect(newColl.get('members').size).toBe(0);
-        });
-    });
-
-    describe('renameCollection()', () =>{
-        it('works', () => {
-            // setup: make a collection
-            const name = 'Tester Bester';
-            signals.newCollection(name);
-            const newName = 'Broccoli is a "gateway vegetable."';
-
-            const colid = reactor.evaluate(getters.collections).first().get('colid');
-            signals.renameCollection(colid, newName);
-
-            const collection = reactor.evaluate(getters.collections).get(colid);
-            expect(collection.get('name')).toBe(newName);
-        });
-    });
-
-    describe('deleteCollection()', () =>{
-        it('works', () => {
-            // setup: make a collection
-            const name = 'Tester Bester';
-            signals.newCollection(name);
-            const colid = reactor.evaluate(getters.collections).first().get('colid');
-
-            signals.deleteCollection(colid);
-
-            const theStore = reactor.evaluate(getters.collections);
-            expect(theStore.size).toBe(0);
-        });
-    });
-
-    describe('addToCollection()', function() {
+    describe('functions with mocks on saveCollections() and saveCollectionCache()', function() {
         beforeAll(() => {
-            this.requestForCache = signals.requestForCache;
-            this.saveCollections = signals.saveCollections;
+            this.saveColl = signals.saveCollections;
+            this.saveCache = signals.saveCollectionCache;
         });
         beforeEach(() => {
-            signals.requestForCache = jest.genMockFn();
             signals.saveCollections = jest.genMockFn();
+            signals.saveCollections.mockReturnValue({then: (func) => { func(); }});
+            signals.saveCollectionCache = jest.genMockFn();
+            signals.saveCollectionCache.mockReturnValue({then: (func) => { func(); }});
         });
         afterAll(() => {
-            signals.requestForCache = this.requestForCache;
-            signals.saveCollections = this.saveCollections;
+            signals.saveCollections = this.saveColl;
+            signals.saveCollectionCache = this.saveCache;
         });
 
-        it('works', () => {
-            // setup: make a collection
-            const rid = '123';
-            signals.newCollection('whatever');
-            const colid = reactor.evaluate(getters.collections).first().get('colid');
+        describe('newCollection()', () =>{
+            it('works', () => {
+                const name = 'Tester Bester';
 
-            signals.addToCollection(colid, rid);
+                signals.newCollection(name);
 
-            const collection = reactor.evaluate(getters.collections).get(colid);
-            expect(collection.get('members').first()).toBe(rid);
-            expect(signals.requestForCache).toBeCalledWith(rid);
-            expect(signals.saveCollections).toBeCalled();
+                const theStore = reactor.evaluate(getters.collections);
+                expect(theStore.size).toBe(1);
+                const newColl = theStore.first();
+                expect(newColl.get('name')).toBe(name);
+                expect(newColl.get('members').size).toBe(0);
+                expect(signals.saveCollections).toBeCalled();
+                expect(signals.saveCollectionCache).toBeCalled();
+            });
         });
 
-        it('does not pass things along when the "rid" is missing', () => {
-            // setup: make a collection
-            const rid = undefined;
-            signals.newCollection('whatever');
-            const colid = reactor.evaluate(getters.collections).first().get('colid');
+        describe('renameCollection()', () =>{
+            it('works', () => {
+                // setup: make a collection
+                const name = 'Tester Bester';
+                signals.newCollection(name);
+                const newName = 'Broccoli is a "gateway vegetable."';
 
-            signals.addToCollection(colid, rid);
+                const colid = reactor.evaluate(getters.collections).first().get('colid');
+                signals.renameCollection(colid, newName);
 
-            const collection = reactor.evaluate(getters.collections).get(colid);
-            expect(collection.get('members').size).toBe(0);
-            expect(signals.requestForCache).not.toBeCalled();
-            expect(signals.saveCollections).not.toBeCalled();
+                const collection = reactor.evaluate(getters.collections).get(colid);
+                expect(collection.get('name')).toBe(newName);
+                expect(signals.saveCollections).toBeCalled();
+            });
+        });
+
+        describe('deleteCollection()', () =>{
+            it('works', () => {
+                // setup: make a collection
+                const name = 'Tester Bester';
+                signals.newCollection(name);
+                const colid = reactor.evaluate(getters.collections).first().get('colid');
+
+                signals.deleteCollection(colid);
+
+                const theStore = reactor.evaluate(getters.collections);
+                expect(theStore.size).toBe(0);
+                expect(signals.saveCollections).toBeCalled();
+                expect(signals.saveCollectionCache).toBeCalled();
+            });
+        });
+
+        describe('addToCollection()', function() {
+            beforeAll(() => { this.requestForCache = signals.requestForCache; });
+            beforeEach(() => { signals.requestForCache = jest.genMockFn(); });
+            afterAll(() => { signals.requestForCache = this.requestForCache; });
+
+            it('works', () => {
+                // setup: make a collection
+                const rid = '123';
+                signals.newCollection('whatever');
+                const colid = reactor.evaluate(getters.collections).first().get('colid');
+
+                signals.addToCollection(colid, rid);
+
+                const collection = reactor.evaluate(getters.collections).get(colid);
+                expect(collection.get('members').first()).toBe(rid);
+                expect(signals.requestForCache).toBeCalledWith(rid);
+                expect(signals.saveCollections).toBeCalled();
+            });
+
+            it('does not pass things along when the "rid" is missing', () => {
+                // setup: make a collection
+                const rid = undefined;
+                signals.newCollection('whatever');
+                signals.saveCollections.mockClear();  // called by newCollection()
+                const colid = reactor.evaluate(getters.collections).first().get('colid');
+
+                signals.addToCollection(colid, rid);
+
+                const collection = reactor.evaluate(getters.collections).get(colid);
+                expect(collection.get('members').size).toBe(0);
+                expect(signals.requestForCache).not.toBeCalled();
+                expect(signals.saveCollections).not.toBeCalled();
+            });
+        });
+
+        describe('removeFromCollection()', () =>{
+            it('works', () => {
+                // setup: make a collection and put a resource in it
+                const rid = '123';
+                signals.newCollection('whatever');
+                const colid = reactor.evaluate(getters.collections).first().get('colid');
+                signals.addToCollection(colid, rid);
+
+                signals.removeFromCollection(colid, rid);
+
+                const collection = reactor.evaluate(getters.collections).get(colid);
+                expect(collection.get('members').size).toBe(0);
+            });
+        });
+
+        describe('addToCache()', () => {
+            it('works with one thing to add', () => {
+                // const saveCollectionCache = signals.saveCollectionCache;
+                signals.saveCollectionCache = jest.genMockFn();
+                const response = {
+                    '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
+                    'sort_order': ['123'],
+                };
+                signals.addToCache(response);
+                const theStore = reactor.evaluate(getters.collectionsCache);
+                expect(theStore.has('123')).toBeTruthy();
+                expect(signals.saveCollectionCache).toBeCalled();
+                // signals.saveCollectionCache = saveCollectionCache;
+            });
+
+            it('works with three things to add', () => {
+                const response = {
+                    '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
+                    '456': {'type': 'chant', 'id': '456', 'incipit': 'Gloria in excelsis...'},
+                    '789': {'type': 'chant', 'id': '789', 'incipit': 'Deus meus keus seus...'},
+                    'sort_order': ['123', '456', '789'],
+                };
+                signals.addToCache(response);
+                const theStore = reactor.evaluate(getters.collectionsCache);
+                expect(theStore.has('123')).toBeTruthy();
+                expect(theStore.has('456')).toBeTruthy();
+                expect(theStore.has('789')).toBeTruthy();
+            });
+
+            it('works with nothing to add', () => {
+                const response = {'sort_order': []};
+                signals.addToCache(response);
+                const theStore = reactor.evaluate(getters.collections);
+                expect(theStore.size).toBe(0);
+            });
+
+            it('works when CantusJS reports an error', () => {
+                const response = {code: '90001', response: "It's over nine thousand!"};
+                signals.addToCache(response);
+                const theStore = reactor.evaluate(getters.collectionsCache);
+                expect(theStore.size).toBe(0);
+            });
         });
     });
 
@@ -408,65 +481,6 @@ describe('Collection management signals', () => {
 
             expect(mockSearch).toBeCalledWith(expAjaxSettings);
             expect(mockPromise.then).toBeCalledWith(signals.addToCache);
-        });
-    });
-
-    describe('removeFromCollection()', () =>{
-        it('works', () => {
-            // setup: make a collection and put a resource in it
-            const rid = '123';
-            signals.newCollection('whatever');
-            const colid = reactor.evaluate(getters.collections).first().get('colid');
-            signals.addToCollection(colid, rid);
-
-            signals.removeFromCollection(colid, rid);
-
-            const collection = reactor.evaluate(getters.collections).get(colid);
-            expect(collection.get('members').size).toBe(0);
-        });
-    });
-
-    describe('addToCache()', () => {
-        it('works with one thing to add', () => {
-            const saveCollectionCache = signals.saveCollectionCache;
-            signals.saveCollectionCache = jest.genMockFn();
-            const response = {
-                '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
-                'sort_order': ['123'],
-            };
-            signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsCache);
-            expect(theStore.has('123')).toBeTruthy();
-            expect(signals.saveCollectionCache).toBeCalled();
-            signals.saveCollectionCache = saveCollectionCache;
-        });
-
-        it('works with three things to add', () => {
-            const response = {
-                '123': {'type': 'chant', 'id': '123', 'incipit': 'Et quoniam...'},
-                '456': {'type': 'chant', 'id': '456', 'incipit': 'Gloria in excelsis...'},
-                '789': {'type': 'chant', 'id': '789', 'incipit': 'Deus meus keus seus...'},
-                'sort_order': ['123', '456', '789'],
-            };
-            signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsCache);
-            expect(theStore.has('123')).toBeTruthy();
-            expect(theStore.has('456')).toBeTruthy();
-            expect(theStore.has('789')).toBeTruthy();
-        });
-
-        it('works with nothing to add', () => {
-            const response = {'sort_order': []};
-            signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collections);
-            expect(theStore.size).toBe(0);
-        });
-
-        it('works when CantusJS reports an error', () => {
-            const response = {code: '90001', response: "It's over nine thousand!"};
-            signals.addToCache(response);
-            const theStore = reactor.evaluate(getters.collectionsCache);
-            expect(theStore.size).toBe(0);
         });
     });
 
