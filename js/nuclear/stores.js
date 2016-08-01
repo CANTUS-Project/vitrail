@@ -172,16 +172,21 @@ const SETTERS = {
         }
         else if (next instanceof Error) {
             log.error(next.toString());
-            return Immutable.Map({error: 'Unexpected error', results: null});
+            return Immutable.Map({error: 'Unexpected error', loading: false, results: null});
         }
         else if (next.code) {
             // request was not successful
-            return toImmutable({error: next, results: null});//previous.get('results')});
+            return toImmutable({error: next, loading: false, results: null});
         }
         else {
             // request was successful
-            return toImmutable({error: null, results: next});
+            return toImmutable({error: null, loading: false, results: next});
         }
+    },
+
+    /** Set the "loading" member to true. */
+    submittedServerRequest(previous) {
+        return previous.set('loading', true);
     },
 
     /** Set how the ResultList component will render itself.
@@ -487,8 +492,17 @@ const STORES = {
         // This is the object returned from CantusJS without modification.
         // Getters results appropriately-formatted results.
         //
-        getInitialState() { return Immutable.Map({error: null, results: null}); },
-        initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
+        // Data members:
+        // - error: contains a string with information about an error that happened
+        // - loading: boolean depending on whether a search was submitted to the server but results
+        //            have not arrived yet
+        // - results: the search results
+        //
+        getInitialState() { return Immutable.Map({error: null, loading: false, results: null}); },
+        initialize() {
+            this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults);
+            this.on(SIGNAL_NAMES.SUBMITTED_SERVER_REQUEST, SETTERS.submittedServerRequest);
+        },
     }),
 
     CollectionsList: Store({

@@ -33,9 +33,17 @@
     margin-top: 0px;
 }
 
-.result-list { padding-bottom: 13px; }
+.result-list { padding-bottom: 13px; position: relative; }
 .result-list .pagination { margin: 0; }
 .result-list-settings form > :last-child { margin-bottom: 0; }
+.result-list .modal, .result-list .modal-backdrop { position: absolute; }
+
+.loading-box {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
 
 /* set up the multi-column layout when ResultList is showing in Views */
 .result-list-item-view {

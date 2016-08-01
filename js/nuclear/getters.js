@@ -223,6 +223,7 @@ const getters = {
     currentItemView: ['currentItemView'],
     itemViewOverlaySize: ['itemViewOverlaySize'],
     // related to the query already completed
+    loadingResults: [['searchResults'], (results) => results.get('loading')],  // if a search was submitted and not yet completed
     searchResultsFormat: ['searchResultsFormat'],
     searchResultsPages: [['searchResults'], formatters.searchResultsPages],
     searchResultsHeaders: [['searchResults'], formatters.searchResultsHeaders],

@@ -39,6 +39,15 @@ import reactor from '../js/nuclear/reactor';
 import {LOCALFORAGE_COLLECTIONS_KEY, LOCALFORAGE_CACHE_KEY, SIGNAL_NAMES, SIGNALS as signals} from '../js/nuclear/signals';
 
 
+describe('submittedServerRequest()', () => {
+    it('works', () => {
+        expect(reactor.evaluate(getters.loadingResults)).toBe(false);  // precondition
+        signals.submittedServerRequest();
+        expect(reactor.evaluate(getters.loadingResults)).toBe(true);
+    });
+});
+
+
 describe('setSearchResultsFormat()', () => {
     beforeEach(() => { reactor.reset(); });
 

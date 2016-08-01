@@ -65,6 +65,7 @@ const SIGNAL_NAMES = {
     SET_PAGE: 'SET_PAGE',
     SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
     LOAD_SEARCH_RESULTS: 'LOAD_SEARCH_RESULTS',
+    SUBMITTED_SERVER_REQUEST: 'SUBMITTED_SERVER_REQUEST',  // emit before request to Cantus server
     SET_RENDER_AS: 'SET_RENDER_AS',
     SET_ITEMVIEW_OVERLAY_SIZE: 'SET_ITEMVIEW_OVERLAY_SIZE',
     // for Collections
@@ -84,6 +85,13 @@ const SIGNAL_NAMES = {
 
 
 const SIGNALS = {
+    /** Call this signal just before submitting a request to the Cantus server to indicate that the
+     *  UI should display a "loading" message or similar.
+     */
+    submittedServerRequest() {
+        reactor.dispatch(SIGNAL_NAMES.SUBMITTED_SERVER_REQUEST);
+    },
+
     /** Load a resource in the ItemView, given a type and ID.
      *
      * @param {str} type - The resource type to load.

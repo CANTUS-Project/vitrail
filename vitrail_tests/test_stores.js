@@ -231,9 +231,7 @@ describe('SETTERS.setSearchQuery', () => {
 });
 
 
-describe('SETTERS.loadSearchResults()', () => {
-    beforeEach(() => { log.warn.mockClear(); });
-
+describe('SETTERS.loadSearchResults() and submittedServerRequest()', () => {
     it('handles the special "reset" value', () => {
         const previous = 'yep';
         const next = 'reset';
@@ -247,7 +245,7 @@ describe('SETTERS.loadSearchResults()', () => {
     it('accepts an Error and reports it properly', () => {
         const previous = 'yep';
         const next = new Error('wow this sucks');
-        const expected = Immutable.fromJS({error: 'Unexpected error', results: null});
+        const expected = Immutable.fromJS({error: 'Unexpected error', loading: false, results: null});
 
         const actual = stores.setters.loadSearchResults(previous, next);
 
@@ -255,9 +253,9 @@ describe('SETTERS.loadSearchResults()', () => {
     });
 
     it('deals with a successful request', () => {
-        const previous = 'whatever';
+        const previous = Immutable.Map({results: 'whatever', loading: true, error: null});
         const next = {incipit: 'deus ex machina'};
-        const expected = Immutable.fromJS({error: null, results: next});
+        const expected = Immutable.fromJS({error: null, loading: false, results: next});
 
         const actual = stores.setters.loadSearchResults(previous, next);
 
@@ -265,13 +263,19 @@ describe('SETTERS.loadSearchResults()', () => {
     });
 
     it('deals with an unsuccessful request', () => {
-        const previous = Immutable.fromJS({results: 42});
+        const previous = Immutable.Map({results: 'whatever', loading: true, error: null});
         const next = {code: 500};
-        const expected = Immutable.fromJS({results: null, error: next});
+        const expected = Immutable.fromJS({results: null, loading: false, error: next});
 
         const actual = stores.setters.loadSearchResults(previous, next);
 
         expect(actual.equals(expected)).toBeTruthy();
+    });
+
+    it('submittedServerRequest()', () => {
+        const previous = Immutable.Map({results: 'whatever', loading: false, error: null});
+        const actual = stores.setters.submittedServerRequest(previous);
+        expect(actual.get('loading')).toBe(true);
     });
 });
 
