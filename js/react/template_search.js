@@ -280,6 +280,7 @@ const TemplateSearchTemplate = React.createClass({
     },
     handleSubmit() {
         signals.setPage(1);
+        signals.submittedServerRequest();
         signals.submitSearchQuery();
     },
     render() {

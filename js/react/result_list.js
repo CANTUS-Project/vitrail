@@ -34,6 +34,7 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import ListGroup from 'react-bootstrap/lib/ListGroup';
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem';
+import Modal from 'react-bootstrap/lib/Modal';
 import Pagination from 'react-bootstrap/lib/Pagination';
 import Panel from 'react-bootstrap/lib/Panel';
 import Radio from 'react-bootstrap/lib/Radio';
@@ -353,6 +354,7 @@ const Paginator = React.createClass({
         // If the user clicked a page other than the current page, emit the setPage() signal.
         if (requestedPage !== this.state.page) {
             signals.setPage(requestedPage);
+            signals.submittedServerRequest();
             signals.submitSearchQuery();
         }
     },
@@ -587,10 +589,12 @@ const ErrorMessage = React.createClass({
  * @param () error - ?
  */
 const ResultList = React.createClass({
-    mixins: [reactor.ReactMixin],  // connection to NuclearJS
+    mixins: [reactor.ReactMixin],
     getDataBindings() {
-        // connection to NuclearJS
-        return {error: getters.searchError};
+        return {
+            error: getters.searchError,
+            loading: getters.loadingResults,
+        };
     },
     render() {
         let errorMessage;
@@ -605,7 +609,13 @@ const ResultList = React.createClass({
         }
 
         return (
-            <Well className="result-list">
+            <Well className="result-list modal-container">
+                <Modal container={this} show={this.state.loading}>
+                    <Modal.Body className="loading-box">
+                        <Glyphicon bsSize="large" glyph="cog"/>
+                        {`loading...`}
+                    </Modal.Body>
+                </Modal>
                 {errorMessage}
                 <ResultListSettings/>
                 <ResultListMultiplexer/>
