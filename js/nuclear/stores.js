@@ -172,15 +172,15 @@ const SETTERS = {
         }
         else if (next instanceof Error) {
             log.error(next.toString());
-            return previous;
+            return Immutable.Map({error: 'Unexpected error', results: null});
         }
-        else if (undefined === next.code) {
-            // request was successful
-            return toImmutable({error: null, results: next});
+        else if (next.code) {
+            // request was not successful
+            return toImmutable({error: next, results: null});//previous.get('results')});
         }
         else {
-            // request was not successful
-            return toImmutable({error: next, results: previous.get('results')});
+            // request was successful
+            return toImmutable({error: null, results: next});
         }
     },
 
@@ -487,7 +487,7 @@ const STORES = {
         // This is the object returned from CantusJS without modification.
         // Getters results appropriately-formatted results.
         //
-        getInitialState() { return toImmutable({error: null, results: null}); },
+        getInitialState() { return Immutable.Map({error: null, results: null}); },
         initialize() { this.on(SIGNAL_NAMES.LOAD_SEARCH_RESULTS, SETTERS.loadSearchResults); },
     }),
 

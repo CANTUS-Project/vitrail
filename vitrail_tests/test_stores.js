@@ -234,22 +234,44 @@ describe('SETTERS.setSearchQuery', () => {
 describe('SETTERS.loadSearchResults()', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
+    it('handles the special "reset" value', () => {
+        const previous = 'yep';
+        const next = 'reset';
+        const expected = stores.stores.SearchResults.getInitialState();
+
+        const actual = stores.setters.loadSearchResults(previous, next);
+
+        expect(actual.equals(expected)).toBeTruthy();
+    });
+
+    it('accepts an Error and reports it properly', () => {
+        const previous = 'yep';
+        const next = new Error('wow this sucks');
+        const expected = Immutable.fromJS({error: 'Unexpected error', results: null});
+
+        const actual = stores.setters.loadSearchResults(previous, next);
+
+        expect(actual.equals(expected)).toBeTruthy();
+    });
+
     it('deals with a successful request', () => {
-        let previous = 'whatever';
-        let next = {incipit: 'deus ex machina'};
-        let expected = nuclear.toImmutable({error: null, results: next});
-        let actual = stores.setters.loadSearchResults(previous, next);
-        expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
-        expect(actual.equals(expected)).toBe(true);
+        const previous = 'whatever';
+        const next = {incipit: 'deus ex machina'};
+        const expected = Immutable.fromJS({error: null, results: next});
+
+        const actual = stores.setters.loadSearchResults(previous, next);
+
+        expect(actual.equals(expected)).toBeTruthy();
     });
 
     it('deals with an unsuccessful request', () => {
-        let previous = nuclear.toImmutable({results: 42});
-        let next = {code: 500};
-        let expected = nuclear.toImmutable({results: 42, error: next});
-        let actual = stores.setters.loadSearchResults(previous, next);
-        expect(nuclear.Immutable.Map.isMap(actual)).toBe(true);
-        expect(actual.equals(expected)).toBe(true);
+        const previous = Immutable.fromJS({results: 42});
+        const next = {code: 500};
+        const expected = Immutable.fromJS({results: null, error: next});
+
+        const actual = stores.setters.loadSearchResults(previous, next);
+
+        expect(actual.equals(expected)).toBeTruthy();
     });
 });
 
