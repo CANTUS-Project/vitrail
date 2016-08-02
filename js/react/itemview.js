@@ -746,6 +746,7 @@ const ItemViewError = React.createClass({
  * @param (ImmutableJS.Map) resources - A resource's resource URLs.
  *
  */
+// TODO: this component is far too complex, and much of it should be done in NuclearJS
 const ItemView = React.createClass({
     // NOTE for Developers:
     // The ItemView component itself does not render anything. ItemView itself decides whether to
@@ -767,7 +768,10 @@ const ItemView = React.createClass({
     },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
-        return {theItem: getters.currentItemView};
+        return {
+            itemViewLoading: getters.itemViewLoading,
+            theItem: getters.currentItemView,
+        };
     },
     componentDidMount() {
         // for some reason we have to use componentDidMount() for this, not componentWillMount()
@@ -823,7 +827,18 @@ const ItemView = React.createClass({
         let rendered;  // this holds the rendered component
         const dataFormat = this.whatShouldWeDisplay();
 
-        if (this.canWeDisplaySomething()) {
+        if (dataFormat === 'nuclearjs' && this.state.itemViewLoading) {
+            // TODO: deduplicate this to a subcomponent with ResultList?
+            return (
+                <Panel className="itemview">
+                    <div className="loading-box">
+                        <Glyphicon bsSize="large" glyph="cog"/>
+                        {`loading...`}
+                    </div>
+                </Panel>
+            );
+        }
+        else if (this.canWeDisplaySomething()) {
             // "item" will contain only fields for this item
             // "resources" will contain only URLs for this item
             let item, resources;
