@@ -332,29 +332,43 @@ describe('itemViewOverlaySize()', () => {
 });
 
 
-describe('setCurrentItemView()', () => {
+describe('CurrentItemView Store', () => {
     beforeEach(() => { log.warn.mockClear(); });
 
-    it('works when the argument is a Map', () => {
-        const previous = 'fuzz';
-        const next = Immutable.fromJS({'123': {id: '123', type: 'chant'}, sort_order: ['123']});
-        const actual = stores.setters.setCurrentItemView(previous, next);
-        expect(actual).toBe(next);
+    describe('setCurrentItemView()', () => {
+        it('works when the argument is a Map', () => {
+            const previous = Immutable.Map({loading: true});
+            const next = Immutable.fromJS({'123': {id: '123', type: 'chant'}, sort_order: ['123']});
+            const actual = stores.setters.setCurrentItemView(previous, next);
+            expect(actual.get('resource')).toBe(next);
+            expect(actual.get('loading')).toBe(false);
+        });
+
+        it('works when the argument is an object', () => {
+            const previous = Immutable.Map({loading: true});
+            const next = {'123': {id: '123', type: 'chant'}, sort_order: ['123']};
+            const actual = stores.setters.setCurrentItemView(previous, next);
+            expect(Immutable.Map.isMap(actual)).toBe(true);
+            expect(actual.get('resource').equals(Immutable.fromJS(next))).toBeTruthy();
+            expect(actual.get('loading')).toBe(false);
+        });
+
+        it('fails when the argument is not an object', () => {
+            const previous = Immutable.Map({resource: 'fuzz', loading: true});
+            const next = 'bark!';
+            const actual = stores.setters.setCurrentItemView(previous, next);
+            expect(actual.get('resource')).toBe('fuzz');
+            expect(actual.get('loading')).toBe(false);
+            expect(log.warn).toBeCalled();
+        });
     });
 
-    it('works when the argument is an object', () => {
-        const previous = 'fuzz';
-        const next = {'123': {id: '123', type: 'chant'}, sort_order: ['123']};
-        const actual = stores.setters.setCurrentItemView(previous, next);
-        expect(Immutable.Map.isMap(actual)).toBe(true);
-    });
-
-    it('fails when the argument is not an object', () => {
-        const previous = 'fuzz';
-        const next = 'bark!';
-        const expected = previous;
-        expect(stores.setters.setCurrentItemView(previous, next)).toBe(expected);
-        expect(log.warn).toBeCalled();
+    describe('submittedForItemView()', () => {
+        it('works', () => {
+            const previous = Immutable.Map({loading: false});
+            const actual = stores.setters.submittedForItemView(previous);
+            expect(actual.get('loading')).toBe(true);
+        });
     });
 });
 

@@ -216,21 +216,27 @@ const SETTERS = {
         }
     },
 
-    /** Set the "CurrentItemView."
+    /** Set the "resource" in the CurrentItemView Store.
      *
-     * @param (ImmutableJS.Map) next - The resource to display in an ItemView.
+     * @param {ImmutableMap} next - The resource to display in an ItemView.
      */
     setCurrentItemView(previous, next) {
         if (Immutable.Map.isMap(next)) {
-            return next;
+            return previous.set('resource', next).set('loading', false);
         }
         else if (typeof next === 'object') {
-            return toImmutable(next);
+            return previous.set('resource', toImmutable(next)).set('loading', false);
         }
         else {
             log.warn('Stores.setCurrentItemView() received incorrect arguments.');
-            return previous;
+            return previous.set('loading', false);
         }
+    },
+
+    /** Set the CurrentItemView flag that says a Cantus server request was submitted for it.
+     */
+    submittedForItemView(previous) {
+        return previous.set('loading', true);
     },
 
     /** Make a new collection.
@@ -443,10 +449,11 @@ const STORES = {
         // resource ID in "sort_order" is taken as the resource to show.
 
         getInitialState() {
-            return toImmutable({});
+            return Immutable.Map({resource: null, loading: false});
         },
         initialize() {
             this.on(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, SETTERS.setCurrentItemView);
+            this.on(SIGNAL_NAMES.SUBMITTED_FOR_ITEMVIEW, SETTERS.submittedForItemView);
         },
     }),
 

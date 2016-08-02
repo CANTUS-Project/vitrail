@@ -58,6 +58,7 @@ const CANTUS = new cantusjs.Cantus(urlToCantusServer);
 
 
 const SIGNAL_NAMES = {
+    SUBMITTED_FOR_ITEMVIEW: 'SUBMITTED_FOR_ITEMVIEW',  // emit before submitting to Cantus server for ItemView
     LOAD_IN_ITEMVIEW: 'LOAD_IN_ITEMVIEW',
     SET_SEARCH_RESULT_FORMAT: 'SET_SEARCH_RESULT_FORMAT',
     SET_PER_PAGE: 'SET_PER_PAGE',
@@ -109,6 +110,7 @@ const SIGNALS = {
                 reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, loadMe);
             }
             else {
+                reactor.dispatch(SIGNAL_NAMES.SUBMITTED_FOR_ITEMVIEW);
                 const settings = {type: type, id: id};
                 CANTUS.get(settings)
                 .then((response) => reactor.dispatch(SIGNAL_NAMES.LOAD_IN_ITEMVIEW, response))

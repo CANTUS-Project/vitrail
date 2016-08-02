@@ -36,6 +36,7 @@ import cantusjs from '../js/cantusjs/cantus.src';
 
 import getters from '../js/nuclear/getters';
 import reactor from '../js/nuclear/reactor';
+import stores from '../js/nuclear/stores';
 import {LOCALFORAGE_COLLECTIONS_KEY, LOCALFORAGE_CACHE_KEY, SIGNAL_NAMES, SIGNALS as signals} from '../js/nuclear/signals';
 
 
@@ -304,12 +305,14 @@ describe('loadInItemView()', () => {
         signals.loadInItemView('feasts', '2234');
 
         expect(mockGet).toBeCalledWith(expAjaxSettings);
-
         // NOTE: for some reason, these don't work with the usual expect().toBeCalledWith() checks,
         //       so we'll have to go with this, which is clumsy but at least works
         // Just... make sure it was called... idk.
         expect(mockPromise.then.mock.calls.length === 1).toBe(true);
         expect(mockThen.catch.mock.calls.length === 1).toBe(true);
+        // Make sure the SUBMITTED_FOR_ITEMVIEW signal was emitted... because the CantusJS Promise
+        // is mocked, LOAD_IN_ITEMVIEW isn't called, so SUBMITTED_FOR_ITEMVIEW is still true.
+        expect(reactor.evaluate(getters.itemViewLoading)).toBe(true);
     });
 
     it(`loads from the CollectionsList cache when possible`, () => {

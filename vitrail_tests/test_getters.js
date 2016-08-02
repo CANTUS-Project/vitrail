@@ -338,3 +338,18 @@ describe('CollectionsList getters', () => {
         expect(formatters.showingCollection(collectionsList)).toBe('showing');
     });
 });
+
+
+describe('CurrentItemView getters', () => {
+    it('currentItemView() getter', () => {
+        const theStore = Immutable.Map({resource: 'shmesource'});
+        const actual = formatters.currentItemView(theStore);
+        expect(actual).toBe('shmesource');
+    });
+
+    it('itemViewLoading() getter', () => {
+        const theStore = Immutable.Map({loading: false});
+        const actual = formatters.itemViewLoading(theStore);
+        expect(actual).toBe(false);
+    });
+});

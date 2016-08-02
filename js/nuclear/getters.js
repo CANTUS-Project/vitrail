@@ -216,11 +216,19 @@ const formatters = {
     showingCollection(collectionsList) {
         return collectionsList.get('showing');
     },
+
+    currentItemView(theStore) {
+        return theStore.get('resource');
+    },
+    itemViewLoading(theStore) {
+        return theStore.get('loading');
+    },
 };
 
 
 const getters = {
-    currentItemView: ['currentItemView'],
+    currentItemView: [['currentItemView'], formatters.currentItemView],
+    itemViewLoading: [['currentItemView'], formatters.itemViewLoading],  // if a request was submitted for CurrentItemView and not yet completed
     itemViewOverlaySize: ['itemViewOverlaySize'],
     // related to the query already completed
     loadingResults: [['searchResults'], (results) => results.get('loading')],  // if a search was submitted and not yet completed
