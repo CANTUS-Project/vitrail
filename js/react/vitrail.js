@@ -37,15 +37,15 @@ import Table from 'react-bootstrap/lib/Table';
 const listOfSoftware = [
     {
         name: 'Abbot',
-        version: 'TODO (0.6.1+)',
-        description: 'The "Cantus Server" that provides data for Vitrail.',
+        version: '0.7.10+',
+        description: 'The Cantus Server that provides data to the Web App.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/abbot',
     },
     {
         name: 'CantusJS',
-        version: 'TODO (commit f2a62ac)',
-        description: 'Makes it easier for Vitrail to access Abbot.',
+        version: 'commit 84accc6',
+        description: 'The Web App\'s adapter for Abbot.',
         licence: 'GPLv3+',
         link: 'https://github.com/CANTUS-Project/cantus-js',
     },
@@ -58,8 +58,8 @@ const listOfSoftware = [
     },
     {
         name: 'Vitrail',
-        version: 'TODO (0.3.1+)',
-        description: 'The browser-based application to access Cantus data.',
+        version: '0.4.2+',
+        description: 'The Cantus Web App itself.',
         licence: 'AGPLv3+',
         link: 'https://github.com/CANTUS-Project/vitrail',
     },
@@ -196,62 +196,52 @@ const Colophon = React.createClass({
         return (
             <article className="container">
                 <section>
-                    <h1>{`About the Cantus Database`}</h1>
+                    <h1>{`About the Cantus Web App`}</h1>
                     <p className="lead">
-                        {`Cantus is a database of the Latin chants found in over 130 manuscripts and early
-                        printed books.`}
+                        {`The `}<em>{`Cantus Web App`}</em>{` is an offline-capable interface for
+                        browsing the Cantus Database.`}
                     </p>
                     <p>
-                        {`This searchable digital archive holds inventories of primarily
+                        {`The Web App is a website that works everywhere. If your browser is new
+                        enough, the Web App offers additional functionality that usually requires
+                        installing an app. For example, you can make collections of chants,
+                        which are automatically stored for offline access. Because the chants are
+                        stored in your browser, there's no need to make an account on a server!`}
+                    </p>
+                    <p>
+                        {`The Cantus Web App is a new complement to the `}
+                        <a href="http://cantus.uwaterloo.ca/">{`Cantus Database`}</a>{`. Both
+                        websites will continue to exist for the forseeable future\u2014the Web App
+                        is not a replacement for the Database. Each website has different strengths,
+                        and we encourage you to explore and use both as you see fit.`}
+                    </p>
+                </section>
+                <section>
+                    <h2>{`About Cantus`}</h2>
+                    <p className="lead">
+                        {`Cantus is a database of the Latin chants found in over 130 manuscripts and
+                        early printed books.`}
+                    </p>
+                    <p>
+                        {`The data you find in the Cantus Web App are created and curated by the
+                        Cantus Project. This searchable digital archive holds inventories of primarily
                         antiphoners and breviaries from medieval Europe; these are the main sources for
-                        the music sung in the liturgical Office. You are currently accessing the
-                        Cantus Database through a secondary user interface called Vitrail. The primary
-                        user interface, called Drupal, is available at `}
+                        the music sung in the liturgical Office. The primary user interface, called `}
+                        <em>{`Cantus Database`}</em>{`, is available at `}
                         <a href="http://cantus.uwaterloo.ca/">{`http://cantus.uwaterloo.ca/`}</a>{`.`}
                     </p>
                 </section>
 
                 <section>
-                    <h2>{`Differences between the User Interfaces`}</h2>
+                    <h2>{`One last thing...`}</h2>
                     <p>
-                        {`Drupal is the usual way of accessing the Cantus Database. Drupal holds the authoritative
-                        version of the database. Registered users may edit the database.`}
-                    </p>
-                    <p>
-                        {`Vitrail is a new way to access the Cantus Database, currently under development.
-                        Vitrail uses a replica of the Drupal database, which may occasionally be out-of-sync
-                        with what you see on Drupal. However, Vitrail automatically updates itself, so
-                        any differences are temporary.`}
-                    </p>
-                    <p>
-                        {`Vitrail is being developed to provide a mobile-friendly way to access the Cantus
-                        Database. Drupal will continue to exist alongside Vitrail for several
-                        years\u2014perhaps indefinitely.`}
-                    </p>
-                </section>
-
-                <section>
-                    <h2>{`About Vitrail`}</h2>
-                    <p>
-                        {`Vitrail is currently under development. This is not \u201Cproduction-ready\u201D
-                        software, so you can expect to encounter bugs and things that don\u0027t look right.
-                        When you find these, please do report them to the Cantus team, whose contact
-                        information is available on `}<a href="http://cantus.uwaterloo.ca/">{`Drupal`}</a>{`.`}
-                    </p>
-                    <p>
-                        {`Vitrail is built with \u201Cfree and open source\u201D software, which means
-                        that users have different legal rights than most software. One such right is
-                        access to the application\u0027s \u201Csource code\u201D so that you may
-                        modify, share, and study the application. Thus the following list briefly
-                        describes some of the free and open source software used in Vitrail, and
-                        where to access its source code.`}
+                        {`The Cantus Web App is \u201Cfree and open source\u201D software, which means
+                        you have different legal rights than with most software. For example,
+                        you can access the application\u0027s \u201Csource code\u201D to modify,
+                        share, or study it. The following list briefly describes some
+                        of the software used in the Web App, and where to access its source code.`}
                     </p>
                     <SoftwareTable software={listOfSoftware}/>
-                    <p>
-                        {`This list only includes software built by the Cantus team. You may learn about
-                        additional software we use by visiting the source code repository of the project
-                        you wish to learn about.`}
-                    </p>
                 </section>
             </article>
         );
@@ -296,7 +286,7 @@ const VitrailNavbar = React.createClass({
             <Navbar>
                 <Navbar.Header>
                     <Navbar.Brand>
-                        <a href="/">{`Cantus Database`}</a>
+                        <a href="/">{`Cantus Web App`}</a>
                     </Navbar.Brand>
                     <Navbar.Toggle/>
                 </Navbar.Header>
