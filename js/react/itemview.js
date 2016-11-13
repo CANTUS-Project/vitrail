@@ -788,12 +788,10 @@ const ItemView = React.createClass({
         // Examine the props to determine whether we should connect to "nuclearjs" state, display
         // the "props" data already provided, or there is an "error" in the props.
         //
-        if (undefined !== this.props.type && undefined !== this.props.rid &&
-            undefined === this.props.data && undefined === this.props.resources) {
+        if (this.props.type && this.props.rid && !this.props.data && !this.props.resources) {
             return 'nuclearjs';
         }
-        else if (undefined === this.props.type && undefined === this.props.rid &&
-            undefined !== this.props.data && undefined !== this.props.resources) {
+        else if (!this.props.type && !this.props.rid && this.props.data && this.props.resources) {
             return 'props';
         }
 

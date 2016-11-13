@@ -332,7 +332,7 @@ describe('ItemViewOverlay', () => {
     // https://stackoverflow.com/questions/35086297/testing-a-react-modal-component
 
     it('works as intended', () => {
-        const params = {type: 'chant', rid: '1234'};
+        const params = {type: '', rid: ''};
         const routes = [{path: '/'}, {path: 'lolz'}, {path: ':type/:rid'}];
 
         const overlay = TestUtils.renderIntoDocument(
@@ -345,8 +345,9 @@ describe('ItemViewOverlay', () => {
 
         // prove the ItemView rendered an ItemViewError inside the Modal (there is no data, so a
         // full ItemView can't render)
-        const outAlert = outModal.getElementsByClassName('alert')[0];
-        expect(outAlert.getAttribute('role')).toBe('alert');
+        const outAlert = outModal.getElementsByClassName('alert');
+        expect(outAlert.length).toBe(1);
+        expect(outAlert[0].getAttribute('role')).toBe('alert');
     });
 });
 
