@@ -307,7 +307,6 @@ const TemplateSearchTemplate = React.createClass({
                     {field: 'finalis', displayName: 'Finalis'},
                     {field: 'volpiano', displayName: 'Volpiano'},
                     {field: 'notes', displayName: 'Notes'},
-                    {field: 'cao_concordances', displayName: 'CAO Concordances'},
                     {field: 'siglum', displayName: 'Siglum'},
                     {field: 'proofreader', displayName: 'Proofreader'},
                     {field: 'melody_id', displayName: 'Melody ID'},

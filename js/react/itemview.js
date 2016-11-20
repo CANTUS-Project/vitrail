@@ -116,7 +116,6 @@ const ItemViewChant = React.createClass({
         // - melody_id
         // - volpiano
         // - full_text & full_text_manuscript
-        // - cao_concordances
         // - cantus ID
         // - finalis
 
@@ -174,15 +173,6 @@ const ItemViewChant = React.createClass({
         let melodyID;
         let cantusID;
         let finalis;
-
-        // CAO Concordances
-        if (data.get('cao_concordances')) {
-            concordances = (
-                <ListGroupItem>
-                    {`CAO Concordances: ${data.get('cao_concordances')}`}
-                </ListGroupItem>
-            );
-        }
 
         // Full Text
         if (data.get('full_text') && data.get('full_text_manuscript')) {
