@@ -41,7 +41,7 @@ import {OfflineManager} from './react/offline';
 ReactDOM.render(
     <Router history={hashHistory}>
         <Route path="/" component={Vitrail}>
-            <IndexRoute component={Colophon}/>
+            <Route path="about" component={Colophon}/>
 
             <Route path="onebox" component={OneboxSearch}>
                 <Route path=":type/:rid" component={ItemViewOverlay}/>

@@ -24,7 +24,7 @@
 
 import React from 'react';
 import {Immutable} from 'nuclear-js';
-import {Link} from 'react-router';
+import {Link, Redirect} from 'react-router';
 
 import Alert from 'react-bootstrap/lib/Alert';
 import Nav from 'react-bootstrap/lib/Nav';
@@ -286,7 +286,7 @@ const VitrailNavbar = React.createClass({
             <Navbar>
                 <Navbar.Header>
                     <Navbar.Brand>
-                        <a href="/">{`Cantus Web App`}</a>
+                        <Link to="/about">{`Cantus Web App`}</Link>
                     </Navbar.Brand>
                     <Navbar.Toggle/>
                 </Navbar.Header>
@@ -313,11 +313,32 @@ const NotImplemented = React.createClass({
 
 
 const Vitrail = React.createClass({
-    //
-
     propTypes: {
         children: React.PropTypes.element,
+        location: React.PropTypes.object.isRequired,
+        router: React.PropTypes.object.isRequired,
     },
+
+    componentWillMount() {
+        this.checkForRedirect(this.props.location.pathname);
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.location.pathname !== this.props.location.pathname) {
+            this.checkForRedirect(nextProps.location.pathname);
+        }
+    },
+
+    /** Check for whether we need to redirect to /onbox
+     *
+     * @param {str} pathname - The react-router pathname.
+     */
+    checkForRedirect(pathname) {
+        if (pathname === '/') {
+            this.props.router.replace('/onebox');
+        }
+    },
+
     render() {
         const navbarItems = [
             // {name, link}
