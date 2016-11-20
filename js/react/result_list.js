@@ -26,6 +26,7 @@ import {Immutable} from 'nuclear-js';
 import {Link} from 'react-router';
 import React from 'react';
 
+import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import Form from 'react-bootstrap/lib/Form';
@@ -464,19 +465,25 @@ const ResultListSettings = React.createClass({
     getInitialState() {
         return {isExpanded: false};
     },
-    handleCollapse(event) {
-        // Toggle this.state.isExpanded
-        if (event.target.className === 'panel-title') {
-            this.setState({isExpanded: !this.state.isExpanded});
-        }
+
+    handleCollapse() {
+        this.setState({isExpanded: !this.state.isExpanded});
     },
+
     render() {
+        const headerButton = (
+            <Button bsSize="xs" bsStyle="primary" onClick={this.handleCollapse}>
+                {(this.state.isExpanded) ? 'Hide Display Settings' : 'Show Display Settings'}
+            </Button>
+        );
+
+        // NB: the .result-list-settings class is indeed needed for style purposes
+
         return (
             <Panel
                 collapsible
                 expanded={this.state.isExpanded}
-                onClick={this.handleCollapse}
-                header="Display Settings"
+                header={headerButton}
                 className="result-list-settings"
             >
                 <Form horizontal>

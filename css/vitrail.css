@@ -35,6 +35,7 @@
 
 .result-list { padding-bottom: 13px; position: relative; }
 .result-list .pagination { margin: 0; }
+.result-list-settings .panel-heading button { color: #fffdf7; }
 .result-list-settings form > :last-child { margin-bottom: 0; }
 .result-list .modal, .result-list .modal-backdrop { position: absolute; }
 
