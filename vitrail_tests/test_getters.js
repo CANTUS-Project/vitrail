@@ -284,8 +284,8 @@ describe('ResultListTable_columns()', () => {
             '3': {type: 'genre'},
         }});
         const expected = Immutable.fromJS({
-            names: ['what', 'ever'],
-            display: ['What', 'Ever']
+            names: ['type', 'what', 'ever'],
+            display: ['Type', 'What', 'Ever']
         });
         expect(formatters.ResultListTable_columns(results)).toEqual(expected);
     });
@@ -299,8 +299,8 @@ describe('ResultListTable_columns()', () => {
             '3': {type: 'genre'},
         }});
         const expected = Immutable.fromJS({
-            names: ['what', 'branch_force'],
-            display: ['What', 'Branch Force']
+            names: ['type', 'what', 'branch_force'],
+            display: ['Type', 'What', 'Branch Force']
         });
         expect(formatters.ResultListTable_columns(results)).toEqual(expected);
     });
@@ -314,8 +314,8 @@ describe('ResultListTable_columns()', () => {
             '3': {type: 'feast'},
         }});
         const expected = Immutable.fromJS({
-            names: ['fun', 'is', 'cao_concordances'],
-            display: ['Fun', 'Is', 'CAO Concordances'],
+            names: ['type', 'fun', 'is', 'cao_concordances'],
+            display: ['Type', 'Fun', 'Is', 'CAO Concordances'],
         });
         expect(formatters.ResultListTable_columns(results)).toEqual(expected);
     });

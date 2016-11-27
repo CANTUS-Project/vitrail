@@ -139,11 +139,8 @@ const formatters = {
 
         // Remove the "id" field and, if the resource types are all the same, remove "type" too.
         // First find out whether all the "types" are the same.
-        const dontInclude = ['id'];
+        const dontInclude = ['id', 'type'];  // "type" is handled specially
         const firstResType = data.get(sortOrder.get(0)).get('type');
-        if (!resultsAllSameType) {
-            dontInclude.push('type');
-        }
 
         // Determine which columns to show. If all the results are "chant" or "source" then we'll
         // use a predetermined order of columns.
@@ -168,7 +165,7 @@ const formatters = {
 
                 prev.push(curr);
                 return prev;
-            }, []);
+            }, ['type']);
         }
 
         // and make the formatted display names
