@@ -149,7 +149,7 @@ const formatters = {
             // we'll show only the fields called "primary" in the ItemView
             if ('chant' === firstResType) {
                 columns = ['incipit', 'genre', 'office', 'feast', 'position', 'siglum', 'folio',
-                           'sequence', 'mode', 'differentia'
+                           'mode', 'differentia'
                           ];
             }
             else {

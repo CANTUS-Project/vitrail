@@ -158,11 +158,23 @@ const ResultRow = React.createClass({
         }
     },
     render() {
-        let renderedColumns = this.props.columns.map((columnName) =>
-            <ResultCell key={columnName} link={this.getColumnLink(columnName)}>
-                {this.cleanColumn(this.props.data.get(columnName))}
-            </ResultCell>
-        );
+        let renderedColumns = this.props.columns.map((columnName) => {
+            // if this column is for "folio," try to add "sequence" too
+            if (columnName === 'folio' && this.props.data.has('sequence')) {
+                return (
+                    <ResultCell key={columnName} link={this.getColumnLink(columnName)}>
+                        {`${this.cleanColumn(this.props.data.get('folio'))}/${this.cleanColumn(this.props.data.get('sequence'))}`}
+                    </ResultCell>
+                );
+            }
+            else {
+                return (
+                    <ResultCell key={columnName} link={this.getColumnLink(columnName)}>
+                        {this.cleanColumn(this.props.data.get(columnName))}
+                    </ResultCell>
+                );
+            }
+        });
 
         // add a button to the ItemViewOverlay, if relevant
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {

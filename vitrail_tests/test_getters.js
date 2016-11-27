@@ -252,9 +252,9 @@ describe('ResultListTable_columns()', () => {
             '3': {type: 'chant'},
         }});
         const expected = Immutable.fromJS({
-            names: ['incipit', 'genre', 'office', 'feast', 'position','siglum', 'folio', 'sequence',
+            names: ['incipit', 'genre', 'office', 'feast', 'position','siglum', 'folio',
                     'mode', 'differentia'],
-            display: ['Incipit', 'Genre', 'Office', 'Feast', 'Position','Siglum', 'Folio', 'Sequence',
+            display: ['Incipit', 'Genre', 'Office', 'Feast', 'Position','Siglum', 'Folio',
                       'Mode', 'Differentia']
         });
         expect(formatters.ResultListTable_columns(results)).toEqual(expected);
