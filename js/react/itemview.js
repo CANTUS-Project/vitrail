@@ -888,16 +888,11 @@ function pathToParent(routes, params) {
  * When the ItemView is closed, the URL is changed to navigate away from the item-specific page.
  *
  * Props (NOTE: all provided by react-router)
- * @param (str) params.type - The type of resource to display. Provided by react-router from the URL.
- * @param (str) params.rid - The resource ID to display. Provided by react-router from the URL.
- * @param (array) routes - An array of objects that have a "path" member, which is a string
- *        containing part of the URL of this resource.
- *
- * NOTE: The "routes" prop is an undocumented feature of react-router, provided by their RouterContext
- *       component. Of course I don't like using undocumented features, and especially not when it's
- *       in a third-party library with which I already have trust issues, but I can't really think
- *       of a better way at this point, and there are bigger problems to solve!
- * https://github.com/rackt/react-router/blob/3dd0cdf517e5c4d981113fad83f95939ae50cb60/modules/RouterContext.js
+ * @param {string} params.type - The type of resource to display. Provided by react-router from the URL.
+ * @param {string} params.rid - The resource ID to display. Provided by react-router from the URL.
+ * @param {array} routes - An array of objects that have a "path" member, which is a string
+ *     containing part of the URL of this resource.
+ * @param {object} router
  */
 const ItemViewOverlay = React.createClass({
     propTypes: {
@@ -915,12 +910,15 @@ const ItemViewOverlay = React.createClass({
         // connection to NuclearJS
         return {size: getters.itemViewOverlaySize};
     },
+    handleCloseModal() {
+        this.props.router.push(pathToParent(this.props.routes, this.props.params));
+    },
     render() {
         // When the <Modal> is just set to "show" all the time, it won't close itself... so it's
         // changing the URL that will trigger the ItemViewOverlay to go away!
         //
         return (
-            <Modal show>
+            <Modal onHide={this.handleCloseModal} show>
                 <Modal.Header>
                     <Link className="btn btn-danger" to={pathToParent(this.props.routes, this.props.params)}>
                         <Glyphicon glyph="remove-circle"/>
