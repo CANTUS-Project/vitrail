@@ -88,7 +88,7 @@ vit_out = pathlib.Path(VITRAIL_OUT)
 if vit_out.exists():
     vit_out.unlink()
 
-subprocess.check_call([BROWSERIFY, VITRAIL_SRC, '-o', VITRAIL_MID])
+subprocess.check_call([BROWSERIFY, VITRAIL_SRC, '-o', VITRAIL_MID], env={'NODE_ENV': 'production'})
 
 
 # 2.) minify JavaScript asset
