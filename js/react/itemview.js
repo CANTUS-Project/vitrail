@@ -6,7 +6,7 @@
 // Filename:               js/react/itemview.js
 // Purpose:                ItemView React component for Vitrail.
 //
-// Copyright (C) 2015, 2016 Christopher Antila
+// Copyright (C) 2015, 2016, 2017 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -38,32 +38,6 @@ import {getters} from '../nuclear/getters';
 import {reactor} from '../nuclear/reactor';
 import {SIGNALS} from '../nuclear/signals';
 import {AlertView} from './vitrail';
-
-
-/** Make the URL to an ItemViewOverlay over the current component.
- *
- * @param {str} type - The type of the resource.
- * @param {str} id - The ID of the resource.
- * @returns {str} The link to use to the ItemView.
- *
- * This function uses "window.location" to determine the current URL, in order to figure out which
- * path to request as the "to" prop to a react-router <Link> component.
- *
- * This function does not check the validity of the type or id.
- */
-function makeLinkToItemView(type, id) {
-    // TODO: this function is untested
-    // looks something like: #/onebox?_k=5hhcl3
-    const current = window.location.hash;
-    // ... so we want to put our stuff just before the ?
-    const indexOfQMark = current.indexOf('?');
-
-    if (-1 === indexOfQMark || current.length < 3) {
-        return '';
-    }
-
-    return `${current.slice(1, indexOfQMark)}/${type}/${id}`;
-}
 
 
 /** A button linking to a resource on Drupal. */
@@ -967,4 +941,4 @@ const moduleForTesting = {
     ItemViewOverlay: ItemViewOverlay,
     ItemViewMultiplexer: ItemViewMultiplexer,
 };
-export {ItemView, ItemViewOverlay, moduleForTesting, makeLinkToItemView};
+export {ItemView, ItemViewOverlay, moduleForTesting};

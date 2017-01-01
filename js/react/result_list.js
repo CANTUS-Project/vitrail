@@ -6,7 +6,7 @@
 // Filename:               js/react/result_list.js
 // Purpose:                ResultList React components for Vitrail.
 //
-// Copyright (C) 2015, 2016 Christopher Antila
+// Copyright (C) 2015, 2016, 2017 Christopher Antila
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -46,7 +46,7 @@ import {SIGNALS as signals} from '../nuclear/signals';
 import {reactor} from '../nuclear/reactor';
 import {getters} from '../nuclear/getters';
 import {AlertView} from './vitrail';
-import {ItemView, makeLinkToItemView} from './itemview';
+import {ItemView} from './itemview';
 import {AddRemoveCollection} from './workspace';
 
 
@@ -119,6 +119,9 @@ const ResultCell = React.createClass({
  * @param (ImmutableJS.Map) resources - Map with URLs for a resource.
  */
 const ResultRow = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.object,
+    },
     propTypes: {
         // the column names to render, or the fields in "data" to render as columns
         columns: React.PropTypes.instanceOf(Immutable.List).isRequired,
@@ -154,7 +157,7 @@ const ResultRow = React.createClass({
             return this.props.resources.get('self');
         }
         else if (this.props.resources.has(`${columnName}_id`)) {
-            return makeLinkToItemView(columnName, this.props.resources.get(`${columnName}_id`));
+            return `${this.context.router.location.pathname}/${columnName}/${this.props.resources.get(`${columnName}_id`)}`;
         }
     },
     render() {
@@ -178,7 +181,7 @@ const ResultRow = React.createClass({
 
         // add a button to the ItemViewOverlay, if relevant
         if (this.props.data.get('type') === 'chant' || this.props.data.get('type') === 'source') {
-            const url = makeLinkToItemView(this.props.data.get('type'), this.props.data.get('id'));
+            const url = `${this.context.router.location.pathname}/${this.props.data.get('type')}/${this.props.data.get('id')}`;
             renderedColumns = renderedColumns.push(
                 <ResultCell key="itemview">
                     <Link to={url} className="btn btn-default btn-sm">{`View`}</Link>
