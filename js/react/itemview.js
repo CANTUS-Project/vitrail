@@ -151,14 +151,14 @@ const ItemViewChant = React.createClass({
         // Full Text
         if (data.get('full_text') && data.get('full_text_manuscript')) {
             fullText = [
-                <ListGroupItem key="1">{`Full Text: ${data.get('full_text')}`}</ListGroupItem>,
+                <ListGroupItem key="1">{`Full Text (Standardized Spelling): ${data.get('full_text')}`}</ListGroupItem>,
                 <ListGroupItem key="2">
-                    {`Full Text (manuscript spelling):${data.get('full_text_manuscript')}`}
+                    {`Full Text (Manuscript Spelling): ${data.get('full_text_manuscript')}`}
                 </ListGroupItem>,
             ];
         }
         else if (data.get('full_text')) {
-            fullText = <ListGroupItem>{`Full Text: ${data.get('full_text')}`}</ListGroupItem>;
+            fullText = <ListGroupItem>{`Full Text (Standardized Spelling): ${data.get('full_text')}`}</ListGroupItem>;
         }
 
         // Volpiano
