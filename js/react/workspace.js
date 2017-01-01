@@ -363,9 +363,6 @@ const ReactorResetter = React.createClass({
  *     the NuclearJS Reactor, and should therefore show the "ReactorResetter" component.
  */
 const Shelf = React.createClass({
-    propTypes: {
-        children: React.PropTypes.element,
-    },
     mixins: [reactor.ReactMixin],
     getDataBindings() {
         return {collections: getters.collections};
@@ -383,13 +380,15 @@ const Shelf = React.createClass({
         signals.newCollection(newName);
     },
     render() {
-        const collections = (
-            <Nav stacked>
-                {this.state.collections.map((value) =>
+        const collections =
+            this.state.collections.size > 0
+            ?
+                this.state.collections.map((value) =>
                     <Collection key={value.get('colid')} collection={value}/>
-                ).toArray()}
-            </Nav>
-        );
+                ).toArray()
+            :
+                <li>{'Choose '}<Glyphicon glyph="plus"/>{' below to make a collection.'}</li>
+            ;
 
         let renamer;
         if (this.state.addingNewCollection) {
@@ -411,7 +410,9 @@ const Shelf = React.createClass({
                 {renamer}
                 {resetter}
                 <Panel header="Shelf">
-                    {collections}
+                    <Nav stacked>
+                        {collections}
+                    </Nav>
                     <hr/>
                     <ButtonGroup block vertical>
                         <Button bsStyle="primary" onClick={this.toggleAddingCollection}>
@@ -422,7 +423,6 @@ const Shelf = React.createClass({
                         </Button>
                     </ButtonGroup>
                 </Panel>
-                {this.props.children}
             </Col>
         );
     },
