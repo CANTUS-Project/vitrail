@@ -555,7 +555,7 @@ const Workspace = React.createClass({
                     {`Workspace\u2003`}
                     <small>
                         <i>{`Manage your personal collections.\u2003`}</i>
-                        <Button bsStyle="info" onClick={this.handleHelp}>
+                        <Button bsStyle="info" className="help-icon" onClick={this.handleHelp}>
                             <Glyphicon glyph="question-sign"/>
                         </Button>
                     </small>

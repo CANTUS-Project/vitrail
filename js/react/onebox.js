@@ -157,7 +157,7 @@ const OneboxSearch = React.createClass({
                     {`Onebox Search\u2003`}
                     <small>
                         <i>{`Standard search box with advanced capabilities.\u2003`}</i>
-                        <Button bsStyle="info" onClick={this.handleShowHelp}>
+                        <Button bsStyle="info" className="help-icon" onClick={this.handleShowHelp}>
                             <Glyphicon glyph="question-sign"/>
                         </Button>
                     </small>
